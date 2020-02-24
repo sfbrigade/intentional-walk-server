@@ -24,7 +24,7 @@ class AppUser(models.Model):
 
 # Event model
 class DailyWalk(models.Model):
-    date = models.DateField(unique=True)
+    date = models.DateField()
     steps = models.IntegerField()
     user = models.manufacturer = models.ForeignKey('AppUser',
                                                    on_delete=models.CASCADE)

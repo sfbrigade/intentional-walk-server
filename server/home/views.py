@@ -1,3 +1,4 @@
+import json
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View, generic
@@ -13,40 +14,36 @@ class AppUserCreateView(View):
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        # Yank out all the attributes
-        name = request.POST.get("name")
-        email = request.POST.get("email")
-        zip = request.POST.get("zip")
-        age = request.POST.get("age")
-        device_id = request.POST.get("device_id")
+        # Parse the body json
+        json_data = json.loads(request.body)
 
         # If any of the field is missing, return an error
-        if name is None:
+        if 'name' not in json_data:
             return JsonResponse({"status": "error", "message": "Name missing"})
-        if email is None:
+        if 'email' not in json_data:
             return JsonResponse({"status": "error", "message": "Email missing"})
-        if zip is None:
+        if 'zip' not in json_data:
             return JsonResponse({"status": "error", "message": "Zip missing"})
-        if age is None:
+        if 'age' not in json_data:
             return JsonResponse({"status": "error", "message": "Age missing"})
-        if device_id is None:
+        if 'device_id' not in json_data:
             return JsonResponse({"status": "error", "message": "Device_id missing"})
 
         # Update if the object exists else create
         try:
-            appuser = AppUser.objects.get(email=email, device_id=device_id)
-            appuser.name = name
-            appuser.zip = zip
-            appuser.age = age
+            appuser = AppUser.objects.get(email=json_data['email'], device_id=json_data['device_id'])
+            appuser.name = json_data['name']
+            appuser.zip = json_data['zip']
+            appuser.age = json_data['age']
             appuser.save()
             return JsonResponse({"status": "success", "message": "App User updated successfully"})
 
         except ObjectDoesNotExist:
-            obj = AppUser.objects.create(name=name,
-                                 email=email,
-                                 zip=zip,
-                                 age=age,
-                                 device_id=device_id)
+            obj = AppUser.objects.create(name=json_data['name'],
+                                 email=json_data['email'],
+                                 zip=json_data['zip'],
+                                 age=json_data['age'],
+                                 device_id=json_data['device_id'])
 
             return JsonResponse({"status": "success", "message": "App User registered successfully"})
 
@@ -60,32 +57,29 @@ class DailyWalkView(View):
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        email = request.POST.get("email")
-        device_id = request.POST.get("device_id")
-        date = request.POST.get("date")
-        steps = request.POST.get("steps")
+        json_data = json.loads(request.body)
 
         # If any of the field is missing, return an error
-        if email is None:
+        if 'email' not in json_data:
             return JsonResponse({"status": "error", "message": "Email missing"})
-        if device_id is None:
+        if 'device_id' not in json_data:
             return JsonResponse({"status": "error", "message": "Device_id missing"})
-        if date is None:
+        if 'date' not in json_data:
             return JsonResponse({"status": "error", "message": "Date missing"})
-        if steps is None:
+        if 'steps' not in json_data:
             return JsonResponse({"status": "error", "message": "Steps missing"})
 
         try:
-            user = AppUser.objects.get(email=email, device_id=device_id)
+            user = AppUser.objects.get(email=json_data['email'], device_id=json_data['device_id'])
         except ObjectDoesNotExist:
             return JsonResponse({"status": "error", "message": "User/device not registered"})
 
         try:
-            _ = DailyWalk.objects.get(user=user, date=date)
+            _ = DailyWalk.objects.get(user=user, date=json_data['date'])
             return JsonResponse({"status": "error", "message": "Steps already entered for this date"})
         except ObjectDoesNotExist:
-            _ = DailyWalk.objects.create(date=date,
-                                           steps=steps,
+            _ = DailyWalk.objects.create(date=json_data['date'],
+                                           steps=json_data['steps'],
                                            user=user)
 
             return JsonResponse({"status": "success", "message": "Daily Walk recorded successfully"})
@@ -100,21 +94,27 @@ class DailyWalkListView(View):
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        email = request.POST.get("email")
-        device_id = request.POST.get("device_id")
+        json_data = json.loads(request.body)
+        reverse_order = json_data['reverse_order'] if 'reverse_order' in json_data else False
+        num_walks = json_data['num_walks'] if 'num_walks' in json_data else None
 
         # If any of the field is missing, return an error
-        if email is None:
+        if 'email' not in json_data:
             return JsonResponse({"status": "error", "message": "Email missing"})
-        if device_id is None:
+        if 'device_id' not in json_data:
             return JsonResponse({"status": "error", "message": "Device_id missing"})
 
         try:
-            user = AppUser.objects.get(email=email, device_id=device_id)
+            user = AppUser.objects.get(email=json_data['email'], device_id=json_data['device_id'])
         except ObjectDoesNotExist:
             return JsonResponse({"status": "error", "message": "User/device not registered"})
 
-        daily_walks = DailyWalk.objects.filter(user=user)
+        # Order based on the parameters
+        if reverse_order:
+            daily_walks = DailyWalk.objects.filter(user=user).order_by("date")[:num_walks]
+        else:
+            daily_walks = DailyWalk.objects.filter(user=user)[:num_walks]
+
         # Hacky serializer
         total_steps = 0
         daily_walk_list = []
@@ -142,32 +142,28 @@ class IntentionalWalkView(View):
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        email = request.POST.get("email")
-        device_id = request.POST.get("device_id")
-        start = request.POST.get("start")
-        end = request.POST.get("end")
-        steps = request.POST.get("steps")
+        json_data = json.loads(request.body)
 
         # If any of the field is missing, return an error
-        if email is None:
+        if 'email' not in json_data:
             return JsonResponse({"status": "error", "message": "Email missing"})
-        if device_id is None:
+        if 'device_id' not in json_data:
             return JsonResponse({"status": "error", "message": "Device_id missing"})
-        if start is None:
+        if 'start' not in json_data:
             return JsonResponse({"status": "error", "message": "Start timestamp missing"})
-        if end is None:
+        if 'end' not in json_data:
             return JsonResponse({"status": "error", "message": "End timestamp missing"})
-        if steps is None:
+        if 'steps' not in json_data:
             return JsonResponse({"status": "error", "message": "Steps missing"})
 
         try:
-            user = AppUser.objects.get(email=email, device_id=device_id)
+            user = AppUser.objects.get(email=json_data['email'], device_id=json_data['device_id'])
         except ObjectDoesNotExist:
             return JsonResponse({"status": "error", "message": "User/device not registered"})
 
-        _ = IntentionalWalk.objects.create(start=start,
-                                             end=end,
-                                             steps=steps,
+        _ = IntentionalWalk.objects.create(start=json_data['start'],
+                                             end=json_data['end'],
+                                             steps=json_data['steps'],
                                              user=user)
 
         return JsonResponse({"status": "success", "message": "Intentional Walk recorded successfully"})
@@ -182,21 +178,27 @@ class IntentionalWalkListView(View):
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        email = request.POST.get("email")
-        device_id = request.POST.get("device_id")
+        json_data = json.loads(request.body)
+        reverse_order = json_data['reverse_order'] if 'reverse_order' in json_data else False
+        num_walks = json_data['num_walks'] if 'num_walks' in json_data else None
 
         # If any of the field is missing, return an error
-        if email is None:
+        if 'email' not in json_data:
             return JsonResponse({"status": "error", "message": "Email missing"})
-        if device_id is None:
+        if 'device_id' not in json_data:
             return JsonResponse({"status": "error", "message": "Device_id missing"})
 
         try:
-            user = AppUser.objects.get(email=email, device_id=device_id)
+            user = AppUser.objects.get(email=json_data['email'], device_id=json_data['device_id'])
         except ObjectDoesNotExist:
             return JsonResponse({"status": "error", "message": "User/device not registered"})
 
-        intentional_walks = IntentionalWalk.objects.filter(user=user)
+        # Order based on the parameters
+        if reverse_order:
+            intentional_walks = IntentionalWalk.objects.filter(user=user).order_by("start")[:num_walks]
+        else:
+            intentional_walks = IntentionalWalk.objects.filter(user=user)[:num_walks]
+
         # Hacky serializer
         total_steps = 0
         intentional_walk_list = []
