@@ -1,0 +1,9 @@
+version: '3'
+services:
+  server:
+    command: bash -l -c "bin/init; python manage.py runserver 0:8000"
+    volumes:
+      - .:/app
+      - ~/.aws:/root/.aws
+      - ~/.ssh:/root/.ssh
+      - /var/run/docker.sock:/var/run/docker.sock
