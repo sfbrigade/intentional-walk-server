@@ -1,0 +1,38 @@
+version: 2.1
+
+orbs:
+  docker: circleci/docker@0.6.0
+
+jobs:
+  build-and-test:
+    docker:
+      - image: circleci/python:3.8
+        environment:
+          DATABASE_URL: "postgresql://postgres@localhost/webtool"
+          SECRET_KEY: "secretkey"
+      - image: circleci/postgres:11
+        environment:
+          POSTGRES_HOST_AUTH_METHOD=trust
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "poetry.lock" }}
+      - run:
+          name: Install Dependencies
+          command: |
+            poetry install
+      - save_cache:
+          key: deps-{{ checksum "poetry.lock" }}
+          paths:
+            - /home/circleci/.cache/pypoetry/virtualenvs
+      - run:
+          name: Run Pytest, report coverage
+          command: |
+            poetry run coverage run --omit="/home/circleci/.cache/pypoetry/virtualenvs" -m pytest
+            poetry run coveralls
+
+workflows:
+  main:
+    jobs:
+      - build-and-test
