@@ -1,5 +1,7 @@
 # Intentional Walk Server
 
+[![Coverage Status](https://coveralls.io/repos/github/sfbrigade/intentional-walk-server/badge.svg?branch=master)](https://coveralls.io/github/sfbrigade/intentional-walk-server?branch=master)
+
 ## Docker-based Development Setup
 
 1. Install Docker Desktop: https://www.docker.com/products/docker-desktop
