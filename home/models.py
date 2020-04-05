@@ -1,3 +1,4 @@
+import time
 from django.db import models
 
 
@@ -16,7 +17,7 @@ class AppUser(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.name} | {self.email}"
+        return f"{self.name} | {self.email} | {self.account_id} "
 
     class Meta:
         ordering = ("-created",)
@@ -55,6 +56,22 @@ class IntentionalWalk(models.Model):
     distance = models.FloatField()
     appuser = models.manufacturer = models.ForeignKey("AppUser", on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def walk_time(self):
+        return (self.end - self.start).total_seconds() - self.pause_time
+
+    @property
+    def walk_time_repr(self):
+        return time.strftime("%Hh %Mm %Ss", time.gmtime(int((self.end - self.start).total_seconds() - self.pause_time)))
+
+    @property
+    def pause_time_repr(self):
+        return time.strftime("%Hh %Mm %Ss", time.gmtime(int(self.pause_time)))
+
+    @property
+    def speed(self):
+        return (self.distance/((self.end - self.start).total_seconds() - self.pause_time))*3600
 
     def __str__(self):
         return f"{self.appuser} | {self.start} - {self.end}"

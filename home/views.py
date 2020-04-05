@@ -4,6 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views import View, generic
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from typing import Dict, List, Any
 
 from .models import AppUser, DailyWalk, IntentionalWalk
@@ -339,13 +341,12 @@ class IntentionalWalkListView(View):
         total_distance = 0
         intentional_walk_list = []
         for intentional_walk in intentional_walks:
-            walk_time = (intentional_walk.end - intentional_walk.start).total_seconds() - intentional_walk.pause_time
             intentional_walk_list.append(
                 {"start": intentional_walk.start, "end": intentional_walk.end, "steps": intentional_walk.steps,
-                 "distance": intentional_walk.distance, "walk_time": walk_time, "pause_time": intentional_walk.pause_time}
+                 "distance": intentional_walk.distance, "walk_time": intentional_walk.walk_time, "pause_time": intentional_walk.pause_time}
             )
             total_steps += intentional_walk.steps
-            total_walk_time += walk_time
+            total_walk_time += intentional_walk.walk_time
             total_distance += intentional_walk.distance
             total_pause_time += intentional_walk.pause_time
         intentional_walk_list = sorted(intentional_walk_list, key=lambda x: x['start'], reverse=True)
@@ -362,3 +363,94 @@ class IntentionalWalkListView(View):
 
     def http_method_not_allowed(self, request):
         return JsonResponse({"status": "error", "message": "Method not allowed!"})
+
+
+class HomeView(generic.ListView):
+    template_name = "home/home.html"
+    model = AppUser
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        context['appuser_list'] = AppUser.objects.all()
+        all_emails = set(AppUser.objects.values_list('email', flat=True))
+        context['total_users'] = len(all_emails)
+        # TODO: This is very inefficient. This should be a member function of the model
+        all_daily_walks = []
+        for email in all_emails:
+            users_accounts = AppUser.objects.filter(email=email)
+            user_daily_walks = []
+            for users_account in users_accounts:
+                user_daily_walks += DailyWalk.objects.filter(appuser=users_account)
+            # Hacky code to group by date and keep the latest entry
+            user_daily_walk_dict = {}
+            for user_daily_walk in user_daily_walks:
+                # If date already is there, keep only the latest entry
+                if user_daily_walk.date in user_daily_walk_dict:
+                    if user_daily_walk.updated > user_daily_walk_dict[user_daily_walk.date].updated:
+                        user_daily_walk_dict[user_daily_walk.date] = user_daily_walk
+                else:
+                    user_daily_walk_dict[user_daily_walk.date] = user_daily_walk
+
+            # Update dailywalks
+            all_daily_walks += list(user_daily_walk_dict.values())
+
+        total_steps = 0
+        total_distance = 0
+        for daily_walk in all_daily_walks:
+            total_steps += daily_walk.steps
+            total_distance += daily_walk.distance
+
+        context['total_steps'] = total_steps
+        context['total_distance'] = total_distance
+        context['total_daily_walks'] = len(all_daily_walks)
+        context['total_intentional_walks'] = len(IntentionalWalk.objects.all())
+
+        return context
+
+
+class UserView(generic.DetailView):
+    template_name = "home/user.html"
+    model = AppUser
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        print(self)
+        users_accounts = AppUser.objects.filter(email=self.object.email)
+        # TODO: This is very inefficient. This should be a member function of the model
+        daily_walks = []
+        for users_account in users_accounts:
+            daily_walks += DailyWalk.objects.filter(appuser=users_account)
+        # Hacky code to group by date and keep the latest entry
+        daily_walk_dict = {}
+        for daily_walk in daily_walks:
+            # If date already is there, keep only the latest entry
+            if daily_walk.date in daily_walk_dict:
+                if daily_walk.updated > daily_walk_dict[daily_walk.date].updated:
+                    daily_walk_dict[daily_walk.date] = daily_walk
+            else:
+                daily_walk_dict[daily_walk.date] = daily_walk
+
+        # Update dailywalks
+        daily_walks = list(daily_walk_dict.values())
+
+        total_steps = 0
+        total_distance = 0
+        for daily_walk in daily_walks:
+            total_steps += daily_walk.steps
+            total_distance += daily_walk.distance
+
+        context['total_steps'] = total_steps
+        context['total_distance'] = total_distance
+        context['daily_walk_list'] = sorted(daily_walks, key=lambda x: x.date, reverse=True)
+        context['total_daily_walks'] = len(daily_walks)
+
+        # Get all the intentional walks
+        all_users = AppUser.objects.filter(email=self.object.email)
+        intentional_walks = []
+        for user_obj in all_users:
+            intentional_walks += IntentionalWalk.objects.filter(appuser=user_obj)
+        context['intentional_walk_list'] = sorted(intentional_walks, key=lambda x: x.start, reverse=True)
+        context['total_intentional_walks'] = len(intentional_walks)
+        return context
