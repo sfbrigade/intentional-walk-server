@@ -1,0 +1,35 @@
+html, body {
+    font-family: 'Comfortaa';
+    height: 100%
+}
+
+.login-prompt{
+    margin-top: 100px;
+}
+
+
+.home-row{
+    margin-top: 100px;
+}
+
+.home-aggregate{
+    margin-top: 100px;
+    margin-bottom: 100px;
+}
+
+.agg-stat{
+    font-size: 4em;
+}
+
+.agg-text{
+    margin-left: 0.5em;
+    font-size: 2em;
+}
+
+.all-users{
+    margin-top: 50px;
+}
+
+.profile-row{
+    margin-top: 50px;
+}

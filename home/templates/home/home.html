@@ -1,0 +1,66 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+  <div class="container-fluid home-aggregate">
+      <div class="row home-row">
+          <div class="col-4 text-center">
+              <span class="agg-stat" style="color:olivedrab">{{total_users}}</span>
+              <span class="agg-text">Users</span>
+          </div>
+          <div class="col-4  text-center">
+              <span class="agg-stat" style="color:forestgreen">{{total_steps}}</span>
+              <span class="agg-text">Steps</span>
+          </div>
+          <div class="col-4  text-center">
+              <span class="agg-stat" style="color:limegreen">{{total_distance}}</span>
+              <span class="agg-text">Miles</span>
+          </div>
+      </div>
+      <div class="row home-row">
+          <div class="col-6  text-center">
+              <span class="agg-stat" style="color:steelblue">{{total_daily_walks}}</span>
+              <span class="agg-text">Daily Walks</span>
+          </div>
+          <div class="col-6  text-center">
+              <span class="agg-stat" style="color:slateblue">{{total_intentional_walks}}</span>
+              <span class="agg-text">Intentional Walks</span>
+          </div>
+      </div>
+  </div>
+    <hr/>
+
+  <div class="container-fluid all-users">
+      <h1 class="text-center">All users</h1>
+      <p class="text-center"><small>Click on user names to open their detail page. For more flexibility with search/sort, visit the <a href="/admin/home/appuser/" target="_blank">admin page</a></small></p>
+      <p class="text-center"><small>There might be more accounts than the number of users since users can register from multiple devices with the same email</small></p>
+   </div>
+  <div class="home-row table-responsive">
+      <table class="table table-striped">
+          <thead>
+            <tr>
+                <th scope="col">#</th>
+              <th scope="col">Account ID</th>
+              <th scope="col">Name</th>
+              <th scope="col">Email</th>
+                <th scope="col">Age</th>
+              <th scope="col">Zip</th>
+                <th scope="col">Account Created</th>
+            </tr>
+          </thead>
+            <tbody>
+                {% for appuser in appuser_list%}
+                <tr>
+                  <th scope="row">{{ forloop.counter }}</th>
+                    <th>{{appuser.account_id}}</th>
+                  <td><a href="/user/{{appuser.account_id}}">{{appuser.name}}</a></td>
+                  <td>{{appuser.email}}</td>
+                  <td>{{appuser.age}}</td>
+                    <td>{{appuser.zip}}</td>
+                    <td>{{appuser.created}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+      </table>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+  <div class="container-fluid">
+      <div class="row profile-row">
+          <div class="col-12  text-center">
+              <h1 style="color:darkslateblue;">{{object.name}}</h1>
+              <p>Age: {{object.age}} | Zip: {{object.zip}} | Email: {{object.email}} | Joined: {{object.created}}</p>
+          </div>
+      </div>
+      <div class="row profile-row">
+          <div class="col-3  text-center">
+              <span class="agg-stat" style="color:forestgreen">{{total_steps}}</span>
+              <span class="agg-text">Steps</span>
+          </div>
+          <div class="col-3  text-center">
+              <span class="agg-stat" style="color:limegreen">{{total_distance}}</span>
+              <span class="agg-text">Miles</span>
+          </div>
+          <div class="col-3  text-center">
+              <span class="agg-stat" style="color:steelblue">{{total_daily_walks}}</span>
+              <span class="agg-text">Daily walks</span>
+          </div>
+          <div class="col-3  text-center">
+              <span class="agg-stat" style="color:slateblue">{{total_intentional_walks}}</span>
+              <span class="agg-text">Intentional walks</span>
+          </div>
+      </div>
+  </div>
+    <hr/>
+
+  <div class="container-fluid all-users">
+      <h1 class="text-center">Daily Walks</h1>
+      <p class="text-center"><small>For more flexibility with search/sort, visit the <a href="/admin/home/dailywalk/" target="_blank">admin page</a></small></p>
+   </div>
+  <div class="table-responsive  profile-row">
+      <table class="table table-striped">
+          <thead>
+            <tr>
+                <th scope="col">#</th>
+              <th scope="col">Account ID</th>
+              <th scope="col">Date</th>
+              <th scope="col">Steps</th>
+                <th scope="col">Distance</th>
+                <th scope="col">Updated</th>
+            </tr>
+          </thead>
+            <tbody>
+                {% for dailywalk in daily_walk_list %}
+                <tr>
+                  <th scope="row">{{ forloop.counter }}</th>
+                    <th>{{dailywalk.appuser.account_id}}</th>
+                  <td>{{dailywalk.date}}</td>
+                  <td>{{dailywalk.steps}}</td>
+                  <td>{{dailywalk.distance}} miles</td>
+                    <td>{{dailywalk.updated}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+      </table>
+    </div>
+    <hr/>
+
+  <div class="container-fluid all-users">
+      <h1 class="text-center">Intentional Walks</h1>
+      <p class="text-center"><small>For more flexibility with search/sort, visit the <a href="/admin/home/dailywalk/" target="_blank">admin page</a></small></p>
+   </div>
+  <div class="table-responsive  profile-row">
+      <table class="table table-striped">
+          <thead>
+            <tr>
+                <th scope="col">#</th>
+              <th scope="col">Account ID</th>
+              <th scope="col">Start</th>
+                <th scope="col">End</th>
+                <th scope="col">Walk Time</th>
+                <th scope="col">Pause time</th>
+              <th scope="col">Steps</th>
+                <th scope="col">Distance</th>
+                <th scope="col">Speed</th>
+            </tr>
+          </thead>
+            <tbody>
+                {% for intentionalwalk in intentional_walk_list %}
+                <tr>
+                  <th scope="row">{{ forloop.counter }}</th>
+                    <th>{{intentionalwalk.appuser.account_id}}</th>
+                  <td>{{intentionalwalk.start}}</td>
+                    <td>{{intentionalwalk.end}}</td>
+                    <td>{{intentionalwalk.walk_time_repr}}</td>
+                    <td>{{intentionalwalk.pause_time_repr}}</td>
+                  <td>{{intentionalwalk.steps}}</td>
+                  <td>{{intentionalwalk.distance}} miles</td>
+                    <td>{{intentionalwalk.speed|floatformat:-2}} mph</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+      </table>
+    </div>
+{% endblock %}

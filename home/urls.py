@@ -4,6 +4,8 @@ from . import views
 
 app_name = "home"
 urlpatterns = [
+    path("", views.HomeView.as_view(), name="home_view"),
+    path("user/<slug:pk>", views.UserView.as_view(), name="user_view"),
     path("api/appuser/create", views.AppUserCreateView.as_view(), name="appuser_create"),
     path("api/dailywalk/create", views.DailyWalkCreateView.as_view(), name="dailywalk_create"),
     path("api/dailywalk/get", views.DailyWalkListView.as_view(), name="dailywalk_get"),
