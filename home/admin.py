@@ -12,8 +12,8 @@ class AppUserAdmin(admin.ModelAdmin):
 
 @admin.register(DailyWalk)
 class DailyWalkAdmin(admin.ModelAdmin):
-    list_display = ["appuser", "date", "steps", "distance", "event_id"]
-    list_display_links = ["appuser", "date", "steps", "distance", "event_id"]
+    list_display = ["appuser", "date", "steps", "distance"]
+    list_display_links = ["appuser", "date", "steps", "distance"]
     ordering = ["-date"]
     search_fields = ["user__name"]
 

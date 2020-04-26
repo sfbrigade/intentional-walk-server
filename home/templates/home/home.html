@@ -1,4 +1,5 @@
 {% extends 'home/base.html' %}
+{% load format_helpers %}
 
 {% block content %}
   <div class="container-fluid home-aggregate">
@@ -12,7 +13,7 @@
               <span class="agg-text">Steps</span>
           </div>
           <div class="col-4  text-center">
-              <span class="agg-stat" style="color:limegreen">{{total_distance}}</span>
+              <span class="agg-stat" style="color:limegreen">{{total_distance|m_to_mi|floatformat}}</span>
               <span class="agg-text">Miles</span>
           </div>
       </div>

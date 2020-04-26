@@ -31,12 +31,16 @@ class ApiTestCase(TestCase):
         # Request parameters
         self.request_params = {
             "account_id": "12345",
-            "event_id": "8888",
-            "start": "2020-02-21T12:15:00-05:00",
-            "end": "2020-02-21T12:45:00-05:00",
-            "steps": 500,
-            "distance": 1.3,
-            "pause_time": 456
+            "intentional_walks": [
+                {
+                    "event_id": "8888",
+                    "start": "2020-02-21T12:15:00-05:00",
+                    "end": "2020-02-21T12:45:00-05:00",
+                    "steps": 500,
+                    "distance": 1.3,
+                    "pause_time": 456
+                }
+            ]
         }
         # Content type
         self.content_type = "application/json"
@@ -52,14 +56,15 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Intentional Walk recorded successfully", msg=fail_message)
+        self.assertEqual(response_data["message"], "Intentional Walks recorded successfully", msg=fail_message)
         self.assertEqual(response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["event_id"], self.request_params["event_id"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["start"], self.request_params["start"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["end"], self.request_params["end"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["steps"], self.request_params["steps"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["pause_time"], self.request_params["pause_time"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["distance"], self.request_params["distance"], msg=fail_message)
+        print(str(response_data))
+        self.assertEqual(response_data["payload"]["intentional_walks"][0]["event_id"], self.request_params["intentional_walks"][0]["event_id"], msg=fail_message)
+        self.assertEqual(response_data["payload"]["intentional_walks"][0]["start"], self.request_params["intentional_walks"][0]["start"], msg=fail_message)
+        self.assertEqual(response_data["payload"]["intentional_walks"][0]["end"], self.request_params["intentional_walks"][0]["end"], msg=fail_message)
+        self.assertEqual(response_data["payload"]["intentional_walks"][0]["steps"], self.request_params["intentional_walks"][0]["steps"], msg=fail_message)
+        self.assertEqual(response_data["payload"]["intentional_walks"][0]["pause_time"], self.request_params["intentional_walks"][0]["pause_time"], msg=fail_message)
+        self.assertEqual(response_data["payload"]["intentional_walks"][0]["distance"], self.request_params["intentional_walks"][0]["distance"], msg=fail_message)
 
     # Test creation of a intentional walk with an invalid user account
     def test_create_intentionalwalk_invalidaccount(self):
@@ -83,7 +88,7 @@ class ApiTestCase(TestCase):
     # Test creation of a intentional walk with a missing field
     def test_create_intentionalwalk_missing_eventid(self):
 
-        del self.request_params["event_id"]
+        del self.request_params["intentional_walks"][0]["event_id"]
 
         # Send the request
         response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
@@ -100,7 +105,7 @@ class ApiTestCase(TestCase):
     # Test creation of a intentional walk with a missing field
     def test_create_intentionalwalk_missing_steps(self):
 
-        del self.request_params["steps"]
+        del self.request_params["intentional_walks"][0]["steps"]
 
         # Send the request
         response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)

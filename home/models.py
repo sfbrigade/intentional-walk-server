@@ -25,8 +25,6 @@ class AppUser(models.Model):
 
 # Event model
 class DailyWalk(models.Model):
-    # Identifier
-    event_id = models.CharField(max_length=250)
     # Walk meta
     date = models.DateField()
     steps = models.IntegerField()
@@ -47,7 +45,8 @@ class DailyWalk(models.Model):
 
 # Event model
 class IntentionalWalk(models.Model):
-    event_id = models.CharField(max_length=250)
+    # event id will be a v4 random uuid generated on the client
+    event_id = models.CharField(max_length=250, unique=True)
     # Walk meta
     start = models.DateTimeField()
     end = models.DateTimeField()

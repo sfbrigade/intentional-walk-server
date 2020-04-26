@@ -129,7 +129,7 @@ class DailyWalkCreateView(View):
         json_data = json.loads(request.body)
 
         # Validate json. If any field is missing, send back the response message
-        json_status = validate_request_json(json_data, required_fields=["event_id", "account_id", "date", "steps", "distance"],)
+        json_status = validate_request_json(json_data, required_fields=["account_id", "daily_walks"],)
         if "status" in json_status and json_status["status"] == "error":
             return JsonResponse(json_status)
 
@@ -144,43 +144,40 @@ class DailyWalkCreateView(View):
                 }
             )
 
-        # Check if there is already an entry for this date. If there is, update the entry
-        try:
-            daily_walk = DailyWalk.objects.get(appuser=appuser, date=json_data["date"])
-            daily_walk.event_id = json_data["event_id"]
-            daily_walk.steps = json_data["steps"]
-            daily_walk.distance = json_data["distance"]
-            daily_walk.save()
-            return JsonResponse(
-                    {
-                        "status": "success", "message": f"Steps updated successfully for {json_data['date']}",
-                     "payload": {
-                        "event_id": daily_walk.event_id,
-                        "account_id": appuser.account_id,
-                        "date": daily_walk.date,
-                        "steps": daily_walk.steps,
-                        "distance": daily_walk.distance
-                    }
-                     }
-            )
-        except ObjectDoesNotExist:
-            daily_walk = DailyWalk.objects.create(
-                event_id=json_data["event_id"], date=json_data["date"], steps=json_data["steps"], distance=json_data["distance"], appuser=appuser
-            )
+        json_response = {
+            "status": "success", "message": f"Dailywalks recorded successfully",
+            "payload": {
+                "account_id": appuser.account_id,
+                "daily_walks": [],
+            }
+        }
+        for daily_walk_data in json_data["daily_walks"]:
+            # Validate data
+            json_status = validate_request_json(daily_walk_data, required_fields=["date", "steps", "distance"],)
+            if "status" in json_status and json_status["status"] == "error":
+                return JsonResponse(json_status)
 
-            return JsonResponse(
-                {
-                    "status": "success",
-                    "message": "Dailywalk recorded successfully",
-                    "payload": {
-                        "event_id": daily_walk.event_id,
-                        "account_id": appuser.account_id,
-                        "date": daily_walk.date,
-                        "steps": daily_walk.steps,
-                        "distance": daily_walk.distance
-                    },
-                }
-            )
+            # Check if there is already an entry for this date. If there is, update the entry
+            try:
+                daily_walk = DailyWalk.objects.get(appuser=appuser, date=daily_walk_data["date"])
+                daily_walk.steps = daily_walk_data["steps"]
+                daily_walk.distance = daily_walk_data["distance"]
+                daily_walk.save()
+                json_response["payload"]["daily_walks"].append({
+                    "date": daily_walk.date,
+                    "steps": daily_walk.steps,
+                    "distance": daily_walk.distance
+                })
+            except ObjectDoesNotExist:
+                daily_walk = DailyWalk.objects.create(
+                    date=daily_walk_data["date"], steps=daily_walk_data["steps"], distance=daily_walk_data["distance"], appuser=appuser
+                )
+                json_response["payload"]["daily_walks"].append({
+                    "date": daily_walk.date,
+                    "steps": daily_walk.steps,
+                    "distance": daily_walk.distance
+                })
+        return JsonResponse(json_response)
 
     def http_method_not_allowed(self, request):
         return JsonResponse({"status": "error", "message": "Method not allowed!"})
@@ -265,7 +262,7 @@ class IntentionalWalkView(View):
 
         # Validate json. If any field is missing, send back the response message
         json_status = validate_request_json(
-            json_data, required_fields=["event_id", "account_id", "start", "end", "steps", "pause_time", "distance"],
+            json_data, required_fields=["account_id", "intentional_walks"],
         )
         if "status" in json_status and json_status["status"] == "error":
             return JsonResponse(json_status)
@@ -281,22 +278,44 @@ class IntentionalWalkView(View):
                 }
             )
 
-        intentional_walk = IntentionalWalk.objects.create(
-            event_id=json_data["event_id"], start=json_data["start"], end=json_data["end"], steps=json_data["steps"],
-            distance=json_data["distance"], pause_time=json_data["pause_time"], appuser=appuser
-        )
+        json_response = {
+            "status": "success", "message": "Intentional Walks recorded successfully",
+            "payload": {
+                "account_id": appuser.account_id,
+                "intentional_walks": []
+            }
+        }
+        for intentional_walk_data in json_data["intentional_walks"]:
+            json_status = validate_request_json(
+                intentional_walk_data, required_fields=["event_id", "start", "end", "steps", "pause_time", "distance"],
+            )
+            if "status" in json_status and json_status["status"] == "error":
+                return JsonResponse(json_status)
 
-        return JsonResponse({"status": "success", "message": "Intentional Walk recorded successfully",
-                                                 "payload": {
-                        "event_id": intentional_walk.event_id,
-                        "account_id": appuser.account_id,
-                        "start": intentional_walk.start,
-                                                     "end": intentional_walk.end,
-                        "steps": intentional_walk.steps,
-                                                     "distance": intentional_walk.distance,
-                                                     "pause_time": intentional_walk.pause_time,
-                    },
+            try:
+                intentional_walk = IntentionalWalk.objects.create(
+                    event_id=intentional_walk_data["event_id"],
+                    start=intentional_walk_data["start"],
+                    end=intentional_walk_data["end"],
+                    steps=intentional_walk_data["steps"],
+                    distance=intentional_walk_data["distance"],
+                    pause_time=intentional_walk_data["pause_time"],
+                    appuser=appuser
+                )
+                json_response["payload"]["intentional_walks"].append({
+                    "event_id": intentional_walk.event_id,
+                    "start": intentional_walk.start,
+                    "end": intentional_walk.end,
+                    "steps": intentional_walk.steps,
+                    "distance": intentional_walk.distance,
+                    "pause_time": intentional_walk.pause_time,
                 })
+            except:
+                # IntentionalWalk records are immutable- so ignore any errors
+                # that might occur if the record already exists, etc...
+                pass
+
+        return JsonResponse(json_response)
 
     def http_method_not_allowed(self, request):
         return JsonResponse({"status": "error", "message": "Method not allowed!"})
@@ -342,7 +361,7 @@ class IntentionalWalkListView(View):
         intentional_walk_list = []
         for intentional_walk in intentional_walks:
             intentional_walk_list.append(
-                {"start": intentional_walk.start, "end": intentional_walk.end, "steps": intentional_walk.steps,
+                {"event_id": intentional_walk.event_id, "start": intentional_walk.start, "end": intentional_walk.end, "steps": intentional_walk.steps,
                  "distance": intentional_walk.distance, "walk_time": intentional_walk.walk_time, "pause_time": intentional_walk.pause_time}
             )
             total_steps += intentional_walk.steps
