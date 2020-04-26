@@ -1,5 +1,8 @@
 import time
+import uuid
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 
 
 # User model
@@ -17,10 +20,38 @@ class AppUser(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.name} | {self.email} | {self.account_id} "
+        return f"{self.name} | {self.email} | {self.account_id}"
 
     class Meta:
         ordering = ("-created",)
+
+
+# Contest model
+class Contest(models.Model):
+    contest_id = models.CharField(default=uuid.uuid4, max_length=250, primary_key=True)
+    start = models.DateField()
+    end = models.DateField()
+
+    def __str__(self):
+        return f"{self.start} | {self.end}"
+
+    class Meta:
+        ordering = ("-start",)
+
+    def save(self, *args, **kwargs):
+        # ensure end is greater than start
+        if self.end <= self.start:
+            raise ValidationError('End of contest must be after Start')
+        # ensure that this does not overlap an existing contest period
+        query = Contest.objects.filter(
+            Q(start__lte=self.start, end__gt=self.start) |
+            Q(start__lt=self.end, end__gte=self.end) |
+            Q(start__gte=self.start, end__lte=self.end))
+        if self.pk:
+            query = query.exclude(pk=self.pk)
+        if query.exists():
+            raise ValidationError('Contest must not overlap another')
+        super().save(*args, **kwargs)
 
 
 # Event model

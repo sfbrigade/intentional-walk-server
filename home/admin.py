@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AppUser, DailyWalk, IntentionalWalk
+from .models import AppUser, Contest, DailyWalk, IntentionalWalk
 
 
 @admin.register(AppUser)
@@ -8,6 +8,14 @@ class AppUserAdmin(admin.ModelAdmin):
     list_display_links = ["name"]
     ordering = ["-created"]
     search_fields = ["name", "zip"]
+
+
+@admin.register(Contest)
+class AppUserAdmin(admin.ModelAdmin):
+    list_display = ["start", "end", "contest_id"]
+    list_display_links = ["contest_id"]
+    ordering = ["-start"]
+    search_fields = []
 
 
 @admin.register(DailyWalk)

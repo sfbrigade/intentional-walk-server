@@ -9,6 +9,7 @@ Django==3.0.5
 docopt==0.6.2
 gunicorn==20.0.4
 idna==2.9
+libfaketime==2.0.0
 more-itertools==8.2.0
 packaging==20.3
 pluggy==0.13.1
@@ -17,6 +18,7 @@ py==1.8.1
 pyparsing==2.4.6
 pytest==5.4.1
 pytest-django==3.9.0
+pytest-libfaketime==0.1.2
 python-dateutil==2.8.1
 python-dotenv==0.11.0
 pytz==2019.3
@@ -24,5 +26,6 @@ requests==2.23.0
 six==1.14.0
 sqlparse==0.3.1
 urllib3==1.25.8
+uuid==1.30
 wcwidth==0.1.9
 whitenoise==5.0.1

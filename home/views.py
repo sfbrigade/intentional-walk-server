@@ -1,3 +1,4 @@
+import datetime
 import json
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -8,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from typing import Dict, List, Any
 
-from .models import AppUser, DailyWalk, IntentionalWalk
+from .models import AppUser, Contest, DailyWalk, IntentionalWalk
 
 
 def validate_request_json(json_data: Dict[str, Any], required_fields: List[str]) -> Dict[str, str]:
@@ -116,6 +117,39 @@ class AppUserCreateView(View):
 
     def http_method_not_allowed(self, request):
         return JsonResponse({"status": "error", "message": "Method not allowed!"})
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ContestCurrentView(View):
+    """View to retrieve current Contest
+    """
+    model = Contest
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        today = datetime.date.today()
+        # get the current/next Contest
+        contest = Contest.objects.filter(end__gte=today).order_by("start").first()
+        if contest is None:
+            # get the last contest
+            contest = Contest.objects.order_by("-end").first()
+        if contest is None:
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "message": f"There are no contests",
+                }
+            )
+        return JsonResponse(
+            {
+                "status": "success",
+                "payload": {
+                    "contest_id": contest.contest_id,
+                    "start": contest.start,
+                    "end": contest.end,
+                }
+            }
+        )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
