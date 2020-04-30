@@ -12,9 +12,9 @@ class AppUserAdmin(admin.ModelAdmin):
 
 @admin.register(Contest)
 class AppUserAdmin(admin.ModelAdmin):
-    list_display = ["start", "end", "contest_id"]
+    list_display = ["start_promo", "start", "end", "contest_id"]
     list_display_links = ["contest_id"]
-    ordering = ["-start"]
+    ordering = ["-start_promo"]
     search_fields = []
 
 
