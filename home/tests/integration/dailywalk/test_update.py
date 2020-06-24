@@ -24,20 +24,16 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "App User registered successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"], "Device registered & account registered successfully", msg=fail_message
+        )
 
         # Details for Daily walk even creation
         self.url = "/api/dailywalk/create"
         # Request parameters
         self.request_params = {
             "account_id": "12345",
-            "daily_walks": [
-                {
-                    "date": "2020-02-22",
-                    "steps": 500,
-                    "distance": 1.3
-                }
-            ]
+            "daily_walks": [{"date": "2020-02-22", "steps": 500, "distance": 1.3}],
         }
         # Content type
         self.content_type = "application/json"
@@ -67,10 +63,20 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(
-            response_data["message"], f"Dailywalks recorded successfully", msg=fail_message
-        )
+        self.assertEqual(response_data["message"], f"Dailywalks recorded successfully", msg=fail_message)
         self.assertEqual(response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["daily_walks"][0]["date"], self.request_params["daily_walks"][0]["date"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["daily_walks"][0]["steps"], self.request_params["daily_walks"][0]["steps"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["daily_walks"][0]["distance"], self.request_params["daily_walks"][0]["distance"], msg=fail_message)
+        self.assertEqual(
+            response_data["payload"]["daily_walks"][0]["date"],
+            self.request_params["daily_walks"][0]["date"],
+            msg=fail_message,
+        )
+        self.assertEqual(
+            response_data["payload"]["daily_walks"][0]["steps"],
+            self.request_params["daily_walks"][0]["steps"],
+            msg=fail_message,
+        )
+        self.assertEqual(
+            response_data["payload"]["daily_walks"][0]["distance"],
+            self.request_params["daily_walks"][0]["distance"],
+            msg=fail_message,
+        )

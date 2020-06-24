@@ -1,0 +1,80 @@
+{% extends 'home/base.html' %}
+{% load format_helpers %}
+
+{% block content %}
+
+<div class="container all-users" style="padding: 25px;">
+    <h1 class="text-center">All users</h1>
+</div>
+
+<div class="container-fluid" style="padding: 10px;">
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Filter by Contest
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <a class="dropdown-item" href="/users/">None</a>
+          {% for contest in contests %}
+                <a class="dropdown-item" href="/users/?contest_id={{contest.contest_id}}">Contest - {{contest.start| date:"DATE_FORMAT"}} - {{contest.end| date:"DATE_FORMAT"}}</a>
+          {% endfor %}
+      </div>
+    </div>
+</div>
+
+{% if current_contest %}
+<div class="container-fluid" style="padding: 15px; color: #CD6155">
+    <h2>Contest - {{current_contest.start| date:"DATE_FORMAT"}} - {{current_contest.end| date:"DATE_FORMAT"}}</h2>
+</div>
+{% endif %}
+
+<div class="container-fluid" style="padding: 25px;">
+    <div class="home-row table-responsive" style="font-size: 1.2em">
+        <table id="all_users" class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Age</th>
+                <th scope="col">Zip</th>
+                <th scope="col">SignUp Date</th>
+                <th scope="col">Devices</th>
+                <th scope="col">Days active</th>
+                <th scope="col">Total Steps</th>
+                <th scope="col">Total Dist</th>
+                <th scope="col">Rec Walks</th>
+                <th scope="col">Rec Steps</th>
+                <th scope="col">Rec Dist(m)</th>
+                <th scope="col">Rec Time(min)</th>
+                <th scope="col">Avg speed</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for appuser in user_stats_list %}
+            <tr>
+                <td><a href="/users/{{appuser.account.pk}}">{{appuser.account.name}}</a></td>
+                <td><a href="/users/{{appuser.account.pk}}">{{appuser.account.email}}</a></td>
+                <td>{{appuser.account.age}}</td>
+                <td>{{appuser.account.zip}}</td>
+                <td>{{appuser.account.created | date:"DATE_FORMAT"}}</td>
+                <td>{{appuser.account.device_set.count}}</td>
+                <td>{{appuser.num_dws}}</td>
+                <td>{{appuser.dw_steps}}</td>
+                <td>{{appuser.dw_distance|m_to_mi|floatformat}}</td>
+                <td>{{appuser.num_rws}}</td>
+                <td>{{appuser.rw_steps}}</td>
+                <td>{{appuser.rw_distance|m_to_mi|floatformat}}</td>
+                <td>{{appuser.rw_time|floatformat}}</td>
+                <td>{{appuser.rw_avg_speed|floatformat}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block post_scripts %}
+<script>$('#all_users').DataTable();</script>
+{% endblock %}

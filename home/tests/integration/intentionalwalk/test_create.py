@@ -24,7 +24,9 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "App User registered successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"], "Device registered & account registered successfully", msg=fail_message
+        )
 
         # Details for Daily walk even creation
         self.url = "/api/intentionalwalk/create"
@@ -38,9 +40,9 @@ class ApiTestCase(TestCase):
                     "end": "2020-02-21T12:45:00-05:00",
                     "steps": 500,
                     "distance": 1.3,
-                    "pause_time": 456
+                    "pause_time": 456,
                 }
-            ]
+            ],
         }
         # Content type
         self.content_type = "application/json"
@@ -58,13 +60,31 @@ class ApiTestCase(TestCase):
         self.assertEqual(response_data["status"], "success", msg=fail_message)
         self.assertEqual(response_data["message"], "Intentional Walks recorded successfully", msg=fail_message)
         self.assertEqual(response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message)
-        print(str(response_data))
-        self.assertEqual(response_data["payload"]["intentional_walks"][0]["event_id"], self.request_params["intentional_walks"][0]["event_id"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["intentional_walks"][0]["start"], self.request_params["intentional_walks"][0]["start"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["intentional_walks"][0]["end"], self.request_params["intentional_walks"][0]["end"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["intentional_walks"][0]["steps"], self.request_params["intentional_walks"][0]["steps"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["intentional_walks"][0]["pause_time"], self.request_params["intentional_walks"][0]["pause_time"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["intentional_walks"][0]["distance"], self.request_params["intentional_walks"][0]["distance"], msg=fail_message)
+        self.assertEqual(
+            response_data["payload"]["intentional_walks"][0]["start"],
+            self.request_params["intentional_walks"][0]["start"],
+            msg=fail_message,
+        )
+        self.assertEqual(
+            response_data["payload"]["intentional_walks"][0]["end"],
+            self.request_params["intentional_walks"][0]["end"],
+            msg=fail_message,
+        )
+        self.assertEqual(
+            response_data["payload"]["intentional_walks"][0]["steps"],
+            self.request_params["intentional_walks"][0]["steps"],
+            msg=fail_message,
+        )
+        self.assertEqual(
+            response_data["payload"]["intentional_walks"][0]["pause_time"],
+            self.request_params["intentional_walks"][0]["pause_time"],
+            msg=fail_message,
+        )
+        self.assertEqual(
+            response_data["payload"]["intentional_walks"][0]["distance"],
+            self.request_params["intentional_walks"][0]["distance"],
+            msg=fail_message,
+        )
 
     # Test creation of a intentional walk with an invalid user account
     def test_create_intentionalwalk_invalidaccount(self):
@@ -81,25 +101,8 @@ class ApiTestCase(TestCase):
         self.assertEqual(response_data["status"], "error", msg=fail_message)
         self.assertEqual(
             response_data["message"],
-            f'User does not exist for account - {self.request_params["account_id"]}. Please register first!',
+            f'Unregistered device - {self.request_params["account_id"]}. Please register first!',
             msg=fail_message,
-        )
-
-    # Test creation of a intentional walk with a missing field
-    def test_create_intentionalwalk_missing_eventid(self):
-
-        del self.request_params["intentional_walks"][0]["event_id"]
-
-        # Send the request
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
-        # Check for a successful response by the server
-        self.assertEqual(response.status_code, 200)
-        # Parse the response
-        response_data = response.json()
-        fail_message = f"Server response - {response_data}"
-        self.assertEqual(response_data["status"], "error", msg=fail_message)
-        self.assertEqual(
-            response_data["message"], "Required input 'event_id' missing in the request", msg=fail_message,
         )
 
     # Test creation of a intentional walk with a missing field

@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <title>Intentional Walk</title>
+  <title>Intentional Walk - Admin console</title>
 
   <meta name="description" content="">
   <meta name="author" content="">
@@ -16,14 +16,16 @@
 
   <!-- Bootstrap 4 -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa&display=swap" rel="stylesheet">
 
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani&family=Montserrat&family=Exo&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" type="text/css" href="{% static 'home/main.css' %}">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
+  <link rel="stylesheet" type="text/css" href="{% static 'home/main.css' %}">
 
 </head>
 <body>
@@ -37,17 +39,24 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav ml-auto">
+        {% if user.is_authenticated %}
          <li class="nav-item">
            <a class="nav-link" href="/">Home</a>
         </li>
-
-          <li class="nav-item">
-          {% if user.is_authenticated %}
-              <a class="nav-link" href="/admin/logout">Logout</a>
-          {% else %}
-              <a class="nav-link" href="/admin/login"">Login</a>
-          {% endif %}
+         <li class="nav-item">
+           <a class="nav-link" href="/users/">Users</a>
         </li>
+        <li class="nav-item">
+           <a class="nav-link" href="/intentionalwalks/">RecordedWalks</a>
+        </li>
+          <li class="nav-item">
+              <a class="nav-link" href="/admin/logout">Logout</a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+              <a class="nav-link" href="/admin/login">Login</a>
+          </li>
+          {% endif %}
       </ul>
   </nav>
 
@@ -57,7 +66,7 @@
   {% endblock %}
   {% else %}
   <div class="container d-flex h-100 justify-content-center">
-      <div class="row h-100 login-prompt">
+      <div class="row h-100" style="margin-top: 100px;">
           <h1> Please <a href="/admin/login"">Login</a> to view the page </h1>
       </div>
   </div>
@@ -72,8 +81,12 @@
 
   <!-- Bootstrap 4 -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+  <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 
   <script src="{% static 'home/main.js' %}"></script>
+  {% block post_scripts %}
+  {% endblock %}
+
 
 </body>
 </html>

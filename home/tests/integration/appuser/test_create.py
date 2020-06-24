@@ -30,7 +30,9 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "App User registered successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"], "Device registered & account registered successfully", msg=fail_message
+        )
         self.assertEqual(response_data["payload"]["name"], self.request_params["name"], msg=fail_message)
         self.assertEqual(response_data["payload"]["email"], self.request_params["email"], msg=fail_message)
         self.assertEqual(response_data["payload"]["zip"], self.request_params["zip"], msg=fail_message)
@@ -51,7 +53,9 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "App User registered successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"], "Device registered & account registered successfully", msg=fail_message
+        )
         self.assertEqual(response_data["payload"]["name"], self.request_params["name"], msg=fail_message)
         self.assertEqual(response_data["payload"]["email"], self.request_params["email"], msg=fail_message)
         self.assertEqual(response_data["payload"]["zip"], self.request_params["zip"], msg=fail_message)
@@ -69,7 +73,7 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "App User updated successfully", msg=fail_message)
+        self.assertEqual(response_data["message"], "Device & account updated successfully", msg=fail_message)
         self.assertEqual(response_data["payload"]["name"], self.request_params["name"], msg=fail_message)
         self.assertEqual(response_data["payload"]["email"], self.request_params["email"], msg=fail_message)
         self.assertEqual(response_data["payload"]["zip"], self.request_params["zip"], msg=fail_message)
@@ -90,7 +94,9 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "App User registered successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"], "Device registered & account registered successfully", msg=fail_message
+        )
         self.assertEqual(response_data["payload"]["name"], self.request_params["name"], msg=fail_message)
         self.assertEqual(response_data["payload"]["email"], self.request_params["email"], msg=fail_message)
         self.assertEqual(response_data["payload"]["zip"], self.request_params["zip"], msg=fail_message)
@@ -111,7 +117,7 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "App User registered successfully", msg=fail_message)
+        self.assertEqual(response_data["message"], "Device registered & account updated successfully", msg=fail_message)
         self.assertEqual(response_data["payload"]["name"], self.request_params["name"], msg=fail_message)
         self.assertEqual(response_data["payload"]["email"], self.request_params["email"], msg=fail_message)
         self.assertEqual(response_data["payload"]["zip"], self.request_params["zip"], msg=fail_message)
