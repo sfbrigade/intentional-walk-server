@@ -153,10 +153,6 @@ class Migration(migrations.Migration):
             model_name='intentionalwalk',
             name='appuser',
         ),
-        migrations.RemoveField(
-            model_name='intentionalwalk',
-            name='event_id',
-        ),
         migrations.AddField(
             model_name='contest',
             name='created',
@@ -247,8 +243,7 @@ class Migration(migrations.Migration):
             model_name='dailywalk',
             constraint=models.UniqueConstraint(fields=('account', 'date'), name='account_date'),
         ),
-        migrations.RunSQL(
-            "DROP TABLE home_appuser;",
-            migrations.RunPython.noop
-        )
+        migrations.DeleteModel(
+            name='AppUser',
+        ),
     ]

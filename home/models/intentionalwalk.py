@@ -7,7 +7,9 @@ class IntentionalWalk(models.Model):
     Stores a single intentional/recorded walk from a user/account. It is always
     linked to the specific device identifier :model: `home.Device`
     """
-
+    # event id will be a v4 random uuid generated on the client
+    event_id = models.CharField(max_length=250, unique=True)
+    # Walk meta
     start = models.DateTimeField(help_text="Timestamp when the intentional walk started")
     end = models.DateTimeField(help_text="Timestamp when the intentional walk ended")
     steps = models.IntegerField(help_text="Number of steps recorded")
