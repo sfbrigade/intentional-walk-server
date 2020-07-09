@@ -46,6 +46,77 @@
    Stopping intentional-walk-server_server_1      ... done
    ```
 
+## Server management commands
+
+Note: see the instructions in the next quick reference section to start/log in to a running
+server container to perform the following actions.
+
+ * To create an admin user that can log in to the web views:
+
+   ```
+   # python manage.py createsuperuser
+   ```
+
+ * To run the test suite:
+
+   ```
+   # pytest
+   ```
+
+ * To run database migrations:
+
+   ```
+   # python manage.py migrate
+   ```
+
+ * To restore a database backup:
+
+   ```
+   # bin/pg_restore_dump <name of backup.dump>
+   ```
+
+## Heroku deployment info
+
+ * Register a free Heroku account here: https://signup.heroku.com/
+
+   Set up your ssh keys with your account for authentication. Then contact an existing team member for access to the Heroku deployment instance(s).
+
+ * Add the git remote repository corresponding to the Heroku deployment environment you wish to access. For example, the staging environment:
+
+   ```
+   # git remote add staging https://git.heroku.com/iwalk-test.git
+   ```
+
+ * Log in with the Heroku client:
+
+   ```
+   # heroku login
+   ```
+
+ * Perform a manual database backup:
+
+   ```
+   # heroku pg:backups:capture
+   ```
+
+ * Download the latest database backup:
+
+   ```
+   # heroku pg:backups:download
+   ```
+
+ * Deploy to Heroku:
+
+   ```
+   # git push <remote name, i.e. staging> <branch to deploy, i.e. master>
+   ```
+
+ * Execute a management command in the Heroku deployment environment:
+
+   ```
+   # heroku run --remote <remote name, i.e. staging> <command to execute, i.e. python manage.py migrate>
+   ```
+
 ## Docker Command Quick Reference
 
  * To start all the containers:
