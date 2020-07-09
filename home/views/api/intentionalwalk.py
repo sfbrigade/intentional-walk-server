@@ -53,6 +53,7 @@ class IntentionalWalkView(View):
 
             try:
                 intentional_walk = IntentionalWalk.objects.create(
+                    event_id=intentional_walk_data["event_id"],
                     start=intentional_walk_data["start"],
                     end=intentional_walk_data["end"],
                     steps=intentional_walk_data["steps"],
@@ -62,6 +63,7 @@ class IntentionalWalkView(View):
                 )
                 json_response["payload"]["intentional_walks"].append(
                     {
+                        "event_id": intentional_walk.event_id,
                         "start": intentional_walk.start,
                         "end": intentional_walk.end,
                         "steps": intentional_walk.steps,

@@ -61,6 +61,11 @@ class ApiTestCase(TestCase):
         self.assertEqual(response_data["message"], "Intentional Walks recorded successfully", msg=fail_message)
         self.assertEqual(response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message)
         self.assertEqual(
+            response_data["payload"]["intentional_walks"][0]["event_id"],
+            self.request_params["intentional_walks"][0]["event_id"],
+            msg=fail_message,
+        )
+        self.assertEqual(
             response_data["payload"]["intentional_walks"][0]["start"],
             self.request_params["intentional_walks"][0]["start"],
             msg=fail_message,
