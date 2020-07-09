@@ -1,13 +1,39 @@
 from django.contrib import admin
-from .models import AppUser, Contest, DailyWalk, IntentionalWalk
+from .models import Device, Account, DailyWalk, IntentionalWalk, Contest
 
 
-@admin.register(AppUser)
-class AppUserAdmin(admin.ModelAdmin):
-    list_display = ["name", "email", "zip", "age", "created", "account_id"]
-    list_display_links = ["name"]
+@admin.register(Device)
+class DeviceAdmin(admin.ModelAdmin):
+    list_display = ["account", "device_id", "created"]
+    list_display_links = ["account"]
     ordering = ["-created"]
-    search_fields = ["name", "zip"]
+    search_fields = ["account"]
+
+
+@admin.register(Account)
+class AccountAdmin(admin.ModelAdmin):
+    list_display = ["name", "email", "age",  "zip", "created", "updated"]
+    list_display_links = ["email", "name"]
+    ordering = ["-created"]
+    search_fields = ["email", "name", "zip"]
+
+
+@admin.register(DailyWalk)
+class DailyWalkAdmin(admin.ModelAdmin):
+    list_display = ["account", "date", "steps", "distance"]
+    list_display_links = ["account", "date", "steps", "distance"]
+    readonly_fields = ['account', "created", "updated"]
+    ordering = ["-date"]
+    search_fields = ["account"]
+
+
+@admin.register(IntentionalWalk)
+class IntentionalWalkAdmin(admin.ModelAdmin):
+    list_display = ["account", "start", "end", "steps", "distance"]
+    list_display_links = ["account", "start", "end", "steps", "distance"]
+    readonly_fields = ['account', "created"]
+    ordering = ["-start"]
+    search_fields = ["account"]
 
 
 @admin.register(Contest)
@@ -16,19 +42,3 @@ class AppUserAdmin(admin.ModelAdmin):
     list_display_links = ["contest_id"]
     ordering = ["-start_promo"]
     search_fields = []
-
-
-@admin.register(DailyWalk)
-class DailyWalkAdmin(admin.ModelAdmin):
-    list_display = ["appuser", "date", "steps", "distance"]
-    list_display_links = ["appuser", "date", "steps", "distance"]
-    ordering = ["-date"]
-    search_fields = ["user__name"]
-
-
-@admin.register(IntentionalWalk)
-class IntentionalWalkAdmin(admin.ModelAdmin):
-    list_display = ["appuser", "start", "end", "steps", "distance", "event_id"]
-    list_display_links = ["appuser", "start", "end", "steps", "distance", "event_id"]
-    ordering = ["-start"]
-    search_fields = ["user__name"]

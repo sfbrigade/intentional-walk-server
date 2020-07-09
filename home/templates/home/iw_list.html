@@ -1,0 +1,139 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<!-- User aggregate stats -->
+<div class="container text-center" style="margin-top: 75px; margin-bottom: 75px; ">
+    <h1 style="line-height: 150%;">
+        <span style="color:#E59866">{{ total_iw_users | intcomma}} users</span> have
+        <span style="color:#CD6155">recorded {{ total_iw_stats.count }} walks</span> spending
+        <span style="color:#5DADE2">{{ total_iw_stats.time }} minutes </span> walking
+        <span style="color:#2ECC71">{{ total_iw_stats.steps | intword}} steps</span> and covering
+        <span style="color:#1ABC9C">{{ total_iw_stats.miles | floatformat}} miles</span> so far..
+    </h1>
+    <!--
+    <h1 style="line-height: 150%;">
+        <span style="color:#E59866">{{ total_iw_users | intcomma}} out of
+        {{ total_signedup | intcomma}} signed up users ({{ percent_usage | floatformat}}%)</span> have
+        <span style="color:#CD6155">recorded {{ total_iw_stats.count }} walks</span>.
+    </h1>
+    <h1 style="line-height: 150%;">
+        They spent <span style="color:#5DADE2">{{ total_iw_stats.time }} minutes </span> walking
+        <span style="color:#2ECC71">{{ total_iw_stats.steps | intword}} steps
+        (out of a total {{ total_steps | intcomma}} steps / {{ percent_steps | floatformat}}%)</span> and covering
+        <span style="color:#1ABC9C">{{ total_iw_stats.miles | floatformat}} miles
+        (out of a total {{ total_distance | intcomma}} miles / {{ percent_distance | floatformat}}%)</span> so far..
+    </h1> -->
+</div>
+<!-- User aggregate stats -->
+<div class="container-fluid text-center" style="background-color: #f8f8f8; padding: 25px; margin-top: 50px">
+    <h2><b>Overall Trends</b></h2>
+</div>
+<div class="container-fluid text-center" style="padding: 25px; margin-top: 50px">
+    <h2 style="padding-bottom: 50px;"><b>Recorded Walk Trends</b></h2>
+    <div class="row" style="padding-top: 50px; padding-bottom: 25px; color:#922B21">
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Walks (per day)</h3>
+            <div id="daily_rw_count"></div>
+        </div>
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Walks (total)</h3>
+            <div id="total_rw_count"></div>
+        </div>
+    </div>
+    <hr/>
+    <div class="row" style="padding-top: 50px; padding-bottom: 25px; color:#239B56">
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Steps (per day)</h3>
+            <div id="daily_rw_steps"></div>
+        </div>
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Steps (total)</h3>
+            <div id="total_rw_steps"></div>
+        </div>
+    </div>
+    <hr/>
+    <div class="row" style="padding-top: 50px; padding-bottom: 25px; color:#117864">
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Miles (per day)</h3>
+            <div id="daily_rw_miles"></div>
+        </div>
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Miles (total)</h3>
+            <div id="total_rw_miles"></div>
+        </div>
+    </div>
+    <hr/>
+    <div class="row" style="padding-top: 50px; padding-bottom: 25px; color:#2874A6">
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Time (per day)</h3>
+            <div id="daily_rw_time"></div>
+        </div>
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Time (total)</h3>
+            <div id="total_rw_time"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Charting scripts. Load data into js variables her -->
+<script type="text/javascript">
+    // Plot daily & cumulative signup rates
+    // TODO: Terrible spaghetti code. Must refactor
+    var daily_recorded_walk_count = [
+      {% for date, obj in daily_recorded_walks_stats %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{obj.count}}],
+      {% endfor %}
+    ]
+
+    var cumu_recorded_walk_count = [
+      {% for date, obj in cumu_recorded_walks_stats %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{obj.count}}],
+      {% endfor %}
+    ]
+    console.log(cumu_recorded_walk_count)
+    var daily_recorded_walk_steps = [
+      {% for date, obj in daily_recorded_walks_stats %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{obj.steps}}],
+      {% endfor %}
+    ]
+
+    var cumu_recorded_walk_steps = [
+      {% for date, obj in cumu_recorded_walks_stats %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{obj.steps}}],
+      {% endfor %}
+    ]
+
+    var daily_recorded_walk_miles = [
+      {% for date, obj in daily_recorded_walks_stats %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{obj.miles}}],
+      {% endfor %}
+    ]
+
+    var cumu_recorded_walk_miles = [
+      {% for date, obj in cumu_recorded_walks_stats %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{obj.miles}}],
+      {% endfor %}
+    ]
+
+    var daily_recorded_walk_time = [
+      {% for date, obj in daily_recorded_walks_stats %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{obj.time}}/60],
+      {% endfor %}
+    ]
+
+    var cumu_recorded_walk_time = [
+      {% for date, obj in cumu_recorded_walks_stats %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{obj.time}}/60],
+      {% endfor %}
+    ]
+
+
+</script>
+
+{% endblock %}
+
+{% block post_scripts %}
+<script src="{% static 'home/iw_plots.js' %}"></script>
+{% endblock %}

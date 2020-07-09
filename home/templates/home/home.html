@@ -1,67 +1,119 @@
 {% extends 'home/base.html' %}
-{% load format_helpers %}
+{% load static %}
+{% load humanize %}
 
 {% block content %}
-  <div class="container-fluid home-aggregate">
-      <div class="row home-row">
-          <div class="col-4 text-center">
-              <span class="agg-stat" style="color:olivedrab">{{total_users}}</span>
-              <span class="agg-text">Users</span>
-          </div>
-          <div class="col-4  text-center">
-              <span class="agg-stat" style="color:forestgreen">{{total_steps}}</span>
-              <span class="agg-text">Steps</span>
-          </div>
-          <div class="col-4  text-center">
-              <span class="agg-stat" style="color:limegreen">{{total_distance|m_to_mi|floatformat}}</span>
-              <span class="agg-text">Miles</span>
-          </div>
-      </div>
-      <div class="row home-row">
-          <div class="col-6  text-center">
-              <span class="agg-stat" style="color:steelblue">{{total_daily_walks}}</span>
-              <span class="agg-text">Daily Walks</span>
-          </div>
-          <div class="col-6  text-center">
-              <span class="agg-stat" style="color:slateblue">{{total_intentional_walks}}</span>
-              <span class="agg-text">Intentional Walks</span>
-          </div>
-      </div>
-  </div>
-    <hr/>
-
-  <div class="container-fluid all-users">
-      <h1 class="text-center">All users</h1>
-      <p class="text-center"><small>Click on user names to open their detail page. For more flexibility with search/sort, visit the <a href="/admin/home/appuser/" target="_blank">admin page</a></small></p>
-      <p class="text-center"><small>There might be more accounts than the number of users since users can register from multiple devices with the same email</small></p>
-   </div>
-  <div class="home-row table-responsive">
-      <table class="table table-striped">
-          <thead>
-            <tr>
-                <th scope="col">#</th>
-              <th scope="col">Account ID</th>
-              <th scope="col">Name</th>
-              <th scope="col">Email</th>
-                <th scope="col">Age</th>
-              <th scope="col">Zip</th>
-                <th scope="col">Account Created</th>
-            </tr>
-          </thead>
-            <tbody>
-                {% for appuser in appuser_list%}
-                <tr>
-                  <th scope="row">{{ forloop.counter }}</th>
-                    <th>{{appuser.account_id}}</th>
-                  <td><a href="/user/{{appuser.account_id}}">{{appuser.name}}</a></td>
-                  <td>{{appuser.email}}</td>
-                  <td>{{appuser.age}}</td>
-                    <td>{{appuser.zip}}</td>
-                    <td>{{appuser.created}}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-      </table>
+<!-- Aggregate 1 liner-->
+<div class="container text-center" style="margin-top: 75px; margin-bottom: 75px;">
+    <h1 style="line-height: 150%;">
+        <span style="color:#E59866">{{ accounts | length | intcomma}} users</span> have walked
+        <span style="color:#2ECC71">{{total_steps | intword}} steps</span> /
+        <span style="color:#1ABC9C">{{total_miles | intcomma}} miles</span> so far..
+    </h1>
+</div>
+<!-- User aggregate stats -->
+<div class="container-fluid text-center" style="background-color: #f8f8f8; padding: 25px; margin-top: 50px">
+    <h2><b>Overall Trends</b></h2>
+</div>
+<div class="container-fluid text-center" style="padding: 25px; ; margin-top: 50px">
+    <div class="row" style="padding-top: 25px; padding-bottom: 25px; color:#922B21">
+        <div class="col-sm-12 col-lg-6  text-center">
+            <h3>Signups (per day)</h3>
+            <div id="daily_signups"></div>
+        </div>
+        <div class="col-sm-12 col-lg-6  text-center">
+            <h3>Signups (total)</h3>
+            <div id="total_signups"></div>
+        </div>
     </div>
+    <hr/>
+    <div class="row" style="padding-top: 50px; padding-bottom: 25px;  color:#239B56">
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Steps (per day)</h3>
+            <div id="daily_steps"></div>
+        </div>
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Steps (total)</h3>
+            <div id="total_steps"></div>
+        </div>
+    </div>
+    <hr/>
+    <div class="row" style="padding-top: 50px; padding-bottom: 50px; color:#117864">
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Miles (per day)</h3>
+            <div id="daily_miles"></div>
+        </div>
+        <div class="col-sm-12 col-lg-6   text-center">
+            <h3>Miles (total)</h3>
+            <div id="total_miles"></div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid text-center" style="background-color: #f8f8f8; padding: 25px; ; margin-top: 50px">
+    <h2><b>User Breakdown</b></h2>
+</div>
+<div class="container text-center" style="padding: 25px; ; margin-top: 50px">
+    <div class="row" style="padding-top: 25px; padding-bottom: 25px; color:#7D3C98">
+        <div class="col-sm-12 col-lg-12  text-center">
+            <h3>Age Distribution</h3>
+            <div id="user_age_dist"></div>
+        </div>
+    </div>
+</div>
 
+<div id="map"></div>
+
+<!-- Charting scripts. Load data into js variables her -->
+<script type="text/javascript">
+    // Plot daily & cumulative signup rates
+    // TODO: Terrible spaghetti code. Must refactor
+    var daily_user_signups = [
+      {% for date, count in daily_signups %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{count}}],
+      {% endfor %}
+    ]
+
+    var cumu_user_signups = [
+      {% for date, count in cumu_signups %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{count}}],
+      {% endfor %}
+    ]
+
+    var daily_step_count = [
+      {% for date, count in daily_steps %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{count}}],
+      {% endfor %}
+    ]
+
+    var cumu_step_count = [
+      {% for date, count in cumu_steps %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{count}}],
+      {% endfor %}
+    ]
+
+    var daily_mile_count = [
+      {% for date, count in daily_miles %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{count}}],
+      {% endfor %}
+    ]
+
+    var cumu_mile_count = [
+      {% for date, count in cumu_miles %}
+        [new Date('{{date | date:"Y-m-d"}}'), {{count}}],
+      {% endfor %}
+    ]
+
+    var user_age_dist = [
+      {% for account in accounts %}
+        [{{account.age}}],
+      {% endfor %}
+    ]
+
+</script>
+
+
+{% endblock %}
+
+{% block post_scripts %}
+<script src="{% static 'home/home_plots.js' %}"></script>
 {% endblock %}

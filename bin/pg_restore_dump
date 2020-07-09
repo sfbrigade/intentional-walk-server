@@ -1,0 +1,3 @@
+#!/bin/sh
+psql $DATABASE_URL -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+pg_restore --clean --no-acl --no-owner -d $DATABASE_URL $1
