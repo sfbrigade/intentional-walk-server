@@ -16,6 +16,10 @@ class DailyWalk(models.Model):
     created = models.DateTimeField(auto_now_add=True, help_text="Record creation timestamp")
     updated = models.DateTimeField(auto_now=True, help_text="Record updation timestamp")
 
+    @property
+    def distance_in_miles(self):
+        return self.distance * 0.000621371
+
     # Auto populate the account field from the device field
     def save(self, *args, **kwargs):
         self.account = self.device.account

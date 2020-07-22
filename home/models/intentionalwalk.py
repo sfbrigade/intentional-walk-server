@@ -34,8 +34,8 @@ class IntentionalWalk(models.Model):
         return time.strftime("%Hh %Mm %Ss", time.gmtime(int(self.pause_time)))
 
     @property
-    def speed(self):
-        return (self.distance / ((self.end - self.start).total_seconds() - self.pause_time)) * 3600
+    def speed_mph(self):
+        return (self.distance * 0.000621371 / ((self.end - self.start).total_seconds() - self.pause_time)) * 3600
 
     # Auto populate the account field from the device field
     def save(self, *args, **kwargs):

@@ -10,6 +10,9 @@ from home.models import Account, Device, IntentionalWalk, DailyWalk
 START_DATE = datetime.date(2020, 4, 1)
 END_DATE = datetime.datetime.today().date()
 
+# Hacky fix to ensure distance is in miles
+def m_to_mi(value):
+    return value * 0.000621371
 
 # Home page view
 class HomeView(generic.TemplateView):
@@ -71,7 +74,7 @@ class HomeView(generic.TemplateView):
 
         # Get growth for mile
         mile_dist = {
-            date: sum([walk["distance"] for walk in group])
+            date: sum([m_to_mi(walk["distance"]) for walk in group])
             for date, group in itertools.groupby(daily_walks.values(), key=lambda x: x["date"])
         }
         # Fill the gaps cos google charts if annoying af
