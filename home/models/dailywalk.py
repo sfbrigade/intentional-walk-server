@@ -1,4 +1,5 @@
 from django.db import models
+from home.templatetags.format_helpers import m_to_mi
 
 
 # Event model
@@ -18,7 +19,7 @@ class DailyWalk(models.Model):
 
     @property
     def distance_in_miles(self):
-        return self.distance * 0.000621371
+        return m_to_mi(self.distance)
 
     # Auto populate the account field from the device field
     def save(self, *args, **kwargs):

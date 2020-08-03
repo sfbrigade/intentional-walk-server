@@ -5,14 +5,12 @@ from collections import Counter
 from django.views import View, generic
 
 from home.models import Account, Device, IntentionalWalk, DailyWalk
+from home.templatetags.format_helpers import m_to_mi
 
 # Date range for data aggregation
 START_DATE = datetime.date(2020, 4, 1)
 END_DATE = datetime.datetime.today().date()
 
-# Hacky fix to ensure distance is in miles
-def m_to_mi(value):
-    return value * 0.000621371
 
 # Home page view
 class HomeView(generic.TemplateView):

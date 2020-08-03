@@ -6,14 +6,12 @@ from django.views import View, generic
 from django.db.models import Sum
 
 from home.models import Account, Device, IntentionalWalk, DailyWalk
+from home.templatetags.format_helpers import m_to_mi
 
 # Date range for data aggregation
 START_DATE = datetime.date(2020, 4, 1)
 END_DATE = datetime.datetime.today().date()
 
-# Hacky fix to ensure distance is in miles
-def m_to_mi(value):
-    return value * 0.000621371
 
 class IntentionalWalkWebView(generic.ListView):
     template_name = "home/iw_list.html"

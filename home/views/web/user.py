@@ -53,7 +53,7 @@ class UserListView(generic.ListView):
             user_stats["num_dws"] = len(daily_walks)
             for dw in daily_walks:
                 user_stats["dw_steps"] += dw.steps
-                user_stats["dw_distance"] += m_to_mi(dw.distance)
+                user_stats["dw_distance"] += dw.distance_in_miles
 
             # Get all recorded walk data
             user_stats["rw_steps"] = 0
@@ -63,7 +63,7 @@ class UserListView(generic.ListView):
             user_stats["num_rws"] = len(intentional_walks)
             for iw in intentional_walks:
                 user_stats["rw_steps"] += iw.steps
-                user_stats["rw_distance"] += m_to_mi(iw.distance)
+                user_stats["rw_distance"] += iw.distance_in_miles
                 user_stats["rw_time"] += iw.walk_time / 60
                 user_stats["rw_speeds"].append(iw.speed_mph)
             user_stats["rw_avg_speed"] = (
