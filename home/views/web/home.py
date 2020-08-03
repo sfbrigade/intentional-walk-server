@@ -5,6 +5,7 @@ from collections import Counter
 from django.views import View, generic
 
 from home.models import Account, Device, IntentionalWalk, DailyWalk
+from home.templatetags.format_helpers import m_to_mi
 
 # Date range for data aggregation
 START_DATE = datetime.date(2020, 4, 1)
@@ -71,7 +72,7 @@ class HomeView(generic.TemplateView):
 
         # Get growth for mile
         mile_dist = {
-            date: sum([walk["distance"] for walk in group])
+            date: sum([m_to_mi(walk["distance"]) for walk in group])
             for date, group in itertools.groupby(daily_walks.values(), key=lambda x: x["date"])
         }
         # Fill the gaps cos google charts if annoying af

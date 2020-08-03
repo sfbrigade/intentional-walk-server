@@ -1,4 +1,5 @@
 from django.db import models
+from home.templatetags.format_helpers import m_to_mi
 
 
 # Event model
@@ -15,6 +16,10 @@ class DailyWalk(models.Model):
     account = models.ForeignKey("Account", on_delete=models.CASCADE, help_text="Account the data is linked to")
     created = models.DateTimeField(auto_now_add=True, help_text="Record creation timestamp")
     updated = models.DateTimeField(auto_now=True, help_text="Record updation timestamp")
+
+    @property
+    def distance_in_miles(self):
+        return m_to_mi(self.distance)
 
     # Auto populate the account field from the device field
     def save(self, *args, **kwargs):

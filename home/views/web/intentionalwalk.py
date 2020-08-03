@@ -6,6 +6,7 @@ from django.views import View, generic
 from django.db.models import Sum
 
 from home.models import Account, Device, IntentionalWalk, DailyWalk
+from home.templatetags.format_helpers import m_to_mi
 
 # Date range for data aggregation
 START_DATE = datetime.date(2020, 4, 1)
@@ -33,7 +34,7 @@ class IntentionalWalkWebView(generic.ListView):
                 recorded_walks_stats[date]["count"] += 1  # Update count
                 recorded_walks_stats[date]["steps"] += obj["steps"]  # Update count
                 recorded_walks_stats[date]["time"] += (obj["end"] - obj["start"]).total_seconds() - obj["pause_time"]
-                recorded_walks_stats[date]["miles"] += obj["distance"]  # Update count
+                recorded_walks_stats[date]["miles"] += m_to_mi(obj["distance"])  # Update count
 
         # Fill the gaps cos google charts if annoying af
         current_date = START_DATE
@@ -67,7 +68,7 @@ class IntentionalWalkWebView(generic.ListView):
         context["percent_steps"] = (
             (context["total_iw_stats"]["steps"] / context["total_steps"]) * 100 if context["total_steps"] > 0 else 0
         )
-        context["total_distance"] = DailyWalk.objects.all().aggregate(Sum("distance"))["distance__sum"]
+        context["total_distance"] = m_to_mi(DailyWalk.objects.all().aggregate(Sum("distance"))["distance__sum"])
         context["percent_distance"] = (
             (context["total_iw_stats"]["miles"] / context["total_distance"]) * 100
             if context["total_distance"] > 0

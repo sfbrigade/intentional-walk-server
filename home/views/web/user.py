@@ -4,6 +4,9 @@ from django.views import View, generic
 
 from home.models import Account, Contest
 
+# Hacky fix to ensure distance is in miles
+def m_to_mi(value):
+    return value * 0.000621371
 
 # User list page
 class UserListView(generic.ListView):
@@ -22,15 +25,14 @@ class UserListView(generic.ListView):
         if contest_id:
             # Get the contest associated with this id
             contest = Contest.objects.get(contest_id=contest_id)
-            accounts = contest.account_set.all()
             date_range_start = contest.start
             date_range_end = contest.end
             context["current_contest"] = contest
         else:
-            accounts = Account.objects.all()
             date_range_start = None
             date_range_end = None
 
+        accounts = Account.objects.all()
         context["user_stats_list"] = []
         for account in accounts:
             user_stats = {}
@@ -51,7 +53,7 @@ class UserListView(generic.ListView):
             user_stats["num_dws"] = len(daily_walks)
             for dw in daily_walks:
                 user_stats["dw_steps"] += dw.steps
-                user_stats["dw_distance"] += dw.distance
+                user_stats["dw_distance"] += dw.distance_in_miles
 
             # Get all recorded walk data
             user_stats["rw_steps"] = 0
@@ -61,9 +63,9 @@ class UserListView(generic.ListView):
             user_stats["num_rws"] = len(intentional_walks)
             for iw in intentional_walks:
                 user_stats["rw_steps"] += iw.steps
-                user_stats["rw_distance"] += iw.distance
+                user_stats["rw_distance"] += iw.distance_in_miles
                 user_stats["rw_time"] += iw.walk_time / 60
-                user_stats["rw_speeds"].append(iw.speed)
+                user_stats["rw_speeds"].append(iw.speed_mph)
             user_stats["rw_avg_speed"] = (
                 sum(user_stats["rw_speeds"]) / len(user_stats["rw_speeds"]) if user_stats["rw_speeds"] else 0
             )
