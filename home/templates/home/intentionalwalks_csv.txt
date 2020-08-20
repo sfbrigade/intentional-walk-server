@@ -1,0 +1,2 @@
+{% for row in data %}"{{ row.0|addslashes }}", "{{ row.1|addslashes }}", "{{ row.2|addslashes }}", "{{ row.3|addslashes }}", "{{ row.4|addslashes }}", "{{ row.5|addslashes }}", "{{ row.6|addslashes }}", "{{ row.7|addslashes }}", "{{ row.8|addslashes }}", "{{ row.9|addslashes }}"
+{% endfor %}

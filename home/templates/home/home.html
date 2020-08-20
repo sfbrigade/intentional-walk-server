@@ -7,8 +7,8 @@
 <div class="container text-center" style="margin-top: 75px; margin-bottom: 75px;">
     <h1 style="line-height: 150%;">
         <span style="color:#E59866">{{ accounts | length | intcomma}} users</span> have walked
-        <span style="color:#2ECC71">{{total_steps | intword}} steps</span> /
-        <span style="color:#1ABC9C">{{total_miles | intcomma}} miles</span> so far..
+        <span style="color:#2ECC71">{{total_steps | intword }} steps</span> /
+        <span style="color:#1ABC9C">{{total_miles | floatformat }} miles</span> so far..
     </h1>
 </div>
 <!-- User aggregate stats -->
