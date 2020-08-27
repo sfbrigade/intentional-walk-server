@@ -8,3 +8,6 @@ from .api.contest import ContestCurrentView
 from .web.home import HomeView
 from .web.intentionalwalk import IntentionalWalkWebView
 from .web.user import UserListView
+from .web.data import users_csv_view
+from .web.data import daily_walks_csv_view
+from .web.data import intentional_walks_csv_view
