@@ -8,7 +8,7 @@
     <h1 style="line-height: 150%;">
         <span style="color:#E59866">{{ total_iw_users | intcomma}} users</span> have
         <span style="color:#CD6155">recorded {{ total_iw_stats.count }} walks</span> spending
-        <span style="color:#5DADE2">{{ total_iw_stats.time }} minutes </span> walking
+        <span style="color:#5DADE2">{{ total_iw_stats.time }} hours </span> walking
         <span style="color:#2ECC71">{{ total_iw_stats.steps | intword}} steps</span> and covering
         <span style="color:#1ABC9C">{{ total_iw_stats.miles | floatformat}} miles</span> so far..
     </h1>
@@ -26,9 +26,13 @@
         (out of a total {{ total_distance | intcomma}} miles / {{ percent_distance | floatformat}}%)</span> so far..
     </h1> -->
 </div>
-<!-- User aggregate stats -->
 <div class="container-fluid text-center" style="background-color: #f8f8f8; padding: 25px; margin-top: 50px">
-    <h2><b>Overall Trends</b></h2>
+    <h2><b>Overall Trends</b> - {{start_date}} - {{end_date}}</h2>
+    <div class="container-fluid text-center" style="margin-top: 25px">
+        <b>Start Date</b>: &nbsp;<input type="date" id="start-date" aria-describedby="startDate" placeholder="Start Date">&nbsp;&nbsp;&nbsp;&nbsp;
+        <b>End Date</b>: &nbsp;<input type="date" id="end-date" aria-describedby="endDate" placeholder="End Date">
+        <button id="update" class="btn btn-info" style="background-color: #bbbbbb;" onclick="updateGraph()">Update Graph</button>
+    </div>
 </div>
 <div class="container-fluid text-center" style="padding: 25px; margin-top: 50px">
     <h2 style="padding-bottom: 50px;"><b>Recorded Walk Trends</b></h2>
@@ -79,6 +83,30 @@
 
 <!-- Charting scripts. Load data into js variables her -->
 <script type="text/javascript">
+
+    // Update URL on update graph click
+    function updateGraph(){
+        let start_date = $('#start-date').val()
+        let end_date = $('#end-date').val()
+
+        let base_url = window.location.origin;
+
+        let date_params = {}
+
+        if (start_date !== ''){
+            date_params["start_date"] = start_date;
+        }
+        if (end_date !== ''){
+            date_params["end_date"] = end_date;
+        }
+
+        let date_params_str = $.param(date_params);
+
+        if (date_params_str !== ''){
+            window.location.href = window.location.origin + '?' + date_params_str;
+        }
+    }
+
     // Plot daily & cumulative signup rates
     // TODO: Terrible spaghetti code. Must refactor
     var daily_recorded_walk_count = [

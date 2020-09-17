@@ -37,26 +37,24 @@
                 <th scope="col">Age</th>
                 <th scope="col">Zip</th>
                 <th scope="col">SignUp Date</th>
-                <th scope="col">Devices</th>
-                <th scope="col">Days active</th>
+                <th scope="col">Daily Walks</th>
                 <th scope="col">Total Steps</th>
-                <th scope="col">Total Dist</th>
+                <th scope="col">Total Dist(mi)</th>
                 <th scope="col">Rec Walks</th>
                 <th scope="col">Rec Steps</th>
-                <th scope="col">Rec Dist(m)</th>
+                <th scope="col">Rec Dist(mi)</th>
                 <th scope="col">Rec Time(min)</th>
-                <th scope="col">Avg speed</th>
+                <th scope="col">Rec Avg speed(mph)</th>
             </tr>
             </thead>
             <tbody>
             {% for appuser in user_stats_list %}
             <tr>
-                <td><a href="/users/{{appuser.account.pk}}">{{appuser.account.name}}</a></td>
-                <td><a href="/users/{{appuser.account.pk}}">{{appuser.account.email}}</a></td>
+                <td>{{appuser.account.name}}</td>
+                <td>{{appuser.account.email}}</td>
                 <td>{{appuser.account.age}}</td>
                 <td>{{appuser.account.zip}}</td>
                 <td>{{appuser.account.created | date:"DATE_FORMAT"}}</td>
-                <td>{{appuser.account.device_set.count}}</td>
                 <td>{{appuser.num_dws}}</td>
                 <td>{{appuser.dw_steps}}</td>
                 <td>{{appuser.dw_distance|floatformat}}</td>
