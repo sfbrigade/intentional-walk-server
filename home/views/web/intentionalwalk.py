@@ -9,9 +9,8 @@ from home.models import Account, Device, IntentionalWalk, DailyWalk
 from home.templatetags.format_helpers import m_to_mi
 
 # Date range for data aggregation
-START_DATE = datetime.date(2020, 4, 1)
-END_DATE = datetime.datetime.today().date()
-
+DEFAULT_START_DATE = datetime.date(2020, 4, 1)
+DEFAULT_END_DATE = datetime.datetime.today().date()
 
 class IntentionalWalkWebView(generic.ListView):
     template_name = "home/iw_list.html"
@@ -21,6 +20,11 @@ class IntentionalWalkWebView(generic.ListView):
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
+
+        start_date_str = self.request.GET.get("start_date")
+        start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else DEFAULT_START_DATE
+        end_date_str = self.request.GET.get("end_date")
+        end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").date() if end_date_str else DEFAULT_END_DATE
 
         # Get aggregate stats for all users
         all_accounts = Account.objects.all().order_by("created")
@@ -37,11 +41,11 @@ class IntentionalWalkWebView(generic.ListView):
                 recorded_walks_stats[date]["miles"] += m_to_mi(obj["distance"])  # Update count
 
         # Fill the gaps cos google charts if annoying af
-        current_date = START_DATE
+        current_date = start_date
         delta = datetime.timedelta(days=1)
         context["daily_recorded_walks_stats"] = []
         # Iterate over the entire date range
-        while current_date <= END_DATE:
+        while current_date <= end_date:
             context["daily_recorded_walks_stats"].append(
                 [current_date, recorded_walks_stats.get(current_date, {"count": 0, "steps": 0, "time": 0, "miles": 0})]
             )
@@ -56,7 +60,7 @@ class IntentionalWalkWebView(generic.ListView):
             total["miles"] += stat_obj["miles"]
             context["cumu_recorded_walks_stats"].append([date, dict(total)])
         context["total_iw_stats"] = total
-        context["total_iw_stats"]["time"] = int(context["total_iw_stats"]["time"] / 60)
+        context["total_iw_stats"]["time"] = int(context["total_iw_stats"]["time"] / 3600)
 
         # Get IW users
         context["total_iw_users"] = IntentionalWalk.objects.values("account").distinct().count()
@@ -74,5 +78,8 @@ class IntentionalWalkWebView(generic.ListView):
             if context["total_distance"] > 0
             else 0
         )
+
+        context["start_date"] = start_date
+        context["end_date"] = end_date
 
         return context
