@@ -13,11 +13,15 @@ def user_agg_csv_view(request):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="users_agg.csv"'
 
-        csv_data = list()
-        csv_data.append(["email", "name", "zip", "age", "account_created",
-                         "num_daily_walks", "total_steps", "total_distance(miles)",
-                         "num_recorded_walks", "num_recorded_steps", "total_recorded_distance(miles)",
-                         "total_recorded_walk_time", "recorded_walk_average_speed(mph)"])
+        csv_header = [
+            "email", "name", "zip", "age", "account_created",
+            "num_daily_walks", "total_steps", "total_distance(miles)",
+            "num_recorded_walks", "num_recorded_steps",
+            "total_recorded_distance(miles)", "total_recorded_walk_time",
+            "recorded_walk_average_speed(mph)",
+        ]
+        writer = csv.writer(response)
+        writer.writerow(csv_header)
 
         daily_walks = DailyWalk.objects.all().values('account__email','steps','distance','date')
         intentional_walks = IntentionalWalk.objects.all().values('account__email','steps','distance','pause_time', 'start','end')
@@ -61,7 +65,7 @@ def user_agg_csv_view(request):
                 sum(user_stats["rw_speeds"]) / len(user_stats["rw_speeds"]) if user_stats["rw_speeds"] else 0
             )
 
-            csv_data.append([
+            writer.writerow([
                 account["email"],
                 account["name"],
                 account["zip"],
@@ -77,9 +81,6 @@ def user_agg_csv_view(request):
                 user_stats["rw_avg_speed"]
             ])
 
-        t = loader.get_template('home/user_agg_csv.txt')
-        c = {'data': csv_data}
-        response.write(t.render(c))
         return response
     else:
         return HttpResponse("You are not authorized to view this!")
@@ -90,16 +91,20 @@ def users_csv_view(request):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="users.csv"'
 
-        csv_data = list()
-        csv_data.append(["email", "name", "zip",
-                         "age", "account_created",
-                         "account_last_updated",
-                         "device_id", "device_registered_on"])
+        csv_header = [
+            "email", "name", "zip", "age", "account_created",
+            "account_last_updated", "device_id", "device_registered_on",
+        ]
 
+        writer = csv.writer(response)
+        writer.writerow(csv_header)
+
+        # Retrieve all accounts
         all_accounts = Account.objects.all().order_by("created")
         for account in all_accounts:
+            # Retrieve all devices
             for device in account.device_set.all().order_by("created"):
-                csv_data.append([
+                writer.writerow([
                     account.email,
                     account.name,
                     account.zip,
@@ -110,9 +115,6 @@ def users_csv_view(request):
                     device.created
                 ])
 
-        t = loader.get_template('home/users_csv.txt')
-        c = {'data': csv_data}
-        response.write(t.render(c))
         return response
     else:
         return HttpResponse("You are not authorized to view this!")
@@ -121,17 +123,21 @@ def users_csv_view(request):
 def daily_walks_csv_view(request):
     if request.user.is_authenticated:
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="dailywalks.csv"'
+        response['Content-Disposition'] = 'attachment; filename="daily_walks.csv"'
 
-        csv_data = list()
-        csv_data.append(["email", "name", "date",
-                         "steps", "distance(m)",
-                         "device_id", "walk_created"])
+        csv_header = [
+            "email", "name", "date", "steps", "distance(m)",
+            "device_id", "walk_created",
+        ]
+        writer = csv.writer(response)
+        writer.writerow(csv_header)
 
+        # Retrieve all accounts
         all_accounts = Account.objects.all().order_by("created")
         for account in all_accounts:
+            # Retrieve all daily walks
             for daily_walk in account.dailywalk_set.all().order_by("created"):
-                csv_data.append([
+                writer.writerow([
                     account.email,
                     account.name,
                     daily_walk.date,
@@ -141,9 +147,6 @@ def daily_walks_csv_view(request):
                     daily_walk.created,
                 ])
 
-        t = loader.get_template('home/dailywalks_csv.txt')
-        c = {'data': csv_data}
-        response.write(t.render(c))
         return response
     else:
         return HttpResponse("You are not authorized to view this!")
@@ -152,17 +155,21 @@ def daily_walks_csv_view(request):
 def intentional_walks_csv_view(request):
     if request.user.is_authenticated:
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="recorded_walks.csv"'
+        response['Content-Disposition'] = 'attachment; filename="intentional_walks.csv"'
 
-        csv_data = list()
-        csv_data.append(["email", "name", "event_id",
-                         "start_time", "end_time", "steps", "pause_time(mins)", "distance(m)",
-                         "device_id", "walk_created"])
+        csv_header = [
+            "email", "name", "event_id", "start_time", "end_time", "steps",
+            "pause_time(mins)", "distance(m)", "device_id", "walk_created",
+        ]
+        writer = csv.writer(response)
+        writer.writerow(csv_header)
 
+        # Retrieve all accounts
         all_accounts = Account.objects.all().order_by("created")
         for account in all_accounts:
+            # Retrieve all intentional walks
             for intentional_walk in account.intentionalwalk_set.all().order_by("created"):
-                csv_data.append([
+                writer.writerow([
                     account.email,
                     account.name,
                     intentional_walk.event_id,
@@ -172,13 +179,9 @@ def intentional_walks_csv_view(request):
                     intentional_walk.pause_time,
                     intentional_walk.distance,
                     intentional_walk.device.device_id,
-                    intentional_walk.created
+                    intentional_walk.created,
                 ])
 
-        t = loader.get_template('home/intentionalwalks_csv.txt')
-        c = {'data': csv_data}
-        response.write(t.render(c))
         return response
     else:
         return HttpResponse("You are not authorized to view this!")
-
