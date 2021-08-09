@@ -155,7 +155,7 @@ def daily_walks_csv_view(request):
 def intentional_walks_csv_view(request):
     if request.user.is_authenticated:
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="intentional_walks.csv"'
+        response['Content-Disposition'] = 'attachment; filename="recorded_walks.csv"'
 
         csv_header = [
             "email", "name", "event_id", "start_time", "end_time", "steps",
