@@ -14,15 +14,51 @@
 
 <!-- User aggregate stats -->
 <div class="container-fluid text-center" style="background-color: #f8f8f8; padding: 25px; margin-top: 50px">
-    <h2><b>Overall Trends</b> - {{start_date}} - {{end_date}}</h2>
-    <div class="container-fluid text-center" style="margin-top: 25px">
-        <b>Start Date</b>: &nbsp;<input type="date" id="start-date" aria-describedby="startDate" placeholder="Start Date">&nbsp;&nbsp;&nbsp;&nbsp;
-        <b>End Date</b>: &nbsp;<input type="date" id="end-date" aria-describedby="endDate" placeholder="End Date">
-        <button id="update" class="btn btn-info" style="background-color: #bbbbbb;" onclick="updateGraph()">Update Graph</button>
+  <h2><b>Overall Trends</b> - {{start_date}} - {{end_date}}</h2>
+  <div class="container-fluid text-center" style="margin-top: 25px">
+    <b>Start Date</b>: &nbsp;
+    <input
+      type="date"
+      id="start-date"
+      value="{{ start_date.isoformat }}"
+      min="{{ min_date.isoformat }}"
+      max="{{ max_date.isoformat }}"
+      aria-describedby="startDate"
+      placeholder="Start Date"
+      onblur="updateGraph()"
+    >
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <b>End Date</b>: &nbsp;
+    <input
+      type="date"
+      id="end-date"
+      value="{{ end_date.isoformat }}"
+      min="{{ start_date.isoformat }}"
+      max="{{ max_date.isoformat }}"
+      aria-describedby="endDate"
+      placeholder="End Date"
+      onblur="updateGraph()"
+    >
+    &nbsp;
+    <button id="update" class="btn btn-info" style="background-color: #bbbbbb;" onclick="updateGraph()">
+      Update Graphs
+    </button>
+  </div>
+
+  <!-- Download menu -->
+  <div class="container-fluid" style="margin-top: 15px">
+    <div class="btn-group">
+      <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown">
+        Download CSV
+      </button>
+      <div class="dropdown-menu">
+        <a class="dropdown-item" href="/data/daily_walks.csv?start_date={{ start_date.isoformat }}&end_date={{ end_date.isoformat }}">
+          Daily walks
+        </a>
+      </div>
     </div>
+  </div>
 </div>
-
-
 
 <div class="container-fluid text-center" style="padding: 25px; ; margin-top: 50px">
     <div class="row" style="padding-top: 25px; padding-bottom: 25px; color:#922B21">

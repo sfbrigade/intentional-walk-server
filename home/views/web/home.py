@@ -97,5 +97,7 @@ class HomeView(generic.TemplateView):
 
         context["start_date"] = start_date
         context["end_date"] = end_date
+        context["min_date"] = DEFAULT_START_DATE
+        context["max_date"] = DEFAULT_END_DATE
 
         return context

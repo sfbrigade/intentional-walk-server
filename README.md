@@ -9,7 +9,9 @@
    1. If you have Windows Home Edition, you will need to install Docker Toolbox instead.
    See the troubleshooting notes below.
 
-2. Open a command-line shell, change into your repo directory, and execute this command:
+2. Copy `example.env` to `.env` and edit the Docker environment variables as needed.
+
+3. Open a command-line shell, change into your repo directory, and execute this command:
 
    ```
    $ docker-compose up
@@ -18,12 +20,12 @@
    It will take a while the first time you run this command to download and
    build the images to run the web application code in a Docker "container".
 
-3. Now you should be able to open the web app in your browser at: http://localhost:8000/
+4. Now you should be able to open the web app in your browser at: http://localhost:8000/
 
    1. If you had to install Docker Toolbox, then replace "localhost" with the IP
    address of the Docker Virtual Machine.
 
-4. To stop the server, press CONTROL-C in the window with the running server.
+5. To stop the server, press CONTROL-C in the window with the running server.
    If it is successful, you will see something like this:
 
    ```
