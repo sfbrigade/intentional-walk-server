@@ -1,10 +1,14 @@
-import json
 import itertools
+import json
+import logging
+
 from django.views import View, generic
 from django.db.models import Sum
 from home.models import Account, DailyWalk, IntentionalWalk, Contest
 from collections import defaultdict
 from home.templatetags.format_helpers import m_to_mi
+
+logger = logging.getLogger(__name__)
 
 # User list page
 class UserListView(generic.ListView):
@@ -19,6 +23,9 @@ class UserListView(generic.ListView):
         # Check if url has any contest parameters
         contest_id = self.request.GET.get("contest_id")
 
+        # Default href for download button
+        context["download_url"] = "/data/users_agg.csv"
+
         # Hacky groupby in django
         # If there is no contest id passed in or if invalid, select all users
         if contest_id:
@@ -26,10 +33,14 @@ class UserListView(generic.ListView):
             contest = Contest.objects.get(contest_id=contest_id)
             daily_walks = DailyWalk.objects.filter(date__range=(contest.start, contest.end)).values('account__email','steps','distance','date')
             intentional_walks = IntentionalWalk.objects.filter(created__range=(contest.start, contest.end)).values('account__email','steps','distance','pause_time', 'start','end')
+            logger.info(f"For contest id '{contest_id}':")
+            logger.info(f"  daily walks: {len(daily_walks)}, intentional walks: {len(intentional_walks)}")
             context["current_contest"] = contest
+            context["download_url"] += f"?start_date={contest.start.isoformat()}&end_date={contest.end.isoformat()}"
         else:
             daily_walks = DailyWalk.objects.all().values('account__email','steps','distance','date')
             intentional_walks = IntentionalWalk.objects.all().values('account__email','steps','distance','pause_time', 'start','end')
+
 
         # HACKY GROUPBY
         daily_walks_by_acc = defaultdict(list)

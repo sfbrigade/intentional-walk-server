@@ -11,6 +11,14 @@ from home.templatetags.format_helpers import m_to_mi
 
 def user_agg_csv_view(request):
     if request.user.is_authenticated:
+        # GET method with params `start_date` and `end_date`
+        start_date_str = request.GET.get("start_date")
+        end_date_str = request.GET.get("end_date")
+        # Parse params
+        # TODO: consider date validation
+        start_date = date.fromisoformat(start_date_str) if start_date_str else None
+        end_date = date.fromisoformat(end_date_str) if end_date_str else None
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="users_agg.csv"'
 
@@ -24,8 +32,25 @@ def user_agg_csv_view(request):
         writer = csv.writer(response)
         writer.writerow(csv_header)
 
-        daily_walks = DailyWalk.objects.all().values('account__email','steps','distance','date')
-        intentional_walks = IntentionalWalk.objects.all().values('account__email','steps','distance','pause_time', 'start','end')
+        # Retrieve daily walks filtered by date range (if specified)
+        daily_walks = (
+            DailyWalk.objects.filter(
+                date__range=(start_date, end_date),
+            )
+            if start_date and end_date
+            else DailyWalk.objects.all()
+        ).values('account__email','steps','distance','date')
+
+        # Retrieve intentional walks filtered by date range (if specified)
+        intentional_walks = (
+            IntentionalWalk.objects.filter(
+                start__gte=start_date,
+                # time comparison happens at beginning of date
+                end__lt=(end_date + timedelta(days=1)),
+            )
+            if start_date and end_date
+            else IntentionalWalk.objects.all()
+        ).values('account__email','steps','distance','pause_time', 'start','end')
 
         # HACKY GROUPBY
         daily_walks_by_acc = defaultdict(list)
@@ -147,7 +172,7 @@ def daily_walks_csv_view(request):
             # Retrieve daily walks filtered by date range (if specified)
             q = (
                 account.dailywalk_set.filter(
-                    date__range=[start_date, end_date],
+                    date__range=(start_date, end_date),
                 )
                 if start_date and end_date
                 else account.dailywalk_set.all()
