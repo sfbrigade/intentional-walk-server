@@ -7,17 +7,26 @@
     <h1 class="text-center">All users</h1>
 </div>
 
-<div class="container-fluid" style="padding: 10px;">
-    <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Filter by Contest
-      </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a class="dropdown-item" href="/users/">None</a>
-          {% for contest in contests %}
-                <a class="dropdown-item" href="/users/?contest_id={{contest.contest_id}}">Contest - {{contest.start| date:"DATE_FORMAT"}} - {{contest.end| date:"DATE_FORMAT"}}</a>
-          {% endfor %}
-      </div>
+<div class="row" style="margin: 15px;">
+    <div class="col-auto mr-auto">
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Filter by Contest
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="/users/">None</a>
+              {% for contest in contests %}
+                    <a class="dropdown-item" href="/users/?contest_id={{contest.contest_id}}">Contest - {{contest.start| date:"DATE_FORMAT"}} - {{contest.end| date:"DATE_FORMAT"}}</a>
+              {% endfor %}
+          </div>
+        </div>
+    </div>
+
+    <!-- Download menu -->
+    <div class="col-auto">
+        <a class="btn btn-outline-info" href="{{download_url}}" role="button">
+            Download
+        </a>
     </div>
 </div>
 

@@ -1,6 +1,7 @@
 import io
 import csv
 from collections import defaultdict
+from datetime import date, timedelta
 from django.http import HttpResponse
 from django.template import loader, Context
 
@@ -10,6 +11,14 @@ from home.templatetags.format_helpers import m_to_mi
 
 def user_agg_csv_view(request):
     if request.user.is_authenticated:
+        # GET method with params `start_date` and `end_date`
+        start_date_str = request.GET.get("start_date")
+        end_date_str = request.GET.get("end_date")
+        # Parse params
+        # TODO: consider date validation
+        start_date = date.fromisoformat(start_date_str) if start_date_str else None
+        end_date = date.fromisoformat(end_date_str) if end_date_str else None
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="users_agg.csv"'
 
@@ -23,8 +32,25 @@ def user_agg_csv_view(request):
         writer = csv.writer(response)
         writer.writerow(csv_header)
 
-        daily_walks = DailyWalk.objects.all().values('account__email','steps','distance','date')
-        intentional_walks = IntentionalWalk.objects.all().values('account__email','steps','distance','pause_time', 'start','end')
+        # Retrieve daily walks filtered by date range (if specified)
+        daily_walks = (
+            DailyWalk.objects.filter(
+                date__range=(start_date, end_date),
+            )
+            if start_date and end_date
+            else DailyWalk.objects.all()
+        ).values('account__email','steps','distance','date')
+
+        # Retrieve intentional walks filtered by date range (if specified)
+        intentional_walks = (
+            IntentionalWalk.objects.filter(
+                start__gte=start_date,
+                # time comparison happens at beginning of date
+                end__lt=(end_date + timedelta(days=1)),
+            )
+            if start_date and end_date
+            else IntentionalWalk.objects.all()
+        ).values('account__email','steps','distance','pause_time', 'start','end')
 
         # HACKY GROUPBY
         daily_walks_by_acc = defaultdict(list)
@@ -122,6 +148,14 @@ def users_csv_view(request):
 
 def daily_walks_csv_view(request):
     if request.user.is_authenticated:
+        # GET method with params `start_date` and `end_date`
+        start_date_str = request.GET.get("start_date")
+        end_date_str = request.GET.get("end_date")
+        # Parse params
+        # TODO: consider date validation
+        start_date = date.fromisoformat(start_date_str) if start_date_str else None
+        end_date = date.fromisoformat(end_date_str) if end_date_str else None
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="daily_walks.csv"'
 
@@ -135,8 +169,15 @@ def daily_walks_csv_view(request):
         # Retrieve all accounts
         all_accounts = Account.objects.all().order_by("created")
         for account in all_accounts:
-            # Retrieve all daily walks
-            for daily_walk in account.dailywalk_set.all().order_by("created"):
+            # Retrieve daily walks filtered by date range (if specified)
+            q = (
+                account.dailywalk_set.filter(
+                    date__range=(start_date, end_date),
+                )
+                if start_date and end_date
+                else account.dailywalk_set.all()
+            )
+            for daily_walk in q.order_by("created"):
                 writer.writerow([
                     account.email,
                     account.name,
@@ -154,6 +195,14 @@ def daily_walks_csv_view(request):
 
 def intentional_walks_csv_view(request):
     if request.user.is_authenticated:
+        # GET method with params `start_date` and `end_date`
+        start_date_str = request.GET.get("start_date")
+        end_date_str = request.GET.get("end_date")
+        # Parse params
+        # TODO: consider date validation
+        start_date = date.fromisoformat(start_date_str) if start_date_str else None
+        end_date = date.fromisoformat(end_date_str) if end_date_str else None
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="recorded_walks.csv"'
 
@@ -167,8 +216,17 @@ def intentional_walks_csv_view(request):
         # Retrieve all accounts
         all_accounts = Account.objects.all().order_by("created")
         for account in all_accounts:
-            # Retrieve all intentional walks
-            for intentional_walk in account.intentionalwalk_set.all().order_by("created"):
+            # Retrieve intentional walks filtered by date range (if specified)
+            q = (
+                account.intentionalwalk_set.filter(
+                    start__gte=start_date,
+                    # time comparison happens at beginning of date
+                    end__lt=(end_date + timedelta(days=1)),
+                )
+                if start_date and end_date
+                else account.intentionalwalk_set.all()
+            )
+            for intentional_walk in q.order_by("created"):
                 writer.writerow([
                     account.email,
                     account.name,
