@@ -11,6 +11,7 @@ from home.models import Account, DailyWalk, Device, IntentionalWalk
 class AccountGenerator:
     def __init__(self):
         self.fake = Faker()
+        self.zips = ['94105', '94107', '94108', '94109', '94112', '94114', '94122', '94124', '94127', '94132', '94131', '94133', '94102', '94103', '94110', '94111', '94115', '94116', '94117', '94118', '94121', '94123', '94134']
 
     def generate(self, n: int, **kwargs):
         for _ in range(n):
@@ -21,7 +22,8 @@ class AccountGenerator:
         return dict(
             email=self.fake.unique.email(),
             name=self.fake.name(),
-            zip=self.fake["en-US"].postcode(),
+            # zip=self.fake["en-US"].postcode(),
+            zip=random.choice(self.zips),
             age=random.randint(10, 100),
         )
 
