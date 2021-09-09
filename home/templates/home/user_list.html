@@ -96,8 +96,11 @@
 <script>$('#all_users').DataTable();</script>
 
 <script>
-    const sf_geojson = "/static/SanFrancisco.neighborhoods.json";
-    const userdata = "/data/users_agg.csv";
+    // Map and count data
+    const sf_geojson = "/static/SanFrancisco.Neighborhoods.json";
+    // const userdata = "/data/users_agg.csv";
+    const counts = JSON.parse(document.getElementById("zipCountData").getAttribute("data-json"));
+    const maxCount = Math.max(...Object.values(counts));
 
     // The svg
     const svg = d3.select("svg"),
@@ -114,10 +117,8 @@
     // Data and color scale
     const data = d3.map();
     const colorScale = d3.scaleLinear()
-        .domain([1, 5])
+        .domain([1, Math.floor(maxCount/5)])
         .range(d3.schemeBlues[7]);
-
-    const counts = JSON.parse(document.getElementById("zipCountData").getAttribute("data-json"));
 
     // Load external data and boot
     d3.queue()
