@@ -22,19 +22,31 @@
         </div>
     </div>
 
-    <!-- Download menu -->
-    <div class="col-auto">
-        <a class="btn btn-outline-info" href="{{download_url}}" role="button">
-            Download
-        </a>
-    </div>
-</div>
+    <div class="col-auto mr-auto">
+        {% if current_contest %}
+        <!-- Contest info -->
+        <div class="container-fluid" style="padding: 15px; color: #CD6155">
+            <h2>Contest - {{current_contest.start| date:"DATE_FORMAT"}} - {{current_contest.end| date:"DATE_FORMAT"}}</h2>
+        </div>
+        {% endif %}
 
-{% if current_contest %}
-<div class="container-fluid" style="padding: 15px; color: #CD6155">
-    <h2>Contest - {{current_contest.start| date:"DATE_FORMAT"}} - {{current_contest.end| date:"DATE_FORMAT"}}</h2>
-</div>
-{% endif %}
+        <!-- Choropleth (intensity) map of users -->
+        <div class="container-fluid justify-content-center" id="map-container">
+            <!-- JSON data (TODO: find alternative to stuffing data into div) -->
+            <div style="display: none" id="zipCountData" data-json="{{ zipcounts }}"></div>
+            <!-- D3 SVG -->
+            <svg id="intensity-map" style="float: left;" width="400" height="300"></svg>
+            <div id="geo-info" style="float: left; visibility: hidden; width: 125px; padding-top: 150px;"></div>
+        </div>
+
+            </div>
+            <!-- Download menu -->
+            <div class="col-auto">
+                <a class="btn btn-outline-info" href="{{download_url}}" role="button">
+                    Download
+                </a>
+            </div>
+        </div>
 
 <div class="container-fluid" style="padding: 25px;">
     <div class="home-row table-responsive" style="font-size: 1.2em">
@@ -80,8 +92,64 @@
 </div>
 {% endblock %}
 
-
-
 {% block post_scripts %}
 <script>$('#all_users').DataTable();</script>
+
+<script>
+    const sf_geojson = "/static/SanFrancisco.neighborhoods.json";
+    const userdata = "/data/users_agg.csv";
+
+    // The svg
+    const svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height");
+
+    // Map and projection
+    const path = d3.geoPath();
+    const projection = d3.geoMercator()
+        .scale(120000)
+        .center([-122.44, 37.76])
+        .translate([width / 2, height / 2]);
+
+    // Data and color scale
+    const data = d3.map();
+    const colorScale = d3.scaleLinear()
+        .domain([1, 5])
+        .range(d3.schemeBlues[7]);
+
+    const counts = JSON.parse(document.getElementById("zipCountData").getAttribute("data-json"));
+
+    // Load external data and boot
+    d3.queue()
+        .defer(d3.json, sf_geojson)
+        .await(ready);
+
+    function ready(error, topo) {
+        // Draw the map
+        svg.append("g")
+            .selectAll("path")
+            .data(topo.features)
+            .enter()
+            .append("path")
+            // draw each neighborhood
+            .attr("d", d3.geoPath()
+                .projection(projection)
+            )
+            // set the color of each neighborhood
+            .attr("fill", function (d) {
+                // Keys of d: {id, type, properties: {id, neighborhood}}
+                d.total = counts[d.id] || 0;
+                d.name = d.properties.neighborhood;
+                return colorScale(d.total);
+            })
+            .on("mouseover", function(d) {
+                d3.select("#geo-info").style("visibility", "visible")
+                    .text(d.name + ": " + d.total);
+            })
+            .on("mouseout", function() {
+                d3.select("#geo-info").style("visibility", "hidden");
+            });
+    }
+
+</script>
 {% endblock %}
