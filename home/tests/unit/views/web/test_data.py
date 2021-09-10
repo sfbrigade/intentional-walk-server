@@ -75,7 +75,7 @@ class TestCsvViews(TestCase):
             grouped[row[key]].append(row)
         return grouped
 
-    def test_users_agg_csv_view(self):
+    def test_user_agg_csv_view(self):
         c = Client()
         self.assertTrue(self.login(c))
         start_date = date(3000, 3, 7)
