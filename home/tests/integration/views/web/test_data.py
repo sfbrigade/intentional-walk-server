@@ -1,10 +1,8 @@
 import csv
 import io
-import pytest
 
 from collections import defaultdict
 from datetime import date, datetime, timedelta
-from faker import Faker
 from pytz import utc
 from typing import Dict, List
 
@@ -29,11 +27,6 @@ class Login:
         User.objects.create_user(username=self.username, password=self.password)
 
 
-def setUpModule():
-    Login()
-
-
-@pytest.mark.django_db
 class TestCsvViews(TestCase):
     @staticmethod
     def login(client: Client):
@@ -41,7 +34,10 @@ class TestCsvViews(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        fake = Faker()
+        # Create user login
+        Login()
+
+        # Generate fake accounts
         accounts = list(AccountGenerator().generate(2))
         # Device associated with accounts[0]
         device0 = list(DeviceGenerator(accounts[0:1]).generate(1))
@@ -141,7 +137,6 @@ class TestCsvViews(TestCase):
 
     # Test csv response of intentional (recorded) walks
     def test_intentional_walks_csv_view(self):
-
         c = Client()
         self.assertTrue(self.login(c))
         start_date = date(3000, 3, 7)
