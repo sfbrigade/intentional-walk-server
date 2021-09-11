@@ -1,5 +1,6 @@
 import csv
 import io
+import pytest
 
 from collections import defaultdict
 from datetime import date, datetime, timedelta
@@ -32,6 +33,7 @@ def setUpModule():
     Login()
 
 
+@pytest.mark.django_db
 class TestCsvViews(TestCase):
     @staticmethod
     def login(client: Client):
