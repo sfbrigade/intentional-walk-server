@@ -53,6 +53,8 @@ class UserListView(generic.ListView):
         accounts = Account.objects.values('email','name','age','zip', 'created')
 
         context["user_stats_list"] = []
+        zipcounts = defaultdict(lambda: 0)
+
         for account in accounts:
             user_stats = {}
             user_stats["account"] = account
@@ -83,8 +85,14 @@ class UserListView(generic.ListView):
                 sum(user_stats["rw_speeds"]) / len(user_stats["rw_speeds"]) if user_stats["rw_speeds"] else 0
             )
 
-            context["user_stats_list"].append(user_stats)
+            if user_stats["dw_steps"] > 0:
+                context["user_stats_list"].append(user_stats)
+                zipcounts[account["zip"]] += 1
 
         context["contests"] = Contest.objects.all()
+
+        # This allows us to place json (string) data into the `data-json` prop of a <div />
+        # (Probably not ideal but enables us to pass data to <script /> for mapping.)
+        context["zipcounts"] = json.dumps(zipcounts)
 
         return context
