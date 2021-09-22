@@ -3,7 +3,6 @@ import csv
 from collections import defaultdict
 from datetime import date, timedelta
 from django.http import HttpResponse
-from django.template import loader, Context
 
 from home.models import Account, Device, DailyWalk, IntentionalWalk
 from home.templatetags.format_helpers import m_to_mi
@@ -91,21 +90,22 @@ def user_agg_csv_view(request):
                 sum(user_stats["rw_speeds"]) / len(user_stats["rw_speeds"]) if user_stats["rw_speeds"] else 0
             )
 
-            writer.writerow([
-                account["email"],
-                account["name"],
-                account["zip"],
-                account["age"],
-                account["created"],
-                user_stats["num_dws"],
-                user_stats["dw_steps"],
-                user_stats["dw_distance"],
-                user_stats["num_rws"],
-                user_stats["rw_steps"],
-                user_stats["rw_distance"],
-                user_stats["rw_time"],
-                user_stats["rw_avg_speed"]
-            ])
+            if user_stats["dw_steps"] > 0:
+                writer.writerow([
+                    account["email"],
+                    account["name"],
+                    account["zip"],
+                    account["age"],
+                    account["created"],
+                    user_stats["num_dws"],
+                    user_stats["dw_steps"],
+                    user_stats["dw_distance"],
+                    user_stats["num_rws"],
+                    user_stats["rw_steps"],
+                    user_stats["rw_distance"],
+                    user_stats["rw_time"],
+                    user_stats["rw_avg_speed"]
+                ])
 
         return response
     else:
