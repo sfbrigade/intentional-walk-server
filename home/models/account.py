@@ -13,6 +13,11 @@ class Account(models.Model):
     name = models.CharField(max_length=250, help_text="User's name")
     zip = models.CharField(max_length=25, help_text="User's zipcode")
     age = models.IntegerField(help_text="User's age")
+    is_latino = models.BooleanField(null=True, blank=True, help_text="Latino or Hispanic origin")
+    race = models.ManyToManyField("Race", blank=True, help_text="Self-identified race(s) of user")
+    gender = models.CharField(max_length=25, help_text="Self-identified gender identity of user")
+
+    is_tester = models.BooleanField(default=False, help_text="User is an app tester")
     contests = models.ManyToManyField("Contest", blank=True, help_text="All the contests the account has enrolled in")
     created = models.DateTimeField(auto_now_add=True, help_text="Accounts creation timestamp")
     updated = models.DateTimeField(auto_now=True, help_text="Accounts updation timestamp")
