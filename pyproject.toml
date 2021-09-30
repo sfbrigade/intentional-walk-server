@@ -6,11 +6,11 @@ authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-django = "^3.2.7"
-psycopg2 = "^2.9.1"
+django = "^3.0.3"
+psycopg2 = "^2.8.4"
 dj-database-url = "^0.5.0"
 python-dotenv = "^0.11.0"
-pytest-django = "^3.10.0"
+pytest-django = "^3.8.0"
 coveralls = "^1.11.1"
 coverage = "^5.0.3"
 gunicorn = "^20.0.4"
@@ -19,7 +19,7 @@ whitenoise = "^5.0.1"
 uuid = "^1.30"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.4"
+pytest = "^5.2"
 libfaketime = "^2.0.0"
 pytest-libfaketime = "^0.1.2"
 
