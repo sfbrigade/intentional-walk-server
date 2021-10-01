@@ -50,7 +50,7 @@ class UserListView(generic.ListView):
         for iw in intentional_walks:
             intentional_walks_by_acc[iw['account__email']].append(iw)
 
-        accounts = Account.objects.values('email','name','age','zip', 'created')
+        accounts = Account.objects.values('email','name','age','zip','is_sf_resident','created')
 
         context["user_stats_list"] = []
         zipcounts = defaultdict(lambda: 0)

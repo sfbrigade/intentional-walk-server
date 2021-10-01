@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
 
 from home.models import Account, Device
+from home.models.account import SAN_FRANCISCO_ZIP_CODES
 from .utils import validate_request_json
 
 # Except from csrf validation
@@ -47,6 +48,7 @@ class AppUserCreateView(View):
             device.account.name = json_data["name"]
             device.account.zip = json_data["zip"]
             device.account.age = json_data["age"]
+            device.account.is_sf_resident = json_data["zip"] in SAN_FRANCISCO_ZIP_CODES
             device.account.save()
 
             message = "Device & account updated successfully"
@@ -60,6 +62,7 @@ class AppUserCreateView(View):
                 account.name = json_data["name"]
                 account.zip = json_data["zip"]
                 account.age = json_data["age"]
+                account.is_sf_resident = json_data["zip"] in SAN_FRANCISCO_ZIP_CODES
                 account.save()
                 account_updated = True
             except ObjectDoesNotExist:
@@ -87,6 +90,7 @@ class AppUserCreateView(View):
                     "email": device.account.email,
                     "zip": device.account.zip,
                     "age": device.account.age,
+                    "is_sf_resident": device.account.is_sf_resident,
                     "account_id": device.device_id,
                 },
             }
