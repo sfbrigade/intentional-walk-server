@@ -36,7 +36,7 @@ class UserListView(generic.ListView):
             logger.info(f"For contest id '{contest_id}':")
             logger.info(f"  daily walks: {len(daily_walks)}, intentional walks: {len(intentional_walks)}")
             context["current_contest"] = contest
-            context["download_url"] += f"?start_date={contest.start.isoformat()}&end_date={contest.end.isoformat()}"
+            context["download_url"] += f"?contest_id={contest_id}"
         else:
             daily_walks = DailyWalk.objects.all().values('account__email','steps','distance','date')
             intentional_walks = IntentionalWalk.objects.all().values('account__email','steps','distance','pause_time', 'start','end')

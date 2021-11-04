@@ -4,25 +4,28 @@ from collections import defaultdict
 from datetime import date, timedelta
 from django.http import HttpResponse
 
-from home.models import Account, Device, DailyWalk, IntentionalWalk
+from home.models import Account, Contest, Device, DailyWalk, IntentionalWalk
 from home.templatetags.format_helpers import m_to_mi
 
 
 def user_agg_csv_view(request):
     if request.user.is_authenticated:
-        # GET method with params `start_date` and `end_date`
-        start_date_str = request.GET.get("start_date")
-        end_date_str = request.GET.get("end_date")
+        # GET method with param `contest_id`
+        contest_id = request.GET.get("contest_id")
         # Parse params
-        # TODO: consider date validation
-        start_date = date.fromisoformat(start_date_str) if start_date_str else None
-        end_date = date.fromisoformat(end_date_str) if end_date_str else None
+        contest = None
+        if contest_id:
+            contest = Contest.objects.get(pk=contest_id)
+
+        start_date = contest.start if contest else None
+        end_date = contest.end if contest else None
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="users_agg.csv"'
 
         csv_header = [
-            "email", "name", "zip", "age", "account_created",
+            "email", "name", "zip", "age", "account_created", 
+            "new_signup", "active_during_contest",
             "num_daily_walks", "total_steps", "total_distance(miles)",
             "num_recorded_walks", "num_recorded_steps",
             "total_recorded_distance(miles)", "total_recorded_walk_time",
@@ -90,13 +93,21 @@ def user_agg_csv_view(request):
                 sum(user_stats["rw_speeds"]) / len(user_stats["rw_speeds"]) if user_stats["rw_speeds"] else 0
             )
 
-            if user_stats["dw_steps"] > 0:
+            user_stats["active_during_contest"] = user_stats["dw_steps"] > 0
+            if contest is not None:
+                user_stats["new_user"] = account["created"].date() >= contest.start_promo
+            else: 
+                user_stats["new_user"] = None
+
+            if user_stats["new_user"] or user_stats["active_during_contest"]:
                 writer.writerow([
                     account["email"],
                     account["name"],
                     account["zip"],
                     account["age"],
                     account["created"],
+                    user_stats["new_user"],
+                    user_stats["active_during_contest"],
                     user_stats["num_dws"],
                     user_stats["dw_steps"],
                     user_stats["dw_distance"],
