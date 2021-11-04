@@ -28,14 +28,15 @@ def migrate_appusers(apps, schema_editor):
             ON LOWER(au.email)=LOWER(ac.email)
         """)
         # create some dummy rows to set initial default values in migration
-        cursor.execute("""
-            INSERT INTO home_account (id, email, name, zip, age, created, updated)
-            VALUES (0, 'dummy@email.com', 'Dummy Account', '94103', 0, NOW(), NOW())
-        """)
-        cursor.execute("""
-            INSERT INTO home_device (device_id, account_id, created)
-            VALUES ('0', 0, NOW())
-        """)
+        # (2021-11-03/lee51) Commenting out the following (as unnecessary)
+        # cursor.execute("""
+        #     INSERT INTO home_account (id, email, name, zip, age, created, updated)
+        #     VALUES (0, 'dummy@email.com', 'Dummy Account', '94103', 0, NOW(), NOW())
+        # """)
+        # cursor.execute("""
+        #     INSERT INTO home_device (device_id, account_id, created)
+        #     VALUES ('0', 0, NOW())
+        # """)
 
 
 def migrate_walks(apps, schema_editor):
