@@ -2,11 +2,15 @@ import itertools
 import json
 import logging
 
+from collections import defaultdict
+from datetime import timedelta
 from django.views import View, generic
 from django.db.models import Sum
+
 from home.models import Account, DailyWalk, IntentionalWalk, Contest
-from collections import defaultdict
 from home.templatetags.format_helpers import m_to_mi
+from home.utils import localize
+
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +35,16 @@ class UserListView(generic.ListView):
         if contest_id:
             # Get the contest associated with this id
             contest = Contest.objects.get(contest_id=contest_id)
-            daily_walks = DailyWalk.objects.filter(date__range=(contest.start, contest.end)).values('account__email','steps','distance','date')
-            intentional_walks = IntentionalWalk.objects.filter(created__range=(contest.start, contest.end)).values('account__email','steps','distance','pause_time', 'start','end')
+            daily_walks = DailyWalk.objects.filter(
+                date__range=(contest.start, contest.end)
+            ).values('account__email','steps','distance','date')
+            intentional_walks = IntentionalWalk.objects.filter(
+                created__range=(
+                    localize(contest.start),
+                    localize(contest.end) + timedelta(days=1)
+                )
+            ).values('account__email','steps','distance','pause_time', 'start','end')
+
             logger.info(f"For contest id '{contest_id}':")
             logger.info(f"  daily walks: {len(daily_walks)}, intentional walks: {len(intentional_walks)}")
             context["current_contest"] = contest

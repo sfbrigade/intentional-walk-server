@@ -1,18 +1,13 @@
 import io
 import csv
 from collections import defaultdict
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from django.http import HttpResponse
-from django.utils import timezone
 
 from home.models import Account, Contest, Device, DailyWalk, IntentionalWalk
 from home.templatetags.format_helpers import m_to_mi
+from home.utils import localize
 
-
-def localize(d: date) -> datetime:
-    dt = datetime.combine(d, datetime.min.time())
-    tz = timezone.get_default_timezone()
-    return tz.localize(dt)
 
 def user_agg_csv_view(request):
     if request.user.is_authenticated:
@@ -30,7 +25,7 @@ def user_agg_csv_view(request):
         response['Content-Disposition'] = 'attachment; filename="users_agg.csv"'
 
         csv_header = [
-            "email", "name", "zip", "age", "account_created", 
+            "email", "name", "zip", "age", "account_created",
             "new_signup", "active_during_contest",
             "num_daily_walks", "total_steps", "total_distance(miles)",
             "num_recorded_walks", "num_recorded_steps",
@@ -102,7 +97,7 @@ def user_agg_csv_view(request):
             user_stats["active_during_contest"] = user_stats["dw_steps"] > 0
             if contest is not None:
                 user_stats["new_user"] = account["created"].date() >= contest.start_promo
-            else: 
+            else:
                 user_stats["new_user"] = None
 
             if user_stats["new_user"] or user_stats["active_during_contest"]:
