@@ -13,6 +13,7 @@ from django.test import Client, TestCase
 from home.models import IntentionalWalk
 from home.utils.generators import (
     AccountGenerator,
+    ContestGenerator,
     DailyWalkGenerator,
     DeviceGenerator,
     IntentionalWalkGenerator,
@@ -76,13 +77,17 @@ class TestCsvViews(TestCase):
     def test_user_agg_csv_view(self):
         c = Client()
         self.assertTrue(self.login(c))
-        start_date = date(3000, 3, 7)
-        end_date = date(3000, 3, 14)
+
+        params = {
+            "start": date(3000, 3, 7),
+            "end": date(3000, 3, 14),
+        }
+        contest_id = next(ContestGenerator().generate(1, **params)).pk
+
         response = c.get(
             "/data/users_agg.csv",
             {
-                "start_date": start_date.isoformat(),
-                "end_date": end_date.isoformat(),
+                "contest_id": contest_id,
             },
         )
 

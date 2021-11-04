@@ -1,11 +1,12 @@
 import random
 
+from datetime import date, timedelta
 from django.utils import timezone
 from faker import Faker
 from typing import List, Optional
 from uuid import uuid4
 
-from home.models import Account, DailyWalk, Device, IntentionalWalk
+from home.models import Account, Contest, DailyWalk, Device, IntentionalWalk
 from home.models.account import SAN_FRANCISCO_ZIP_CODES
 
 
@@ -100,3 +101,22 @@ class IntentionalWalkGenerator:
         if self.devices:
             values["device"] = random.choice(self.devices)
         return values
+
+class ContestGenerator:
+    def __init__(self):
+        self.fake = Faker()
+
+    def generate(self, n: int, **kwargs):
+        for _ in range(n):
+            params = {**self.random_params(**kwargs)}
+            yield Contest.objects.create(**params)
+
+    def random_params(self, start=None, **kwargs):
+        if start is None:
+            start = date.fromisoformat(self.fake.date())
+
+        return dict(
+            start_promo=(start - timedelta(days=7)),
+            start=start,
+            end=(start + timedelta(days=30)),
+        )
