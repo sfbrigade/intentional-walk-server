@@ -6,12 +6,13 @@ from typing import List, Optional
 from uuid import uuid4
 
 from home.models import Account, DailyWalk, Device, IntentionalWalk
+from home.models.account import SAN_FRANCISCO_ZIP_CODES
 
 
 class AccountGenerator:
     def __init__(self):
         self.fake = Faker()
-        self.zips = ['94105', '94107', '94108', '94109', '94112', '94114', '94122', '94124', '94127', '94132', '94131', '94133', '94102', '94103', '94110', '94111', '94115', '94116', '94117', '94118', '94121', '94123', '94134']
+        self.zips = list(SAN_FRANCISCO_ZIP_CODES)
 
     def generate(self, n: int, **kwargs):
         for _ in range(n):
