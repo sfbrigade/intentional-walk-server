@@ -8,7 +8,10 @@ from home.models import Account, Contest, Device, DailyWalk, IntentionalWalk
 from home.templatetags.format_helpers import m_to_mi
 
 
-def user_agg_csv_view(request):
+def yesno(value: bool) -> str:
+    return "yes" if value else "no"
+
+def user_agg_csv_view(request) -> HttpResponse:
     if request.user.is_authenticated:
         # GET method with param `contest_id`
         contest_id = request.GET.get("contest_id")
@@ -106,8 +109,8 @@ def user_agg_csv_view(request):
                     account["zip"],
                     account["age"],
                     account["created"],
-                    user_stats["new_user"],
-                    user_stats["active_during_contest"],
+                    yesno(user_stats["new_user"]),
+                    yesno(user_stats["active_during_contest"]),
                     user_stats["num_dws"],
                     user_stats["dw_steps"],
                     user_stats["dw_distance"],
@@ -123,7 +126,7 @@ def user_agg_csv_view(request):
         return HttpResponse("You are not authorized to view this!")
 
 
-def users_csv_view(request):
+def users_csv_view(request) -> HttpResponse:
     if request.user.is_authenticated:
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="users.csv"'
@@ -157,7 +160,7 @@ def users_csv_view(request):
         return HttpResponse("You are not authorized to view this!")
 
 
-def daily_walks_csv_view(request):
+def daily_walks_csv_view(request) -> HttpResponse:
     if request.user.is_authenticated:
         # GET method with params `start_date` and `end_date`
         start_date_str = request.GET.get("start_date")
@@ -204,7 +207,7 @@ def daily_walks_csv_view(request):
         return HttpResponse("You are not authorized to view this!")
 
 
-def intentional_walks_csv_view(request):
+def intentional_walks_csv_view(request) -> HttpResponse:
     if request.user.is_authenticated:
         # GET method with params `start_date` and `end_date`
         start_date_str = request.GET.get("start_date")
