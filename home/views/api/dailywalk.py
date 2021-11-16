@@ -83,7 +83,7 @@ class DailyWalkCreateView(View):
                     acct = device.account
                     acct.contests.add(contest)
                 except:
-                    pass
+                    logger.error("Could not add contest to account!", exc_info=True)
 
             # Update the json object
             json_response["payload"]["daily_walks"].append(
