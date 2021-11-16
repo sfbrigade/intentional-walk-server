@@ -25,8 +25,8 @@ class Contest(models.Model):
         ordering = ("-start",)
 
     @staticmethod
-    def active():
-        today = datetime.date.today()
+    def active(for_date=None):
+        today = datetime.date.today() if for_date is None else for_date
         contest = Contest.objects.filter(start_promo__lte=today, end__gte=today).order_by("start_promo").first()
         if contest is None:
             # get the last contest

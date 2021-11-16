@@ -50,6 +50,8 @@ class DailyWalkCreateView(View):
             if "status" in json_status and json_status["status"] == "error":
                 return JsonResponse(json_status)
 
+            walk_date = daily_walk_data["date"]
+
             # Check if there is already an entry for this date. If there is, update the entry
             # NOTE: By definition, there should be one and only one entry for a given email and date
             # NOTE: This is a potential vulnerability. Since there is no email authentication at the moment,
@@ -57,7 +59,7 @@ class DailyWalkCreateView(View):
             # This is also a result of no session auth (can easily hit the api directly)
             try:
                 # Updation
-                daily_walk = DailyWalk.objects.get(account__email=device.account.email, date=daily_walk_data["date"])
+                daily_walk = DailyWalk.objects.get(account__email=device.account.email, date=walk_date)
                 daily_walk.steps = daily_walk_data["steps"]
                 daily_walk.distance = daily_walk_data["distance"]
                 daily_walk.device_id = json_data["account_id"]
@@ -65,11 +67,21 @@ class DailyWalkCreateView(View):
             except ObjectDoesNotExist:
                 # Creation if object is missing
                 daily_walk = DailyWalk.objects.create(
-                    date=daily_walk_data["date"],
+                    date=walk_date,
                     steps=daily_walk_data["steps"],
                     distance=daily_walk_data["distance"],
                     device=device,
                 )
+
+            # Register contest for account
+            # Can be async
+            contest = Contest.active(for_date=date.fromisoformat(walk_date))
+            if contest is not None:
+                try:
+                    acct = device.account
+                    acct.contests.add(contest)
+                except:
+                    pass
 
             # Update the json object
             json_response["payload"]["daily_walks"].append(
