@@ -1,11 +1,13 @@
 import json
+
+from datetime import date
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View, generic
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
 
-from home.models import Device, Account, DailyWalk
+from home.models import Contest, Device, Account, DailyWalk
 from .utils import validate_request_json
 
 

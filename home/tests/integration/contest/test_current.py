@@ -1,5 +1,5 @@
 import datetime
-from unittest import skip
+from django.test import Client, TestCase
 from freezegun import freeze_time
 
 from home.models import Contest
@@ -27,7 +27,6 @@ class ApiTestCase(TestCase):
             response_data["message"], f"There are no contests", msg=fail_message,
         )
 
-    @skip # skipping because libfaketime is not quite working as expected
     def test_contest_current(self):
         # create a few contests
         contest1 = Contest()
