@@ -173,5 +173,5 @@ server container to perform the following actions.
 The Heroku buildpack for python requires the existence of a `requirements.txt` file. However, we use `poetry` (and its associated requirements file, `pyproject.toml`) to run coverage tests in TravisCI. Keeping the two package lists in sync is difficult to manage manually; instead we export a `requirements.txt` file from poetry with:
 
 ```
-poetry export -f requirements.txt --without-hashes > requirement.txt`
+poetry export -f requirements.txt --without-hashes > requirements.txt
 ```

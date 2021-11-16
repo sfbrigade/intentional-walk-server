@@ -6,6 +6,7 @@ from django.http import HttpResponse
 
 from home.models import Account, Contest, Device, DailyWalk, IntentionalWalk
 from home.templatetags.format_helpers import m_to_mi
+from home.utils import localize
 
 
 def yesno(value: bool) -> str:
@@ -27,7 +28,7 @@ def user_agg_csv_view(request) -> HttpResponse:
         response['Content-Disposition'] = 'attachment; filename="users_agg.csv"'
 
         csv_header = [
-            "email", "name", "zip", "age", "account_created", 
+            "email", "name", "zip", "age", "account_created",
             "new_signup", "active_during_contest",
             "num_daily_walks", "total_steps", "total_distance(miles)",
             "num_recorded_walks", "num_recorded_steps",
@@ -49,9 +50,9 @@ def user_agg_csv_view(request) -> HttpResponse:
         # Retrieve intentional walks filtered by date range (if specified)
         intentional_walks = (
             IntentionalWalk.objects.filter(
-                start__gte=start_date,
+                start__gte=localize(start_date),
                 # time comparison happens at beginning of date
-                end__lt=(end_date + timedelta(days=1)),
+                end__lt=(localize(end_date) + timedelta(days=1)),
             )
             if start_date and end_date
             else IntentionalWalk.objects.all()
@@ -99,7 +100,7 @@ def user_agg_csv_view(request) -> HttpResponse:
             user_stats["active_during_contest"] = user_stats["dw_steps"] > 0
             if contest is not None:
                 user_stats["new_user"] = account["created"].date() >= contest.start_promo
-            else: 
+            else:
                 user_stats["new_user"] = None
 
             if user_stats["new_user"] or user_stats["active_during_contest"]:
@@ -233,9 +234,9 @@ def intentional_walks_csv_view(request) -> HttpResponse:
             # Retrieve intentional walks filtered by date range (if specified)
             q = (
                 account.intentionalwalk_set.filter(
-                    start__gte=start_date,
+                    start__gte=localize(start_date),
                     # time comparison happens at beginning of date
-                    end__lt=(end_date + timedelta(days=1)),
+                    end__lt=(localize(end_date) + timedelta(days=1)),
                 )
                 if start_date and end_date
                 else account.intentionalwalk_set.all()
