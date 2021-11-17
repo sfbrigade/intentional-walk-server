@@ -9,11 +9,16 @@ class ApiTestCase(TestCase):
         self.url = "/api/appuser/create"
         # Request parameters
         self.request_params = {
-            "name": "Abhay Kashyap",
-            "email": "abhay@blah.com",
+            "name": "John Doe",
+            "email": "john@blah.com",
             "zip": "72185",
             "age": 99,
             "account_id": "12345",
+            "is_latino": False,
+            "gender": "TM",
+            "gender_other": None,
+            "race": ["BL", "OT"],
+            "race_other": "Some other race",
         }
         # Content type
         self.content_type = "application/json"
@@ -33,13 +38,8 @@ class ApiTestCase(TestCase):
         self.assertEqual(
             response_data["message"], "Device registered & account registered successfully", msg=fail_message
         )
-        self.assertEqual(response_data["payload"]["name"], self.request_params["name"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["email"], self.request_params["email"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["zip"], self.request_params["zip"], msg=fail_message)
-        self.assertEqual(response_data["payload"]["age"], self.request_params["age"], msg=fail_message)
-        self.assertEqual(
-            response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message,
-        )
+        for field in ["account_id", "name", "email", "zip", "age", "is_latino", "gender", "gender_other", "race", "race_other"]:
+            self.assertEqual(response_data["payload"][field], self.request_params[field], msg=fail_message)
 
     # Test creation of a duplicate user
     # This should default to an update
