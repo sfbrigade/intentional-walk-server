@@ -1,4 +1,5 @@
 import json
+import logging
 
 from datetime import date
 from django.http import HttpResponseRedirect, JsonResponse
@@ -10,6 +11,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from home.models import Contest, Device, Account, DailyWalk
 from .utils import validate_request_json
 
+
+logger = logging.getLogger(__name__)
 
 # Except from csrf validation
 @method_decorator(csrf_exempt, name="dispatch")
@@ -75,9 +78,9 @@ class DailyWalkCreateView(View):
                     device=device,
                 )
 
-            # Register contest for account
-            # Can be async
-            contest = Contest.active(for_date=date.fromisoformat(walk_date))
+            # Register contest for account if walk_date falls strictly within contest dates
+            # (Can be async)
+            contest = Contest.active(for_date=date.fromisoformat(walk_date), strict=True)
             if contest is not None:
                 try:
                     acct = device.account

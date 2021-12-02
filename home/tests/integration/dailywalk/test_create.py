@@ -1,10 +1,15 @@
 from django.test import Client, TestCase
 
+from home.models import Contest, Device
 
 class ApiTestCase(TestCase):
     def setUp(self):
         # Test client
         self.client = Client()
+
+        # Device ID is passed to the API as "account_id",
+        self.device_id = "12345"
+
         # Create a user
         response = self.client.post(
             path="/api/appuser/create",
@@ -13,7 +18,7 @@ class ApiTestCase(TestCase):
                 "email": "abhay@blah.com",
                 "zip": "72185",
                 "age": 99,
-                "account_id": "12345",
+                "account_id": self.device_id,
             },
             content_type="application/json",
         )
@@ -48,6 +53,16 @@ class ApiTestCase(TestCase):
 
     # Test a successful creation of a daily walk
     def test_create_dailywalk(self):
+        # Create a contest
+        contest = Contest()
+        contest.start_promo = "2020-02-01"
+        contest.start = "2020-02-01"
+        contest.end = "2020-02-28"
+        contest.save()
+
+        # Verify that the user has no contests
+        acct = Device.objects.get(device_id=self.device_id).account
+        self.assertFalse(acct.contests.exists())
 
         # Send the request
         response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
@@ -74,6 +89,33 @@ class ApiTestCase(TestCase):
             self.request_params["daily_walks"][0]["distance"],
             msg=fail_message,
         )
+
+        # Verify that the user now has a contest
+        self.assertEqual(1, len(acct.contests.all()))
+
+
+    # Test that a daily walk outside of a contest does not show up as
+    # contest participation for that user
+    def test_create_dailywalk_outside_contests(self):
+        # Create a contest
+        contest = Contest()
+        contest.start_promo = "2020-03-01"
+        contest.start = "2020-03-01"
+        contest.end = "2020-03-31"
+        contest.save()
+
+        # Verify that the user has no contests
+        acct = Device.objects.get(device_id=self.device_id).account
+        self.assertFalse(acct.contests.exists())
+
+        # Send the request
+        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+
+        # Verify that the user still has no contests
+        self.assertFalse(acct.contests.exists())
+
 
     # Test creation of a daily walk with an invalid user account
     def test_create_dailywalk_invalidaccount(self):
