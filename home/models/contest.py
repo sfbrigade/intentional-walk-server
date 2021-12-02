@@ -26,6 +26,8 @@ class Contest(models.Model):
 
     @staticmethod
     def active(for_date=None, strict=False):
+        # strict: for_date (today, in general) must fall within contest dates
+        # If strict is False, then find most recent contest (prior to for_date)
         today = datetime.date.today() if for_date is None else for_date
         contest = Contest.objects.filter(start_promo__lte=today, end__gte=today).order_by("start_promo").first()
         if contest is None and not strict:
