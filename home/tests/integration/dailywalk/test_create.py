@@ -38,26 +38,26 @@ class ApiTestCase(TestCase):
         # Request parameters
         self.request_params = {
             "account_id": "12345",
-            "daily_walks": [{"date": "2020-02-22", "steps": 500, "distance": 1.3}],
+            "daily_walks": [{"date": "3000-02-22", "steps": 500, "distance": 1.3}],
         }
         self.bulk_request_params = {
             "account_id": "12345",
             "daily_walks": [
-                {"date": "2020-02-21", "steps": 1500, "distance": 2.1},
-                {"date": "2020-02-22", "steps": 500, "distance": 0.8},
-                {"date": "2020-02-23", "steps": 1000, "distance": 1.4},
+                {"date": "3000-02-21", "steps": 1500, "distance": 2.1},
+                {"date": "3000-02-22", "steps": 500, "distance": 0.8},
+                {"date": "3000-02-23", "steps": 1000, "distance": 1.4},
             ],
         }
         # Content type
         self.content_type = "application/json"
 
-    # Test a successful creation of a daily walk
+    # Test a successful creation of a daily walk (within a contest)
     def test_create_dailywalk(self):
         # Create a contest
         contest = Contest()
-        contest.start_promo = "2020-02-01"
-        contest.start = "2020-02-01"
-        contest.end = "2020-02-28"
+        contest.start_promo = "3000-02-01"
+        contest.start = "3000-02-01"
+        contest.end = "3000-02-28"
         contest.save()
 
         # Verify that the user has no contests
@@ -99,9 +99,9 @@ class ApiTestCase(TestCase):
     def test_create_dailywalk_outside_contests(self):
         # Create a contest
         contest = Contest()
-        contest.start_promo = "2020-03-01"
-        contest.start = "2020-03-01"
-        contest.end = "2020-03-31"
+        contest.start_promo = "3000-03-01"
+        contest.start = "3000-03-01"
+        contest.end = "3000-03-31"
         contest.save()
 
         # Verify that the user has no contests
