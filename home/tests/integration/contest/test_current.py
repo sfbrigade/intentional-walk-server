@@ -1,9 +1,6 @@
 import datetime
-import libfaketime
-
-from dateutil import parser
 from django.test import Client, TestCase
-from unittest import skip
+from freezegun import freeze_time
 
 from home.models import Contest
 
@@ -30,7 +27,6 @@ class ApiTestCase(TestCase):
             response_data["message"], f"There are no contests", msg=fail_message,
         )
 
-    @skip # skipping because libfaketime is not quite working as expected
     def test_contest_current(self):
         # create a few contests
         contest1 = Contest()
@@ -46,7 +42,7 @@ class ApiTestCase(TestCase):
         contest2.save()
 
         # before first promo starts, failure
-        with libfaketime.fake_time("2020-04-01 00:00:01"):
+        with freeze_time("2020-04-01"):
             response = self.client.get(path=self.url, content_type=self.content_type)
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
@@ -59,7 +55,7 @@ class ApiTestCase(TestCase):
             )
 
         # after promo starts for first contest
-        with libfaketime.fake_time("2020-04-28 00:00:01"):
+        with freeze_time("2020-04-28"):
             response = self.client.get(path=self.url, content_type=self.content_type)
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
@@ -73,7 +69,7 @@ class ApiTestCase(TestCase):
             self.assertEqual(response_data["payload"]["end"], "2020-05-31")
 
         # during first contest
-        with libfaketime.fake_time("2020-05-15 00:00:01"):
+        with freeze_time("2020-05-15"):
             response = self.client.get(path=self.url, content_type=self.content_type)
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
@@ -87,7 +83,7 @@ class ApiTestCase(TestCase):
             self.assertEqual(response_data["payload"]["end"], "2020-05-31")
 
         # after first contest, before promo starts for next
-        with libfaketime.fake_time("2020-06-14 00:00:01"):
+        with freeze_time("2020-06-14"):
             response = self.client.get(path=self.url, content_type=self.content_type)
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
@@ -101,7 +97,7 @@ class ApiTestCase(TestCase):
             self.assertEqual(response_data["payload"]["end"], "2020-05-31")
 
         # after promo starts for next
-        with libfaketime.fake_time("2020-06-28 00:00:01"):
+        with freeze_time("2020-06-28"):
             response = self.client.get(path=self.url, content_type=self.content_type)
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
@@ -115,7 +111,7 @@ class ApiTestCase(TestCase):
             self.assertEqual(response_data["payload"]["end"], "2020-07-31")
 
         # after last contest
-        with libfaketime.fake_time("2020-08-14 00:00:01"):
+        with freeze_time("2020-08-14"):
             response = self.client.get(path=self.url, content_type=self.content_type)
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)

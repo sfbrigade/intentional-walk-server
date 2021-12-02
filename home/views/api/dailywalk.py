@@ -1,13 +1,18 @@
 import json
+import logging
+
+from datetime import date
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View, generic
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
 
-from home.models import Device, Account, DailyWalk
+from home.models import Contest, Device, Account, DailyWalk
 from .utils import validate_request_json
 
+
+logger = logging.getLogger(__name__)
 
 # Except from csrf validation
 @method_decorator(csrf_exempt, name="dispatch")
@@ -50,6 +55,8 @@ class DailyWalkCreateView(View):
             if "status" in json_status and json_status["status"] == "error":
                 return JsonResponse(json_status)
 
+            walk_date = daily_walk_data["date"]
+
             # Check if there is already an entry for this date. If there is, update the entry
             # NOTE: By definition, there should be one and only one entry for a given email and date
             # NOTE: This is a potential vulnerability. Since there is no email authentication at the moment,
@@ -57,7 +64,7 @@ class DailyWalkCreateView(View):
             # This is also a result of no session auth (can easily hit the api directly)
             try:
                 # Updation
-                daily_walk = DailyWalk.objects.get(account__email=device.account.email, date=daily_walk_data["date"])
+                daily_walk = DailyWalk.objects.get(account__email=device.account.email, date=walk_date)
                 daily_walk.steps = daily_walk_data["steps"]
                 daily_walk.distance = daily_walk_data["distance"]
                 daily_walk.device_id = json_data["account_id"]
@@ -65,11 +72,21 @@ class DailyWalkCreateView(View):
             except ObjectDoesNotExist:
                 # Creation if object is missing
                 daily_walk = DailyWalk.objects.create(
-                    date=daily_walk_data["date"],
+                    date=walk_date,
                     steps=daily_walk_data["steps"],
                     distance=daily_walk_data["distance"],
                     device=device,
                 )
+
+            # Register contest for account if walk_date falls strictly within contest dates
+            # (Can be async)
+            contest = Contest.active(for_date=date.fromisoformat(walk_date), strict=True)
+            if contest is not None:
+                try:
+                    acct = device.account
+                    acct.contests.add(contest)
+                except:
+                    logger.error("Could not add contest to account!", exc_info=True)
 
             # Update the json object
             json_response["payload"]["daily_walks"].append(

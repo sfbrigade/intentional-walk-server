@@ -9,7 +9,7 @@ class DailyWalk(models.Model):
     account. It is always linked to the specific device identifier :model: `home.Device`
     """
 
-    date = models.DateField(help_text="The specific for which the steps are recorded for")
+    date = models.DateField(help_text="The specific date for which the steps are recorded")
     steps = models.IntegerField(help_text="Number of steps recorded")
     distance = models.FloatField(help_text="Total distance covered")
     device = models.ForeignKey("Device", on_delete=models.CASCADE, help_text="Device the data is coming from")

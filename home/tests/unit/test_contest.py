@@ -1,7 +1,9 @@
+from datetime import date, datetime
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from freezegun import freeze_time
 
-from home.models import Contest
+from home.models import Account, Contest
 
 
 class TestContest(TestCase):
@@ -91,3 +93,80 @@ class TestContest(TestCase):
         with self.assertRaises(ValidationError) as error:
             contest.save()
         self.assertEqual(error.exception.message, "Contest must not overlap another")
+
+    def test_active(self):
+        # create a few contests
+        contest1 = Contest()
+        contest1.start_promo = "3000-04-24"
+        contest1.start = "3000-05-01"
+        contest1.end = "3000-05-31"
+        contest1.save()
+
+        contest2 = Contest()
+        contest2.start_promo = "3000-06-21"
+        contest2.start = "3000-07-01"
+        contest2.end = "3000-07-31"
+        contest2.save()
+
+        # Helper function
+        def _assertEqual(create_obj, db_obj):
+            self.assertIsNotNone(db_obj)
+            self.assertEqual(str(create_obj.pk), db_obj.pk)
+
+        # before first promo starts, failure
+        with freeze_time("3000-04-01"):
+            self.assertIsNone(Contest.active())
+            self.assertIsNone(Contest.active(strict=True))
+
+        # after promo starts for first contest
+        with freeze_time("3000-04-28"):
+            _assertEqual(contest1, Contest.active())
+            _assertEqual(contest1, Contest.active(strict=True))
+
+        # during first contest
+        with freeze_time("3000-05-15"):
+            _assertEqual(contest1, Contest.active())
+            _assertEqual(contest1, Contest.active(strict=True))
+
+        # after first contest, before promo starts for next
+        with freeze_time("3000-06-14"):
+            _assertEqual(contest1, Contest.active())
+            self.assertIsNone(Contest.active(strict=True))
+
+        # after promo starts for next
+        with freeze_time("3000-06-28"):
+            _assertEqual(contest2, Contest.active())
+            _assertEqual(contest2, Contest.active(strict=True))
+
+        # after last contest
+        with freeze_time("3000-08-14"):
+            _assertEqual(contest2, Contest.active())
+            self.assertIsNone(Contest.active(strict=True))
+
+        # Now test the same using Contest.active with `for_date`
+        # instead of faking time
+        self.assertIsNone(Contest.active(for_date=date(3000,4,1)))
+
+        _assertEqual(contest1, Contest.active(for_date=date(3000,4,28)))
+        _assertEqual(contest1, Contest.active(for_date=date(3000,5,15)))
+        _assertEqual(contest1, Contest.active(for_date=date(3000,6,14)))
+        _assertEqual(contest2, Contest.active(for_date=date(3000,6,28)))
+        _assertEqual(contest2, Contest.active(for_date=date(3000,8,14)))
+
+        # Test with `for_date` and `strict`
+        self.assertIsNone(Contest.active(for_date=date(3000,8,14), strict=True))
+
+    def test_associate_contest_with_account(self):
+        contest = Contest.objects.create(
+            start_promo="3000-04-24",
+            start="3000-05-01",
+            end="3000-05-31",
+        )
+        # TODO: use generator
+        acct = Account.objects.create(
+            email="fake@us.email",
+            age=100,
+        )
+        acct.contests.add(contest)
+        acct.contests.add(contest)
+        self.assertEqual(1, len(Contest.objects.all()))

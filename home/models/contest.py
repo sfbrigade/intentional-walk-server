@@ -25,10 +25,13 @@ class Contest(models.Model):
         ordering = ("-start",)
 
     @staticmethod
-    def active():
-        today = datetime.date.today()
+    def active(for_date=None, strict=False):
+        # strict: for_date, which in general will be "today", must fall within contest dates,
+        #         starting on promo date, ending on end date.
+        # If strict is False, then find most recent contest (prior to for_date)
+        today = datetime.date.today() if for_date is None else for_date
         contest = Contest.objects.filter(start_promo__lte=today, end__gte=today).order_by("start_promo").first()
-        if contest is None:
+        if contest is None and not strict:
             # get the last contest
             contest = Contest.objects.filter(end__lt=today).order_by("-end").first()
         return contest
