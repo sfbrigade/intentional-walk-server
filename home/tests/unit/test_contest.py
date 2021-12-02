@@ -116,26 +116,32 @@ class TestContest(TestCase):
         # before first promo starts, failure
         with freeze_time("3000-04-01"):
             self.assertIsNone(Contest.active())
+            self.assertIsNone(Contest.active(strict=True))
 
         # after promo starts for first contest
         with freeze_time("3000-04-28"):
-            _assertEqual(contest1, Contest.active(for_date=date(3000,4,28)))
+            _assertEqual(contest1, Contest.active())
+            _assertEqual(contest1, Contest.active(strict=True))
 
         # during first contest
         with freeze_time("3000-05-15"):
             _assertEqual(contest1, Contest.active())
+            _assertEqual(contest1, Contest.active(strict=True))
 
         # after first contest, before promo starts for next
         with freeze_time("3000-06-14"):
             _assertEqual(contest1, Contest.active())
+            self.assertIsNone(Contest.active(strict=True))
 
         # after promo starts for next
         with freeze_time("3000-06-28"):
             _assertEqual(contest2, Contest.active())
+            _assertEqual(contest2, Contest.active(strict=True))
 
         # after last contest
         with freeze_time("3000-08-14"):
             _assertEqual(contest2, Contest.active())
+            self.assertIsNone(Contest.active(strict=True))
 
         # Now test the same using Contest.active with `for_date`
         # instead of faking time
@@ -147,7 +153,7 @@ class TestContest(TestCase):
         _assertEqual(contest2, Contest.active(for_date=date(3000,6,28)))
         _assertEqual(contest2, Contest.active(for_date=date(3000,8,14)))
 
-        # Test with `strict`
+        # Test with `for_date` and `strict`
         self.assertIsNone(Contest.active(for_date=date(3000,8,14), strict=True))
 
     def test_associate_contest_with_account(self):
