@@ -34,14 +34,15 @@ class Command(BaseCommand):
             subparser_account_contests.add_mutually_exclusive_group(required=True)
         )
         subparser_account_contests_opts.add_argument(
-            "--all", help="Populate all contests"
+            "--all", action="store_true", help="Populate all contests"
         )
         subparser_account_contests_opts.add_argument(
             "--contest_date",
             help="Select contest to populate by any date during the contest (or multiple if separated by commas)",
         )
         subparser_account_contests_opts.add_argument(
-            "--contest_id", help="Select contest to populate by contest_id"
+            "--contest_id",
+            help="Select contest to populate by contest_id. (Separate multiple by commas.)",
         )
 
     def handle(self, *args, **options):
@@ -55,14 +56,23 @@ class Command(BaseCommand):
         # Choose contest
         # TODO: allow start and end dates for filtering
         if options["contest_id"]:
-            contests = set(Contest.objects.get(pk=options["contest_id"]))
+            contests = set(
+                [
+                    Contest.objects.get(pk=_cid)
+                    for _cid in options["contest_id"].split(",")
+                ]
+            )
         elif options["contest_date"]:
-            contests = set([
-                Contest.active(for_date=_date, strict=True)
-                for _date in options["contest_date"].split(",")
-            ])
-        else:
+            contests = set(
+                [
+                    Contest.active(for_date=_date, strict=True)
+                    for _date in options["contest_date"].split(",")
+                ]
+            )
+        elif options["all"]:
             contests = Contest.objects.all()
+        else:
+            sys.exit(1)
 
         # Retrieve ALL daily walks and try to fit them into contests
         daily_walks = DailyWalk.objects.all().order_by("date")
