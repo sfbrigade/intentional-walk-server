@@ -5,7 +5,7 @@ import logging
 from collections import defaultdict
 from datetime import timedelta
 from django.views import View, generic
-from django.db.models import Sum
+from django.db.models import Count, F, Sum
 
 from home.models import Account, DailyWalk, IntentionalWalk, Contest
 from home.templatetags.format_helpers import m_to_mi
@@ -13,6 +13,32 @@ from home.utils import localize
 
 
 logger = logging.getLogger(__name__)
+
+
+def get_daily_walk_summaries(**filters):
+    dw = DailyWalk.objects.filter(**filters).values("account__email").annotate(
+        dw_count=Count(1),
+        dw_steps=Sum("steps"),
+        dw_distance=Sum("distance"),
+    ).order_by()
+
+    return {row["account__email"]: row for row in list(dw)}
+
+def get_intentional_walk_summaries(**filters):
+    iw = IntentionalWalk.objects.filter(**filters).annotate(
+        total_walk_time=(F("end") - F("start"))
+    ).values(
+        "account__email",
+    ).annotate(
+        rw_count=Count(1),
+        rw_steps=Sum("steps"),
+        rw_distance=Sum("distance"),
+        rw_total_walk_time=Sum("total_walk_time"),
+        rw_pause_time=Sum("pause_time"),
+    ).order_by()
+
+    return {row["account__email"]: row for row in list(iw)}
+
 
 # User list page
 class UserListView(generic.ListView):
@@ -30,76 +56,63 @@ class UserListView(generic.ListView):
         # Default href for download button
         context["download_url"] = "/data/users_agg.csv"
 
-        # Hacky groupby in django
-        # If there is no contest id passed in or if invalid, select all users
+        # DailyWalk and IntentionalWalk accessors
+        daily_walks = DailyWalk.objects
+        intentional_walks = IntentionalWalk.objects
+
+        dw_filters = {}
+        iw_filters = {}
+
+        # If there is no contest id passed in or if invalid, select all walks
         if contest_id:
             # Get the contest associated with this id
             contest = Contest.objects.get(contest_id=contest_id)
-            daily_walks = DailyWalk.objects.filter(
-                date__range=(contest.start, contest.end)
-            ).values('account__email','steps','distance','date')
-            intentional_walks = IntentionalWalk.objects.filter(
-                created__range=(
-                    localize(contest.start),
-                    localize(contest.end) + timedelta(days=1)
-                )
-            ).values('account__email','steps','distance','pause_time', 'start','end')
 
-            logger.info(f"For contest id '{contest_id}':")
-            logger.info(f"  daily walks: {len(daily_walks)}, intentional walks: {len(intentional_walks)}")
+            # Context variables
             context["current_contest"] = contest
             context["download_url"] += f"?contest_id={contest_id}"
-        else:
-            daily_walks = DailyWalk.objects.all().values('account__email','steps','distance','date')
-            intentional_walks = IntentionalWalk.objects.all().values('account__email','steps','distance','pause_time', 'start','end')
 
+            # Create filters for query
+            dw_filters["date__range"] = (contest.start, contest.end)
+            iw_filters["created__range"] = (
+                localize(contest.start),
+                localize(contest.end) + timedelta(days=1)
+            )
 
-        # HACKY GROUPBY
-        daily_walks_by_acc = defaultdict(list)
-        for dw in daily_walks:
-            daily_walks_by_acc[dw['account__email']].append(dw)
-        intentional_walks_by_acc = defaultdict(list)
-        for iw in intentional_walks:
-            intentional_walks_by_acc[iw['account__email']].append(iw)
+        # DailyWalk.objects.filter(date__range=(c.start, c.end)) \
+        # .values('account__email') \
+        # .annotate(dw_steps=Sum('steps'), dw_distance=Sum('distance'), dw_count=Count("id")) \
+        # .order_by()
+        daily_walks = get_daily_walk_summaries(**dw_filters)
+        intentional_walks = get_intentional_walk_summaries(**iw_filters)
 
-        accounts = Account.objects.values('email','name','age','zip','is_sf_resident','created')
+        logger.info(f"For contest id '{contest_id}':")
+        logger.info(f"  daily walks: {len(daily_walks)}, intentional walks: {len(intentional_walks)}")
 
         context["user_stats_list"] = []
         zipcounts = defaultdict(lambda: 0)
 
-        for account in accounts:
+        for email, dw_row in daily_walks.items():
+            acct = Account.objects.values('email','name','age','zip', 'created').get(email=email)
+
             user_stats = {}
-            user_stats["account"] = account
+            user_stats["account"] = acct
+            user_stats["dw_steps"] = dw_row["dw_steps"]
+            user_stats["dw_distance"] = m_to_mi(dw_row["dw_distance"])
+            user_stats["num_dws"] = dw_row["dw_count"]
 
-            user_daily_walks = daily_walks_by_acc.get(account["email"], [])
+            iw_row = intentional_walks.get(email)
+            if iw_row:
+                # Get all recorded walk data
+                user_stats["rw_steps"] = iw_row["rw_steps"]
+                user_stats["rw_distance"] = iw_row["rw_distance"]
+                user_stats["rw_time"] = (
+                    iw_row["rw_total_walk_time"].total_seconds() - iw_row["rw_pause_time"]
+                ) / 60 # minutes
+            user_stats["num_rws"] = iw_row["rw_count"] if iw_row else 0
 
-            user_stats["dw_steps"] = 0
-            user_stats["dw_distance"] = 0
-            user_stats["num_dws"] = len(user_daily_walks)
-            for dw in user_daily_walks:
-                user_stats["dw_steps"] += dw["steps"]
-                user_stats["dw_distance"] += m_to_mi(dw["distance"])
-
-            # Get all recorded walk data
-            user_intentional_walks = intentional_walks_by_acc.get(account["email"], [])
-            user_stats["rw_steps"] = 0
-            user_stats["rw_distance"] = 0
-            user_stats["rw_time"] = 0
-            user_stats["rw_speeds"] = []
-            user_stats["num_rws"] = len(user_intentional_walks)
-            for iw in user_intentional_walks:
-                user_stats["rw_steps"] += iw["steps"]
-                user_stats["rw_distance"] += m_to_mi(iw["distance"])
-                walk_time = (iw["end"]-iw["start"]).total_seconds() - int(iw["pause_time"])
-                user_stats["rw_time"] += walk_time / 60
-                user_stats["rw_speeds"].append(m_to_mi(iw["distance"])/ (walk_time/3600))
-            user_stats["rw_avg_speed"] = (
-                sum(user_stats["rw_speeds"]) / len(user_stats["rw_speeds"]) if user_stats["rw_speeds"] else 0
-            )
-
-            if user_stats["dw_steps"] > 0:
-                context["user_stats_list"].append(user_stats)
-                zipcounts[account["zip"]] += 1
+            context["user_stats_list"].append(user_stats)
+            zipcounts[acct["zip"]] += 1
 
         context["contests"] = Contest.objects.all()
 
