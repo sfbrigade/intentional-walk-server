@@ -16,26 +16,36 @@ logger = logging.getLogger(__name__)
 
 
 def get_daily_walk_summaries(**filters):
-    dw = DailyWalk.objects.filter(**filters).values("account__email").annotate(
-        dw_count=Count(1),
-        dw_steps=Sum("steps"),
-        dw_distance=Sum("distance"),
-    ).order_by()
+    dw = (
+        DailyWalk.objects.filter(**filters)
+        .values("account__email")
+        .annotate(
+            dw_count=Count(1),
+            dw_steps=Sum("steps"),
+            dw_distance=Sum("distance"),
+        )
+        .order_by()
+    )
 
     return {row["account__email"]: row for row in list(dw)}
 
+
 def get_intentional_walk_summaries(**filters):
-    iw = IntentionalWalk.objects.filter(**filters).annotate(
-        total_walk_time=(F("end") - F("start"))
-    ).values(
-        "account__email",
-    ).annotate(
-        rw_count=Count(1),
-        rw_steps=Sum("steps"),
-        rw_distance=Sum("distance"),
-        rw_total_walk_time=Sum("total_walk_time"),
-        rw_pause_time=Sum("pause_time"),
-    ).order_by()
+    iw = (
+        IntentionalWalk.objects.filter(**filters)
+        .annotate(total_walk_time=(F("end") - F("start")))
+        .values(
+            "account__email",
+        )
+        .annotate(
+            rw_count=Count(1),
+            rw_steps=Sum("steps"),
+            rw_distance=Sum("distance"),
+            rw_total_walk_time=Sum("total_walk_time"),
+            rw_pause_time=Sum("pause_time"),
+        )
+        .order_by()
+    )
 
     return {row["account__email"]: row for row in list(iw)}
 
@@ -76,7 +86,7 @@ class UserListView(generic.ListView):
             dw_filters["date__range"] = (contest.start, contest.end)
             iw_filters["created__range"] = (
                 localize(contest.start),
-                localize(contest.end) + timedelta(days=1)
+                localize(contest.end) + timedelta(days=1),
             )
 
         # DailyWalk.objects.filter(date__range=(c.start, c.end)) \
@@ -87,33 +97,57 @@ class UserListView(generic.ListView):
         intentional_walks = get_intentional_walk_summaries(**iw_filters)
 
         logger.info(f"For contest id '{contest_id}':")
-        logger.info(f"  daily walks: {len(daily_walks)}, intentional walks: {len(intentional_walks)}")
+        logger.info(
+            f"  daily walks: {len(daily_walks)}, intentional walks: {len(intentional_walks)}"
+        )
 
+        user_stats_container = {}
         context["user_stats_list"] = []
         zipcounts = defaultdict(lambda: 0)
 
-        for email, dw_row in daily_walks.items():
-            acct = Account.objects.values('email','name','age','zip', 'created').get(email=email)
+        # If a contest is specified, include all new signups, regardless of
+        # whether they walked during the contest or not.
+        if contest is not None:
+            for acct in Account.objects.values(
+                "email", "name", "age", "zip", "created"
+            ).filter(
+                created__range=(
+                    localize(contest.start_promo),
+                    localize(contest.end) + timedelta(days=1),
+                )
+            ):
+                user_stats_container[acct["email"]] = dict(
+                    new_signup="Yes", account=acct
+                )
 
-            user_stats = {}
+        # Add all accounts found in filtered daily walk data
+        for email, dw_row in daily_walks.items():
+            acct = Account.objects.values("email", "name", "age", "zip", "created").get(
+                email=email
+            )
+
+            user_stats = user_stats_container.get(email, dict(new_signup="No"))
             user_stats["account"] = acct
             user_stats["dw_steps"] = dw_row["dw_steps"]
             user_stats["dw_distance"] = m_to_mi(dw_row["dw_distance"])
             user_stats["num_dws"] = dw_row["dw_count"]
 
+            # Also add recorded walk data
             iw_row = intentional_walks.get(email)
             if iw_row:
-                # Get all recorded walk data
                 user_stats["rw_steps"] = iw_row["rw_steps"]
                 user_stats["rw_distance"] = iw_row["rw_distance"]
                 user_stats["rw_time"] = (
-                    iw_row["rw_total_walk_time"].total_seconds() - iw_row["rw_pause_time"]
-                ) / 60 # minutes
+                    iw_row["rw_total_walk_time"].total_seconds()
+                    - iw_row["rw_pause_time"]
+                ) / 60  # minutes
             user_stats["num_rws"] = iw_row["rw_count"] if iw_row else 0
 
-            context["user_stats_list"].append(user_stats)
+            # Put user_stats (row) back into container
+            user_stats_container[email] = user_stats
             zipcounts[acct["zip"]] += 1
 
+        context["user_stats_list"] = user_stats_container.values()
         context["contests"] = Contest.objects.all()
 
         # This allows us to place json (string) data into the `data-json` prop of a <div />
