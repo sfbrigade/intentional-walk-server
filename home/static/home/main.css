@@ -6,3 +6,6 @@ html, body {
     font-family: 'Exo';
     font-size: 1.25em;
 }
+.rw-col {
+    display: none;
+}
