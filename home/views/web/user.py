@@ -15,6 +15,9 @@ from home.utils import localize
 logger = logging.getLogger(__name__)
 
 
+### HELPER FUNCTIONS
+
+
 def get_daily_walk_summaries(**filters):
     dw = (
         DailyWalk.objects.filter(**filters)
@@ -50,7 +53,15 @@ def get_intentional_walk_summaries(**filters):
     return {row["account__email"]: row for row in list(iw)}
 
 
+########################################################################
+###   VIEW(S)
+########################################################################
+#
 # User list page
+#       Puts "user_stats_list" -> context
+#       which is a list of rows containing user stats to be displayed
+#       (see home/tempolates/home/user_list.html)
+#
 class UserListView(generic.ListView):
     template_name = "home/user_list.html"
     model = Account
@@ -70,6 +81,7 @@ class UserListView(generic.ListView):
         daily_walks = DailyWalk.objects
         intentional_walks = IntentionalWalk.objects
 
+        # Initialize filters for querying
         dw_filters = {}
         iw_filters = {}
 
@@ -84,30 +96,22 @@ class UserListView(generic.ListView):
 
             # Create filters for query
             dw_filters["date__range"] = (contest.start, contest.end)
-            iw_filters["created__range"] = (
-                localize(contest.start),
-                localize(contest.end) + timedelta(days=1),
-            )
+            iw_filters["start__gte"] = localize(contest.start)
+            iw_filters["end__lt"] = localize(contest.end) + timedelta(days=1)
 
-        # DailyWalk.objects.filter(date__range=(c.start, c.end)) \
-        # .values('account__email') \
-        # .annotate(dw_steps=Sum('steps'), dw_distance=Sum('distance'), dw_count=Count("id")) \
-        # .order_by()
+        # Fetch all walks and group by user
         daily_walks = get_daily_walk_summaries(**dw_filters)
         intentional_walks = get_intentional_walk_summaries(**iw_filters)
 
-        logger.info(f"For contest id '{contest_id}':")
-        logger.info(
-            f"  daily walks: {len(daily_walks)}, intentional walks: {len(intentional_walks)}"
-        )
-
+        # Prepare loading of data into context
         user_stats_container = {}
         context["user_stats_list"] = []
+        # `zipcounts` holds user counts by zip code for visualization
         zipcounts = defaultdict(lambda: 0)
 
         # If a contest is specified, include all new signups, regardless of
         # whether they walked during the contest or not.
-        if contest is not None:
+        if contest_id is not None:
             for acct in Account.objects.values(
                 "email", "name", "age", "zip", "created"
             ).filter(
