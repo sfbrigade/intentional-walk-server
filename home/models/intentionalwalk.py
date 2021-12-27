@@ -1,5 +1,7 @@
 import time
 from django.db import models
+
+from home.models.destination import Destination
 from home.templatetags.format_helpers import m_to_mi
 
 
@@ -17,6 +19,7 @@ class IntentionalWalk(models.Model):
     pause_time = models.FloatField(help_text="Total time paused (in seconds)")
     distance = models.FloatField(help_text="Total distance covered")
     device = models.ForeignKey("Device", on_delete=models.CASCADE, help_text="Device the data is coming from")
+    destination = models.ManyToManyField(Destination, help_text="Destinations along the walk")
     account = models.ForeignKey("Account", on_delete=models.CASCADE, help_text="Account the data is linked to")
     created = models.DateTimeField(auto_now_add=True, help_text="Record creation timestamp")
 
