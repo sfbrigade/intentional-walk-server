@@ -111,6 +111,17 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-postgres-setfield"
+version = "0.0.1"
+description = "Django field for storing sets, backed by Postgres arrays"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Django = ">=2.1"
+
+[[package]]
 name = "docopt"
 version = "0.6.2"
 description = "Pythonic argument parser, that will make you smile"
@@ -393,7 +404,7 @@ brotli = ["brotli"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "47d8d23b622ed76c9e65dcc9f82e5ffb38a91c122b7ab476550732c11bde1227"
+content-hash = "2e55493bec1efe7f9d71d35568324b3e73d6c5f5843f3ac9b7ef94c77042a70e"
 
 [metadata.files]
 asgiref = [
@@ -485,6 +496,10 @@ dj-database-url = [
 django = [
     {file = "Django-3.2.9-py3-none-any.whl", hash = "sha256:e22c9266da3eec7827737cde57694d7db801fedac938d252bf27377cec06ed1b"},
     {file = "Django-3.2.9.tar.gz", hash = "sha256:51284300f1522ffcdb07ccbdf676a307c6678659e1284f0618e5a774127a6a08"},
+]
+django-postgres-setfield = [
+    {file = "django-postgres-setfield-0.0.1.tar.gz", hash = "sha256:99041c82ead927d0e28a5f154fcf99c4666600314780cd8c8adbe061f33eb923"},
+    {file = "django_postgres_setfield-0.0.1-py3-none-any.whl", hash = "sha256:e7d17ae5405933e65415baf6c4a2cf1f2d62ccf1281d807eed3b1e87d3c73740"},
 ]
 docopt = [
     {file = "docopt-0.6.2.tar.gz", hash = "sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491"},
