@@ -146,16 +146,6 @@ class AppUserCreateView(View):
                 "status": "success",
                 "message": message,
                 "payload": {
-                    "name": device.account.name,
-                    "email": device.account.email,
-                    "zip": device.account.zip,
-                    "age": device.account.age,
-                    "is_sf_resident": device.account.is_sf_resident,
-                    "is_latino": device.account.is_latino,
-                    "race": [row.code for row in device.account.race_set.all()],
-                    "race_other": device.account.race_other,
-                    "gender": device.account.gender,
-                    "gender_other": device.account.gender_other,
                     "account_id": device.device_id,
                 },
             }
