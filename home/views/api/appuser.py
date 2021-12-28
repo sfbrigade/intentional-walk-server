@@ -5,7 +5,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
 
-from home.models import Account, Device, Race
+from home.models import Account, Device
 from home.models.account import SAN_FRANCISCO_ZIP_CODES, GenderLabels, RaceLabels
 from .utils import validate_request_json
 
@@ -66,8 +66,7 @@ def update_account(acct: Account, data: dict):
     acct.is_sf_resident = data["zip"] in SAN_FRANCISCO_ZIP_CODES
     acct.is_tester = is_tester(data["name"])
     acct.is_latino = data.get("is_latino")
-    for race in data.get("race") or []:
-        acct.race_set.create(code=race)
+    acct.race = data.get("race", [])
     acct.race_other = data.get("race_other")
     acct.gender = data.get("gender")
     acct.gender_other = data.get("gender_other")

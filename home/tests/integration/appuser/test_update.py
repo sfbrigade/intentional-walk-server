@@ -57,7 +57,7 @@ class ApiTestCase(TestCase):
         user_obj = Account.objects.get(email=self.request_params["email"])
         for field in ["name", "email", "zip", "age", "is_latino", "gender", "gender_other", "race_other"]:
             self.assertEqual(getattr(user_obj, field), self.request_params[field], msg=fail_message)
-        self.assertEqual(set([r.code for r in user_obj.race_set.all()]), set(self.request_params["race"]), msg=fail_message)
+        self.assertSetEqual(user_obj.race, set(self.request_params["race"]), msg=fail_message)
 
     # Test updating a User's name
     # This would hit the same creation URL
@@ -80,7 +80,7 @@ class ApiTestCase(TestCase):
         user_obj = Account.objects.get(email=self.request_params["email"])
         for field in ["name", "email", "zip", "age", "is_latino", "gender", "gender_other", "race_other"]:
             self.assertEqual(getattr(user_obj, field), self.request_params[field], msg=fail_message)
-        self.assertEqual(set([r.code for r in user_obj.race_set.all()]), set(self.request_params["race"]), msg=fail_message)
+        self.assertSetEqual(user_obj.race, set(self.request_params["race"]), msg=fail_message)
 
     # Test updating a User's email
     # This shouldn't update
