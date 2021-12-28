@@ -66,7 +66,7 @@ def update_account(acct: Account, data: dict):
     acct.is_sf_resident = data["zip"] in SAN_FRANCISCO_ZIP_CODES
     acct.is_tester = is_tester(data["name"])
     acct.is_latino = data.get("is_latino")
-    for race in data.get("race", []):
+    for race in data.get("race") or []:
         acct.race_set.create(code=race)
     acct.race_other = data.get("race_other")
     acct.gender = data.get("gender")
