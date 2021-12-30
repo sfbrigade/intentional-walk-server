@@ -99,18 +99,18 @@ def user_agg_csv_view(request) -> HttpResponse:
 
             user_stats["active_during_contest"] = user_stats["dw_steps"] > 0
             if contest is not None:
-                user_stats["new_user"] = account["created"].date() >= contest.start_promo
+                user_stats["new_signup"] = (account["created"].date() >= contest.start_promo) and (account["created"].date() <= contest.end)
             else:
-                user_stats["new_user"] = None
+                user_stats["new_signup"] = None
 
-            if user_stats["new_user"] or user_stats["active_during_contest"]:
+            if user_stats["new_signup"] or user_stats["active_during_contest"]:
                 writer.writerow([
                     account["email"],
                     account["name"],
                     account["zip"],
                     account["age"],
                     account["created"],
-                    yesno(user_stats["new_user"]),
+                    yesno(user_stats["new_signup"]),
                     yesno(user_stats["active_during_contest"]),
                     user_stats["num_dws"],
                     user_stats["dw_steps"],

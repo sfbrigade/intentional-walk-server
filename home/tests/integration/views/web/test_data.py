@@ -59,7 +59,7 @@ class TestCsvViews(TestCase):
         iwalks1 = IntentionalWalkGenerator(device1)
         for dt in range(5):
             # Set dates on walks to [2, 4, 6, 8, 10] (3000-03)
-            t = utc.localize(datetime(3000, 3, 1, 10, 0)) + timedelta(days=(dt * 2))
+            t = utc.localize(datetime(3000, 3, 2, 10, 0)) + timedelta(days=(dt * 2))
             next(iwalks0.generate(1, start=t, end=(t + timedelta(hours=2))))
             next(iwalks1.generate(1, start=t, end=(t + timedelta(hours=2))))
 

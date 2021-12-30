@@ -50,7 +50,7 @@
 
 <div class="container-fluid" style="padding: 25px;">
     <div class="home-row table-responsive" style="font-size: 1.2em">
-        <table id="all_users" class="table table-striped">
+        <table id="all_users" class="table table-striped display responsive">
             <thead>
             <tr>
                 <th scope="col">Name</th>
@@ -58,14 +58,15 @@
                 <th scope="col">Age</th>
                 <th scope="col">Zip</th>
                 <th scope="col">SignUp Date</th>
+                <th scope="col">New Signup</th>
                 <th scope="col">Daily Walks</th>
                 <th scope="col">Total Steps</th>
                 <th scope="col">Total Dist(mi)</th>
-                <th scope="col">Rec Walks</th>
-                <th scope="col">Rec Steps</th>
-                <th scope="col">Rec Dist(mi)</th>
-                <th scope="col">Rec Time(min)</th>
-                <th scope="col">Rec Avg speed(mph)</th>
+                <th scope="col" class="rw-col">Rec Walks</th>
+                <th scope="col" class="rw-col">Rec Steps</th>
+                <th scope="col" class="rw-col">Rec Dist(mi)</th>
+                <th scope="col" class="rw-col">Rec Time(min)</th>
+                <!-- <th scope="col">Rec Avg speed(mph)</th> -->
             </tr>
             </thead>
             <tbody>
@@ -76,14 +77,15 @@
                 <td>{{appuser.account.age}}</td>
                 <td>{{appuser.account.zip}}</td>
                 <td>{{appuser.account.created | date:"DATE_FORMAT"}}</td>
+                <td>{{appuser.new_signup}}</td>
                 <td>{{appuser.num_dws}}</td>
                 <td>{{appuser.dw_steps}}</td>
                 <td>{{appuser.dw_distance|floatformat}}</td>
-                <td>{{appuser.num_rws}}</td>
-                <td>{{appuser.rw_steps}}</td>
-                <td>{{appuser.rw_distance|floatformat}}</td>
-                <td>{{appuser.rw_time|floatformat}}</td>
-                <td>{{appuser.rw_avg_speed|floatformat}}</td>
+                <td class="rw-col">{{appuser.num_rws}}</td>
+                <td class="rw-col">{{appuser.rw_steps}}</td>
+                <td class="rw-col">{{appuser.rw_distance|floatformat}}</td>
+                <td class="rw-col">{{appuser.rw_time|floatformat}}</td>
+                <!-- <td>{{appuser.rw_avg_speed|floatformat}}</td> -->
             </tr>
             {% endfor %}
             </tbody>
@@ -93,9 +95,35 @@
 {% endblock %}
 
 {% block post_scripts %}
-<script>$('#all_users').DataTable();</script>
-
 <script>
+    // *** DATATABLE TOOLBAR (checkbox) ***
+    const table = $('#all_users').DataTable({
+      "dom": "<'toolbar'>Blftrip",
+    });
+
+    const inputContainer = $('<div class="form-check">').css({
+      padding: "10px 0px 10px",
+      marginLeft: "30px"
+    });
+    inputContainer.append('<input id="hideCols" class="form-check-input" type="checkbox" onclick="toggleRW(this)" unchecked />');
+    inputContainer.append($('<label class="form-check-label" for="hideCols">Show RW data</label>').css({
+      "padding-left": "0.5rem",
+    }));
+
+    function toggleRW(el) {
+      if (el.checked) {
+        console.log("CHECK");
+        $(".rw-col").show();
+      } else {
+        $(".rw-col").hide();
+      }
+    }
+
+    const toolbar = $('#all_users_wrapper > .toolbar')
+      .html(inputContainer)
+      .css("float", "right");
+
+    // *** D3 ***
     // Map and count data
     const sf_geojson = "/static/SanFrancisco.Neighborhoods.json";
     // const userdata = "/data/users_agg.csv";
