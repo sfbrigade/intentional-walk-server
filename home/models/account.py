@@ -1,4 +1,7 @@
 from django.db import models
+from enum import Enum
+from setfield import SetField
+
 
 SAN_FRANCISCO_ZIP_CODES = set([
     '94102', '94103', '94104', '94105', '94107', '94108', '94109', '94110',
@@ -6,6 +9,22 @@ SAN_FRANCISCO_ZIP_CODES = set([
     '94122', '94123', '94124', '94127', '94129', '94130', '94131', '94132',
     '94133', '94134', '94158',
 ])
+
+class GenderLabels(Enum):
+    CF = "Female"
+    CM = "Male"
+    TF = "Trans Female"
+    TM = "Trans Male"
+    NB = "Non-binary"
+    OT = "Other"
+
+class RaceLabels(Enum):
+    NA = "American Indian or Alaska Native"
+    BL = "Black"
+    AS = "Asian"
+    PI = "Native Hawaiian or other Pacific Islander"
+    WH = "White"
+    OT = "Other"
 
 # Note: Maybe inherit from Django's User model?
 class Account(models.Model):
@@ -21,9 +40,11 @@ class Account(models.Model):
     age = models.IntegerField(help_text="User's age")
     is_sf_resident = models.BooleanField(null=True, help_text="Whether the user is a SF resident or not, based on zip")
     is_latino = models.BooleanField(null=True, blank=True, help_text="Latino or Hispanic origin")
-    race = models.ManyToManyField("Race", blank=True, help_text="Self-identified race(s) of user")
-    gender = models.CharField(max_length=25, blank=True, help_text="Self-identified gender identity of user")
-
+    # race is a reverse foreign key (see Race model)
+    race = SetField(models.CharField(max_length=2, choices=list(RaceLabels.__members__.items())), default=list, blank=True)
+    race_other = models.CharField(max_length=75, null=True, blank=True, help_text="Free-form text field for 'race' value 'OT'")
+    gender = models.CharField(max_length=2, null=True, blank=True, help_text="Self-identified gender identity of user")
+    gender_other = models.CharField(max_length=75, null=True, blank=True, help_text="Free-form text field for 'gender' value 'OT'")
     is_tester = models.BooleanField(default=False, help_text="User is an app tester")
     contests = models.ManyToManyField("Contest", blank=True, help_text="All the contests the account has enrolled in")
     created = models.DateTimeField(auto_now_add=True, help_text="Accounts creation timestamp")
