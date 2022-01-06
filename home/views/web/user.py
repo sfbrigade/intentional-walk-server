@@ -107,7 +107,9 @@ class UserListView(generic.ListView):
         user_stats_container = {}
         context["user_stats_list"] = []
         # `zipcounts` holds user counts by zip code for visualization
-        zipcounts = defaultdict(lambda: 0)
+        active_by_zip = defaultdict(lambda: 0)
+        all_users_by_zip = defaultdict(lambda: 0)
+        new_signups_by_zip = defaultdict(lambda: 0)
 
         # If a contest is specified, include all new signups, regardless of
         # whether they walked during the contest or not.
@@ -123,6 +125,7 @@ class UserListView(generic.ListView):
                 user_stats_container[acct["email"]] = dict(
                     new_signup="Yes", account=acct
                 )
+                new_signups_by_zip[acct["zip"]] += 1
 
         # Add all accounts found in filtered daily walk data
         for email, dw_row in daily_walks.items():
@@ -149,13 +152,17 @@ class UserListView(generic.ListView):
 
             # Put user_stats (row) back into container
             user_stats_container[email] = user_stats
-            zipcounts[acct["zip"]] += 1
+            active_by_zip[acct["zip"]] += 1
+
+        for user in user_stats_container.values():
+            all_users_by_zip[user["account"]["zip"]] += 1
 
         context["user_stats_list"] = user_stats_container.values()
         context["contests"] = Contest.objects.all()
 
         # This allows us to place json (string) data into the `data-json` prop of a <div />
         # (Probably not ideal but enables us to pass data to <script /> for mapping.)
-        context["zipcounts"] = json.dumps(zipcounts)
-
+        context["active_by_zip"] = json.dumps(active_by_zip)
+        context["all_users_by_zip"] = json.dumps(all_users_by_zip)
+        context["new_signups_by_zip"] = json.dumps(new_signups_by_zip)
         return context
