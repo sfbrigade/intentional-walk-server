@@ -4,8 +4,10 @@ import logging
 
 from collections import defaultdict
 from datetime import timedelta
+from django import template
 from django.views import View, generic
 from django.db.models import Count, F, Sum
+from typing import Optional
 
 from home.models import Account, DailyWalk, IntentionalWalk, Contest
 from home.templatetags.format_helpers import m_to_mi
@@ -13,11 +15,9 @@ from home.utils import localize
 
 
 logger = logging.getLogger(__name__)
-
+ACCOUNT_FIELDS = ["email", "name", "age", "zip", "is_tester", "created"]
 
 ### HELPER FUNCTIONS
-
-
 def get_daily_walk_summaries(**filters):
     dw = (
         DailyWalk.objects.filter(**filters)
@@ -52,6 +52,38 @@ def get_intentional_walk_summaries(**filters):
 
     return {row["account__email"]: row for row in list(iw)}
 
+def get_contest_walks(contest: Optional[Contest]):
+    # DailyWalk and IntentionalWalk accessors
+    daily_walks = DailyWalk.objects
+    intentional_walks = IntentionalWalk.objects
+
+    # Initialize filters for querying
+    dw_filters = {}
+    iw_filters = {}
+
+    # If there is no contest id passed in or if invalid, select all walks
+    if contest:
+        # Create filters for query
+        dw_filters["date__range"] = (contest.start, contest.end)
+        iw_filters["start__gte"] = localize(contest.start)
+        iw_filters["end__lt"] = localize(contest.end) + timedelta(days=1)
+
+    # Fetch all walks and group by user
+    return (
+        get_daily_walk_summaries(**dw_filters),
+        get_intentional_walk_summaries(**iw_filters)
+    )
+
+def get_new_signups(contest: Contest, include_testers=False):
+    accounts = Account.objects.values(*ACCOUNT_FIELDS).filter(
+        created__range=(
+            localize(contest.start_promo),
+            localize(contest.end),
+        )
+    )
+    return [
+        a for a in accounts if include_testers or not a.get("is_tester")
+    ]
 
 ########################################################################
 ###   VIEW(S)
@@ -74,38 +106,19 @@ class UserListView(generic.ListView):
         # Check if url has any contest parameters
         contest_id = self.request.GET.get("contest_id")
 
+        # Check if url has any contest parameters
+        include_testers = self.request.GET.get("include_testers") is not None
+
         # Default href for download button
         context["download_url"] = "/data/users_agg.csv"
 
-        # DailyWalk and IntentionalWalk accessors
-        daily_walks = DailyWalk.objects
-        intentional_walks = IntentionalWalk.objects
-
-        # Initialize filters for querying
-        dw_filters = {}
-        iw_filters = {}
-
-        # If there is no contest id passed in or if invalid, select all walks
-        if contest_id:
-            # Get the contest associated with this id
-            contest = Contest.objects.get(contest_id=contest_id)
-
-            # Context variables
-            context["current_contest"] = contest
-            context["download_url"] += f"?contest_id={contest_id}"
-
-            # Create filters for query
-            dw_filters["date__range"] = (contest.start, contest.end)
-            iw_filters["start__gte"] = localize(contest.start)
-            iw_filters["end__lt"] = localize(contest.end) + timedelta(days=1)
-
-        # Fetch all walks and group by user
-        daily_walks = get_daily_walk_summaries(**dw_filters)
-        intentional_walks = get_intentional_walk_summaries(**iw_filters)
+        contest = Contest.objects.get(contest_id=contest_id) if contest_id else None
+        daily_walks, intentional_walks = get_contest_walks(contest)
 
         # Prepare loading of data into context
         user_stats_container = {}
         context["user_stats_list"] = []
+
         # `zipcounts` holds user counts by zip code for visualization
         active_by_zip = defaultdict(lambda: 0)
         all_users_by_zip = defaultdict(lambda: 0)
@@ -113,27 +126,34 @@ class UserListView(generic.ListView):
 
         # If a contest is specified, include all new signups, regardless of
         # whether they walked during the contest or not.
-        if contest_id is not None:
-            for acct in Account.objects.values(
-                "email", "name", "age", "zip", "created"
-            ).filter(
-                created__range=(
-                    localize(contest.start_promo),
-                    localize(contest.end) + timedelta(days=1),
-                )
-            ):
-                user_stats_container[acct["email"]] = dict(
-                    new_signup="Yes", account=acct
-                )
-                new_signups_by_zip[acct["zip"]] += 1
+        if contest is not None:
+            # Context variables
+            context["current_contest"] = contest
+            context["download_url"] += f"?contest_id={contest_id}"
+
+            # Find everyone who signed up during the constest
+            for acct in get_new_signups(contest, include_testers):
+                if acct["email"] not in daily_walks:
+                    user_stats_container[acct["email"]] = dict(
+                        new_signup=True, account=acct
+                    )
+                    new_signups_by_zip[acct["zip"]] += 1
 
         # Add all accounts found in filtered daily walk data
         for email, dw_row in daily_walks.items():
-            acct = Account.objects.values("email", "name", "age", "zip", "created").get(
+            acct = Account.objects.values(*ACCOUNT_FIELDS).get(
                 email=email
             )
 
-            user_stats = user_stats_container.get(email, dict(new_signup="No"))
+            # Skip testers unless include_testers
+            if not include_testers and acct.get("is_tester"):
+                continue
+
+            # Don't include those who signed up after the contest ended
+            if contest and acct["created"] > localize(contest.end):
+                continue
+
+            user_stats = user_stats_container.get(email, dict(new_signup=False))
             user_stats["account"] = acct
             user_stats["dw_steps"] = dw_row["dw_steps"]
             user_stats["dw_distance"] = m_to_mi(dw_row["dw_distance"])
@@ -165,4 +185,5 @@ class UserListView(generic.ListView):
         context["active_by_zip"] = json.dumps(active_by_zip)
         context["all_users_by_zip"] = json.dumps(all_users_by_zip)
         context["new_signups_by_zip"] = json.dumps(new_signups_by_zip)
+        context["include_testers"] = include_testers
         return context

@@ -9,3 +9,18 @@ html, body {
 .rw-col {
     display: none;
 }
+.yesno {
+    text-transform: capitalize;
+}
+#contest-title {
+    padding: 15px;
+    color: #CD6155;
+    text-align: center;
+}
+#geo-info {
+    float: left;
+    visibility: hidden;
+    width: 300px;
+    padding-top: 70px;
+    margin-left: 50px;
+}

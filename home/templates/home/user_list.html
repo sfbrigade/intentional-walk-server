@@ -25,10 +25,9 @@
     <div class="col-auto mr-auto">
         {% if current_contest %}
         <!-- Contest info -->
-        <div class="container-fluid" style="padding: 15px; color: #CD6155">
+        <div class="container-fluid" id="contest-title">
             <h2>Contest - {{current_contest.start| date:"DATE_FORMAT"}} - {{current_contest.end| date:"DATE_FORMAT"}}</h2>
         </div>
-        {% endif %}
 
         <!-- Choropleth (intensity) map of users -->
         <div class="container-fluid justify-content-center" id="map-container">
@@ -39,12 +38,23 @@
             <!-- D3 SVG -->
             <svg id="intensity-map" style="float: left;" width="380" height="300"></svg>
             <svg id="intensity-map-3" style="float: left;" width="380" height="300"></svg>
-            <div id="geo-info" style="float: left; visibility: hidden; width: 125px; padding-top: 150px;">
-              <p id="geo-info-name"></p>
-              <p id="geo-info-active"></p>
-              <p id="geo-info-newsignups"></p>
+            <div id="geo-info">
+              <h5 id="geo-info-name" style="margin-bottom: 15px;"></h5>
+              <dl class="row" style="margin-bottom: 0;">
+                <dt class="col-sm-6">Zip code:</dt>
+                <dd id="geo-info-zip" class="col-sm-2"></dd>
+              </dl>
+              <dl class="row" style="margin-bottom: 0;">
+                <dt class="col-sm-6">Active participants:</dt>
+                <dd id="geo-info-active" class="col-sm-2"></dd>
+              </dl>
+              <dl class="row" style="margin-bottom: 0;">
+                <dt class="col-sm-6">New signups:</dt>
+                <dd id="geo-info-newsignups" class="col-sm-2"></dd>
+              </dl>
             </div>
         </div>
+        {% endif %}
     </div>
 
     <!-- Download menu -->
@@ -64,6 +74,9 @@
                 <th scope="col">Email</th>
                 <th scope="col">Age</th>
                 <th scope="col">Zip</th>
+                {% if include_testers %}
+                <th scope="col">Tester</th>
+                {% endif %}
                 <th scope="col">SignUp Date</th>
                 <th scope="col">New Signup</th>
                 <th scope="col">Daily Walks</th>
@@ -83,8 +96,11 @@
                 <td>{{appuser.account.email}}</td>
                 <td>{{appuser.account.age}}</td>
                 <td>{{appuser.account.zip}}</td>
+                {% if include_testers %}
+                <td class="yesno">{{appuser.account.is_tester|yesno}}</td>
+                {% endif %}
                 <td>{{appuser.account.created | date:"DATE_FORMAT"}}</td>
-                <td>{{appuser.new_signup}}</td>
+                <td class="yesno">{{appuser.new_signup|yesno}}</td>
                 <td>{{appuser.num_dws}}</td>
                 <td>{{appuser.dw_steps}}</td>
                 <td>{{appuser.dw_distance|floatformat}}</td>
@@ -105,21 +121,20 @@
 <script>
     // *** DATATABLE TOOLBAR (checkbox) ***
     const table = $('#all_users').DataTable({
-      "dom": "<'toolbar'>Blftrip",
+      dom: "<'toolbar'>Blftrip",
     });
 
     const inputContainer = $('<div class="form-check">').css({
-      padding: "10px 0px 10px",
-      marginLeft: "30px"
+      padding: "6px",
+      marginLeft: "30px",
     });
-    inputContainer.append('<input id="hideCols" class="form-check-input" type="checkbox" onclick="toggleRW(this)" unchecked />');
-    inputContainer.append($('<label class="form-check-label" for="hideCols">Show RW data</label>').css({
+    inputContainer.append('<input id="hideRWCols" class="form-check-input" type="checkbox" onclick="toggleRW(this)" unchecked />');
+    inputContainer.append($('<label class="form-check-label" for="hideRWCols">Show RW data</label>').css({
       "padding-left": "0.5rem",
     }));
 
     function toggleRW(el) {
       if (el.checked) {
-        console.log("CHECK");
         $(".rw-col").show();
       } else {
         $(".rw-col").hide();
@@ -180,9 +195,10 @@
       const active = activeByZip[d.id] || 0;
       const newSignups = newSignupsByZip[d.id] || 0;
       d3.select("#geo-info").style("visibility", "visible");
-      d3.select("#geo-info-name").text(d.name)
-      d3.select("#geo-info-active").text(active + " active");
-      d3.select("#geo-info-newsignups").text(newSignups + " new signups");
+      d3.select("#geo-info-name").text(d.name);
+      d3.select("#geo-info-zip").text(d.zip);
+      d3.select("#geo-info-active").text(active);
+      d3.select("#geo-info-newsignups").text(newSignups);
     }
 
     function hideNeighborhoodDetail() {
@@ -205,6 +221,7 @@
                 // Keys of d: {id, type, properties: {id, neighborhood}}
                 d.total = activeByZip[d.id] || 0;
                 d.name = d.properties.neighborhood;
+                d.zip = d.properties.id;
                 return colorScale(d.total);
             })
             .on("mouseover", showNeighborhoodDetail)
@@ -224,6 +241,7 @@
                   // Keys of d: {id, type, properties: {id, neighborhood}}
                   d.total = newSignupsByZip[d.id] || 0;
                   d.name = d.properties.neighborhood;
+                  d.zip = d.properties.id;
                   return colorScale2(d.total);
               })
               .on("mouseover", showNeighborhoodDetail)

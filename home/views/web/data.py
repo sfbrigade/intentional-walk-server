@@ -1,5 +1,7 @@
 import io
 import csv
+import logging
+
 from collections import defaultdict
 from datetime import date, timedelta
 from django.http import HttpResponse
@@ -7,7 +9,10 @@ from django.http import HttpResponse
 from home.models import Account, Contest, Device, DailyWalk, IntentionalWalk
 from home.templatetags.format_helpers import m_to_mi
 from home.utils import localize
+from home.views.web.user import ACCOUNT_FIELDS, get_contest_walks, get_new_signups
 
+
+logger = logging.getLogger(__name__)
 
 def yesno(value: bool) -> str:
     return "yes" if value else "no"
@@ -17,110 +22,76 @@ def user_agg_csv_view(request) -> HttpResponse:
         # GET method with param `contest_id`
         contest_id = request.GET.get("contest_id")
         # Parse params
-        contest = None
-        if contest_id:
-            contest = Contest.objects.get(pk=contest_id)
-
-        start_date = contest.start if contest else None
-        end_date = contest.end if contest else None
+        contest = Contest.objects.get(pk=contest_id) if contest_id else None
+        start_date = contest.start if contest_id else None
+        end_date = contest.end if contest_id else None
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="users_agg.csv"'
 
         csv_header = [
             "email", "name", "zip", "age", "account_created",
-            "new_signup", "active_during_contest",
+            "is_tester", "new_signup", "active_during_contest",
             "num_daily_walks", "total_steps", "total_distance(miles)",
             "num_recorded_walks", "num_recorded_steps",
             "total_recorded_distance(miles)", "total_recorded_walk_time",
-            "recorded_walk_average_speed(mph)",
         ]
-        writer = csv.writer(response)
-        writer.writerow(csv_header)
+        writer = csv.DictWriter(response, fieldnames=csv_header)
+        writer.writeheader()
 
-        # Retrieve daily walks filtered by date range (if specified)
-        daily_walks = (
-            DailyWalk.objects.filter(
-                date__range=(start_date, end_date),
-            )
-            if start_date and end_date
-            else DailyWalk.objects.all()
-        ).values('account__email','steps','distance','date')
+        daily_walks, intentional_walks = get_contest_walks(contest)
+        new_signups = {
+            a["email"]: a for a in get_new_signups(contest, include_testers=False)
+        } if contest else dict()
 
-        # Retrieve intentional walks filtered by date range (if specified)
-        intentional_walks = (
-            IntentionalWalk.objects.filter(
-                start__gte=localize(start_date),
-                # time comparison happens at beginning of date
-                end__lt=(localize(end_date) + timedelta(days=1)),
-            )
-            if start_date and end_date
-            else IntentionalWalk.objects.all()
-        ).values('account__email','steps','distance','pause_time', 'start','end')
+        for acct in new_signups.values():
+            if acct["email"] not in daily_walks:
+                row_data = {
+                    **acct,
+                    "account_created": acct["created"],
+                    "new_signup": yesno(True), # new signup
+                    "active_during_contest": yesno(False), # inactive
+                    "num_daily_walks": 0,
+                    "num_recorded_walks": 0,
+                }
+                row_data.pop("created")
+                # row_data.pop("is_tester")
+                writer.writerow(row_data)
 
-        # HACKY GROUPBY
-        daily_walks_by_acc = defaultdict(list)
-        for dw in daily_walks:
-            daily_walks_by_acc[dw['account__email']].append(dw)
-        intentional_walks_by_acc = defaultdict(list)
-        for iw in intentional_walks:
-            intentional_walks_by_acc[iw['account__email']].append(iw)
-
-        accounts = Account.objects.values('email','name','age','zip', 'created')
-
-        for account in accounts:
-            user_stats = {}
-            user_stats["account"] = account
-
-            user_daily_walks = daily_walks_by_acc.get(account["email"], [])
-            user_stats["dw_steps"] = 0
-            user_stats["dw_distance"] = 0
-            user_stats["num_dws"] = len(user_daily_walks)
-            for dw in user_daily_walks:
-                user_stats["dw_steps"] += dw["steps"]
-                user_stats["dw_distance"] += m_to_mi(dw["distance"])
-
-            # Get all recorded walk data
-            user_intentional_walks = intentional_walks_by_acc.get(account["email"], [])
-            user_stats["rw_steps"] = 0
-            user_stats["rw_distance"] = 0
-            user_stats["rw_time"] = 0
-            user_stats["rw_speeds"] = []
-            user_stats["num_rws"] = len(user_intentional_walks)
-            for iw in user_intentional_walks:
-                user_stats["rw_steps"] += iw["steps"]
-                user_stats["rw_distance"] += m_to_mi(iw["distance"])
-                walk_time = (iw["end"]-iw["start"]).total_seconds() - int(iw["pause_time"])
-                user_stats["rw_time"] += walk_time / 60
-                user_stats["rw_speeds"].append(m_to_mi(iw["distance"])/ (walk_time/3600))
-            user_stats["rw_avg_speed"] = (
-                sum(user_stats["rw_speeds"]) / len(user_stats["rw_speeds"]) if user_stats["rw_speeds"] else 0
+        # Add all accounts found in filtered daily walk data
+        for email, dw_row in daily_walks.items():
+            acct = Account.objects.values(*ACCOUNT_FIELDS).get(
+                email=email
             )
 
-            user_stats["active_during_contest"] = user_stats["dw_steps"] > 0
-            if contest is not None:
-                user_stats["new_signup"] = (account["created"].date() >= contest.start_promo) and (account["created"].date() <= contest.end)
-            else:
-                user_stats["new_signup"] = None
+            # Skip testers
+            if acct.get("is_tester"):
+                continue
 
-            if user_stats["new_signup"] or user_stats["active_during_contest"]:
-                writer.writerow([
-                    account["email"],
-                    account["name"],
-                    account["zip"],
-                    account["age"],
-                    account["created"],
-                    yesno(user_stats["new_signup"]),
-                    yesno(user_stats["active_during_contest"]),
-                    user_stats["num_dws"],
-                    user_stats["dw_steps"],
-                    user_stats["dw_distance"],
-                    user_stats["num_rws"],
-                    user_stats["rw_steps"],
-                    user_stats["rw_distance"],
-                    user_stats["rw_time"],
-                    user_stats["rw_avg_speed"]
-                ])
+            # Don't include those who signed up after the contest ended
+            if contest and acct["created"] > localize(contest.end):
+                continue
+
+            iw_row = intentional_walks.get(email, {})
+
+            row_data = {
+                **acct,
+                "account_created": acct["created"],
+                "new_signup": yesno(email in new_signups),
+                "active_during_contest": yesno(True),
+                "num_daily_walks": dw_row["dw_count"],
+                "total_steps": dw_row["dw_steps"],
+                "total_distance(miles)": m_to_mi(dw_row["dw_distance"]),
+                "num_recorded_walks": iw_row.get("rw_count"),
+                "num_recorded_steps": iw_row.get("rw_steps"),
+                "total_recorded_distance(miles)": iw_row.get("rw_distance"),
+                "total_recorded_walk_time": (
+                    iw_row["rw_total_walk_time"].total_seconds()
+                    - iw_row["rw_pause_time"]
+                ) / 60 if iw_row else None,  # minutes
+            }
+            row_data.pop("created")
+            writer.writerow(row_data)
 
         return response
     else:
