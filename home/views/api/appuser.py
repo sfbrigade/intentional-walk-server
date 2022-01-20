@@ -146,7 +146,7 @@ class AppUserCreateView(View):
             # Otherwise, update the account's other details
             account = Account.objects.get(email=json_data["email"])
             update_account(account, json_data)
-            message = "Device & Account updated successfully"
+            message = "Device & account updated successfully"
 
         # This implies that it is a new device
         except ObjectDoesNotExist:
@@ -164,6 +164,8 @@ class AppUserCreateView(View):
                     zip=json_data["zip"],
                     age=json_data["age"],
                 )
+                account_updated = False
+
 
             # Create a new device object and link it to the account
             device = Device.objects.create(device_id=json_data["account_id"], account=account)

@@ -51,7 +51,7 @@
 ## Server management commands
 
 Note: see the instructions in the next quick reference section to start/log in to a running
-server container to perform the following actions.
+server container and perform the following actions within the container CLI.
 
  * To create an admin user that can log in to the web views:
 
