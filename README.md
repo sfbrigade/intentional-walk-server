@@ -132,6 +132,7 @@ server container to perform the following actions.
    ```
    $ docker-compose exec server bash -l
    ```
+   If missing module, re-build the server container
 
  * To stop all the containers, in case things didn't shutdown properly with CTRL-C:
 
