@@ -12,15 +12,36 @@ html, body {
 .yesno {
     text-transform: capitalize;
 }
+.map-title {
+    margin-top: 10px;
+    font-size: 1.25em;
+    font-weight: bold;
+    text-align: center;
+}
+
 #contest-title {
-    padding: 15px;
+    padding: 50px;
     color: #CD6155;
     text-align: center;
 }
 #geo-info {
-    float: left;
-    visibility: hidden;
-    width: 300px;
-    padding-top: 70px;
-    margin-left: 50px;
+    padding-top: 50px;
+    padding-left: 75px;
+    min-width: 400px;
+}
+#geo-info .row {
+    margin-bottom: 0;
+}
+#geo-info-name {
+    font-weight: bold;
+    margin-bottom: 50px;
+}
+#contest-maps-container {
+    margin-bottom: 50px;
+}
+#map-label-1 {
+    color: #702B84;
+}
+#map-label-2 {
+    color: #2B388F;
 }

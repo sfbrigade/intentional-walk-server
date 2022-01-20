@@ -3,10 +3,6 @@
 
 {% block content %}
 
-<div class="container all-users" style="padding: 25px;">
-    <h1 class="text-center">All users</h1>
-</div>
-
 <div class="row" style="margin: 15px;">
     <div class="col-auto mr-auto">
         <div class="dropdown">
@@ -23,46 +19,71 @@
     </div>
 
     <div class="col-auto mr-auto">
-        {% if current_contest %}
         <!-- Contest info -->
         <div class="container-fluid" id="contest-title">
+          {% if current_contest %}
             <h2>Contest - {{current_contest.start| date:"DATE_FORMAT"}} - {{current_contest.end| date:"DATE_FORMAT"}}</h2>
+          {% else %}
+            <h2 class="text-center">All users</h2>
+          {% endif %}
         </div>
-
-        <!-- Choropleth (intensity) map of users -->
-        <div class="container-fluid justify-content-center" id="map-container">
-            <!-- JSON data (TODO: find alternative to stuffing data into div) -->
-            <div style="display: none" id="active-by-zip" data-json="{{ active_by_zip }}"></div>
-            <div style="display: none" id="all-users-by-zip" data-json="{{ all_users_by_zip }}"></div>
-            <div style="display: none" id="new-signups-by-zip" data-json="{{ new_signups_by_zip }}"></div>
-            <!-- D3 SVG -->
-            <svg id="intensity-map" style="float: left;" width="380" height="300"></svg>
-            <svg id="intensity-map-3" style="float: left;" width="380" height="300"></svg>
-            <div id="geo-info">
-              <h5 id="geo-info-name" style="margin-bottom: 15px;"></h5>
-              <dl class="row" style="margin-bottom: 0;">
-                <dt class="col-sm-6">Zip code:</dt>
-                <dd id="geo-info-zip" class="col-sm-2"></dd>
-              </dl>
-              <dl class="row" style="margin-bottom: 0;">
-                <dt class="col-sm-6">Active participants:</dt>
-                <dd id="geo-info-active" class="col-sm-2"></dd>
-              </dl>
-              <dl class="row" style="margin-bottom: 0;">
-                <dt class="col-sm-6">New signups:</dt>
-                <dd id="geo-info-newsignups" class="col-sm-2"></dd>
-              </dl>
-            </div>
-        </div>
-        {% endif %}
     </div>
 
     <!-- Download menu -->
     <div class="col-auto">
         <a class="btn btn-outline-info" href="{{download_url}}" role="button">
-            Download
+            Download as CSV
         </a>
     </div>
+</div>
+
+<div class="container-fluid" id="contest-maps-container">
+
+    {% if current_contest %}
+
+    <!-- JSON data (TODO: find alternative to stuffing data into div) -->
+    <div style="display: none" id="active-by-zip" data-json="{{ active_by_zip }}"></div>
+    <div style="display: none" id="all-users-by-zip" data-json="{{ all_users_by_zip }}"></div>
+    <div style="display: none" id="new-signups-by-zip" data-json="{{ new_signups_by_zip }}"></div>
+    <div style="display: none" id="max-steps-by-zip" data-json="{{ max_steps_by_zip }}"></div>
+
+    <div class="row justify-content-center">
+        <!-- D3 SVG: Choropleth (intensity) map of users -->
+        <div class="col-lg-3 row justify-content-center">
+            <svg id="intensity-map" width="380" height="300"></svg>
+            <div id="map-label-1" class="row map-title">Participants by zip code</div>
+        </div>
+
+        <!-- Info box -->
+        <div id="geo-info" class="col-lg-3">
+            <h4 id="geo-info-name"></h4>
+            <dl class="row">
+                <dt class="col-sm-6">Total participants:</dt>
+                <dd id="geo-info-participants" class="col-sm-2"></dd>
+            </dl>
+            <dl class="row">
+                <dt class="col-sm-6">Active participants:</dt>
+                <dd id="geo-info-active" class="col-sm-2"></dd>
+            </dl>
+            <dl class="row">
+                <dt class="col-sm-6">New signups:</dt>
+                <dd id="geo-info-newsignups" class="col-sm-2"></dd>
+            </dl>
+            <dl class="row">
+                <dt class="col-sm-6">Max steps:</dt>
+                <dd id="geo-info-maxsteps" class="col-sm-2"></dd>
+            </dl>
+        </div>
+
+        <!-- D3 SVG: Choropleth (intensity) map of steps -->
+        <div class="col-lg-3 row justify-content-center" style="margin-left: -75px;">
+            <svg id="intensity-map-2" width="380" height="300"></svg>
+            <div id="map-label-2" class="row map-title">Max steps by zip code</div>
+        </div>
+    </div>
+
+    {% endif %}
+
 </div>
 
 <div class="container-fluid" style="padding: 25px;">
@@ -149,13 +170,20 @@
     // Map and count data
     const sf_geojson = "/static/SanFrancisco.Neighborhoods.json";
     // const userdata = "/data/users_agg.csv";
-    const activeByZip = JSON.parse(document.getElementById("active-by-zip").getAttribute("data-json"));
-    const maxActiveByZip = Math.max(...Object.values(activeByZip));
     const allUsersByZip = JSON.parse(document.getElementById("all-users-by-zip").getAttribute("data-json"));
+    const sumUsersbyZip = Object.values(allUsersByZip).reduce((a, b) => a + b);
     const maxUsersByZip = Math.max(...Object.values(allUsersByZip));
+
+    const activeByZip = JSON.parse(document.getElementById("active-by-zip").getAttribute("data-json"));
+    const sumActivebyZip = Object.values(activeByZip).reduce((a, b) => a + b);
+    const maxActiveByZip = Math.max(...Object.values(activeByZip));
+
     const newSignupsByZip = JSON.parse(document.getElementById("new-signups-by-zip").getAttribute("data-json"));
+    const sumNewSignupsByZip = Object.values(newSignupsByZip).reduce((a, b) => a + b);
     const maxNewSignupsByZip = Math.max(...Object.values(newSignupsByZip));
 
+    const maxStepsByZip = JSON.parse(document.getElementById("max-steps-by-zip").getAttribute("data-json"));
+    const maxMaxStepsByZip = Math.max(...Object.values(maxStepsByZip));
 
     // The svg
     const svg = d3.select("svg#intensity-map"),
@@ -163,7 +191,7 @@
         height = +svg.attr("height");
 
     // The other svg
-    const svg3 = d3.select("svg#intensity-map-3");
+    const svg2 = d3.select("svg#intensity-map-2");
 
     // Map and projection
     const path = d3.geoPath();
@@ -175,37 +203,43 @@
     // Data and color scale
     // const data = d3.map();
     const colorScale = d3.scaleLinear()
-        .domain([1, Math.floor(maxActiveByZip/5)])
-        .range(d3.schemeBlues[7]);
+        .domain([1, Math.floor(maxUsersByZip)])
+        .range(["#EEEEEE", "#702B84"]);
+        // .range(d3.schemeBlues[7]);
 
     const colorScale2 = d3.scaleLinear()
-        .domain([1, Math.floor(maxUsersByZip/5)])
-        .range(d3.schemePurples[7]);
-
-    const colorScale3 = d3.scaleLinear()
-        .domain([1, Math.floor(maxNewSignupsByZip/5)])
-        .range(d3.schemeReds[7]);
+        .domain([1, Math.floor(maxMaxStepsByZip)])
+        .range(["#EEEEEE", "#2B388F"]);
+        // .range(d3.schemePurples[7]);
 
     // Load external data and boot
     d3.queue()
         .defer(d3.json, sf_geojson)
         .await(ready);
 
-    function showNeighborhoodDetail(d) {
+    function updateNeighborhoodDetail(d) {
+      const allUsers = allUsersByZip[d.id] || 0;
       const active = activeByZip[d.id] || 0;
       const newSignups = newSignupsByZip[d.id] || 0;
-      d3.select("#geo-info").style("visibility", "visible");
-      d3.select("#geo-info-name").text(d.name);
-      d3.select("#geo-info-zip").text(d.zip);
+      const maxSteps = maxStepsByZip[d.id] || 0;
+      d3.select("#geo-info-name").text(d.zip ? `${d.name} (${d.zip})` : "");
+      d3.select("#geo-info-participants").text(allUsers);
       d3.select("#geo-info-active").text(active);
       d3.select("#geo-info-newsignups").text(newSignups);
+      d3.select("#geo-info-maxsteps").text(maxSteps.toLocaleString("en-US"));
     }
 
-    function hideNeighborhoodDetail() {
-      d3.select("#geo-info").style("visibility", "hidden");
+    function defaultNeighborhoodDetail() {
+      d3.select("#geo-info-name").text("San Francisco");
+      d3.select("#geo-info-participants").text(sumUsersbyZip);
+      d3.select("#geo-info-active").text(sumActivebyZip);
+      d3.select("#geo-info-newsignups").text(sumNewSignupsByZip);
+      d3.select("#geo-info-maxsteps").text(maxMaxStepsByZip.toLocaleString("en-US"));
     }
 
     function ready(error, topo) {
+        defaultNeighborhoodDetail();
+
         // Draw the map
         svg.append("g")
             .selectAll("path")
@@ -219,15 +253,15 @@
             // set the color of each neighborhood
             .attr("fill", function (d) {
                 // Keys of d: {id, type, properties: {id, neighborhood}}
-                d.total = activeByZip[d.id] || 0;
+                d.total = allUsersByZip[d.id] || 0;
                 d.name = d.properties.neighborhood;
                 d.zip = d.properties.id;
                 return colorScale(d.total);
             })
-            .on("mouseover", showNeighborhoodDetail)
-            .on("mouseout", hideNeighborhoodDetail);
+            .on("mouseover", updateNeighborhoodDetail)
+            .on("mouseout", defaultNeighborhoodDetail);
 
-          svg3.append("g")
+          svg2.append("g")
               .selectAll("path")
               .data(topo.features)
               .enter()
@@ -239,13 +273,13 @@
               // set the color of each neighborhood
               .attr("fill", function (d) {
                   // Keys of d: {id, type, properties: {id, neighborhood}}
-                  d.total = newSignupsByZip[d.id] || 0;
+                  d.total = maxStepsByZip[d.id] || 0;
                   d.name = d.properties.neighborhood;
                   d.zip = d.properties.id;
                   return colorScale2(d.total);
               })
-              .on("mouseover", showNeighborhoodDetail)
-              .on("mouseout", hideNeighborhoodDetail);
+              .on("mouseover", updateNeighborhoodDetail)
+              .on("mouseout", defaultNeighborhoodDetail);
     }
 
 </script>
