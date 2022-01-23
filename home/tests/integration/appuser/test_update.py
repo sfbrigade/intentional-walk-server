@@ -35,10 +35,7 @@ class ApiTestCase(TestCase):
     # Additional demographics update with PUT. Test applies to these changes. 
     def test_update_appuser_demographics(self):
     
-        # Register the user
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
-
-        # Update user's demographics 
+        # UPDATE USER DEMOGRAPHICS 
         self.request_params.update({
             "is_latino": False,
             "gender": "TM",
@@ -47,16 +44,21 @@ class ApiTestCase(TestCase):
             "race_other": "Some other race",
         })
 
+        # Register the user
+        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
-        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(response_data["status"], "success", msg=fail_message)
         self.assertEqual(response_data["message"], "Device & account updated successfully", msg=fail_message)
-
+        self.assertEqual(
+            response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message,
+        )
         user_obj = Account.objects.get(email=self.request_params["email"])
-        for field in ["is_latino", "gender", "gender_other", "race_other"]:
+        for field in ["is_latino", "gender", "gender_other", "race_other"]:  
             self.assertEqual(getattr(user_obj, field), self.request_params[field], msg=fail_message)
         self.assertSetEqual(user_obj.race, set(self.request_params["race"]), msg=fail_message)
 
@@ -79,9 +81,8 @@ class ApiTestCase(TestCase):
             response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message,
         )
         user_obj = Account.objects.get(email=self.request_params["email"])
-        for field in ["name", "email", "zip", "age", "is_latino", "gender", "gender_other", "race_other"]:
+        for field in ["name", "email", "zip", "age"]:
             self.assertEqual(getattr(user_obj, field), self.request_params[field], msg=fail_message)
-        self.assertSetEqual(user_obj.race, set(self.request_params["race"]), msg=fail_message)
 
     # Test updating a User's name
     # This would hit the same creation URL
@@ -102,9 +103,8 @@ class ApiTestCase(TestCase):
             response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message,
         )
         user_obj = Account.objects.get(email=self.request_params["email"])
-        for field in ["name", "email", "zip", "age", "is_latino", "gender", "gender_other", "race_other"]:
+        for field in ["name", "email", "zip", "age"]:
             self.assertEqual(getattr(user_obj, field), self.request_params[field], msg=fail_message)
-        self.assertSetEqual(user_obj.race, set(self.request_params["race"]), msg=fail_message)
 
     # Test updating a User's email
     # This shouldn't update
