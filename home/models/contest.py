@@ -30,8 +30,8 @@ class Contest(models.Model):
         # strict: for_date, which in general will be "today", must fall within contest dates,
         #         starting on promo date, ending on end date.
         # If strict is False, then find most recent contest (prior to for_date)
-        if not isinstance(for_date, datetime.date):
-            for_date = date.fromisoformat(for_date)
+        if isinstance(for_date, str):
+            for_date = datetime.date.fromisoformat(for_date)
         today = datetime.date.today() if for_date is None else for_date
         contest = Contest.objects.filter(start_promo__lte=today, end__gte=today).order_by("start_promo").first()
         if contest is None and not strict:
@@ -48,7 +48,7 @@ class Contest(models.Model):
         if self.start < self.start_promo:
             raise ValidationError("Promotion must start before or at same time as Start")
         # ensure baseline begins before contest start
-        if self.start <= self.start_baseline:
+        if self.start_baseline and self.start_baseline >= self.start:
             raise ValidationError("Baseline period must begin before contest start")
         # ensure end is greater than start
         if self.end <= self.start:

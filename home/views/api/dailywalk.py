@@ -58,7 +58,7 @@ class DailyWalkCreateView(View):
                 return JsonResponse(json_status)
 
             walk_date = daily_walk_data["date"]
-            is_baseline = daily_walk_data["is_baseline"]
+            is_baseline = daily_walk_data.get("is_baseline")
 
             # Register contest for account if walk_date falls strictly within contest dates
             # (Can be async)
