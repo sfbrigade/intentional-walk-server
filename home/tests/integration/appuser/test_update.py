@@ -16,12 +16,6 @@ class ApiTestCase(TestCase):
             "zip": "72185",
             "age": 99,
             "account_id": "12345",
-            "is_latino": False,
-            "gender": "TM",
-            "gender_other": None,
-            "race": ["BL", "OT"],
-            "race_other": "Some other race",
-
         }
         # Content type
         self.content_type = "application/json"
@@ -35,6 +29,36 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
+
+    # Test updating a User's demographics 
+    # First user screen (name, email, age) registers a user
+    # Additional demographics update with PUT. Test applies to these changes. 
+    def test_update_appuser_demographics(self):
+    
+        # Register the user
+        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+
+        # Update user's demographics 
+        self.request_params.update({
+            "is_latino": False,
+            "gender": "TM",
+            "gender_other": None,
+            "race": ["BL", "OT"],
+            "race_other": "Some other race",
+        })
+
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(response_data["message"], "Device & account updated successfully", msg=fail_message)
+
+        user_obj = Account.objects.get(email=self.request_params["email"])
+        for field in ["is_latino", "gender", "gender_other", "race_other"]:
+            self.assertEqual(getattr(user_obj, field), self.request_params[field], msg=fail_message)
+        self.assertSetEqual(user_obj.race, set(self.request_params["race"]), msg=fail_message)
 
     # Test updating a User's age
     # This would hit the same creation URL
