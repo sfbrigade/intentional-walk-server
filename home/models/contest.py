@@ -27,9 +27,16 @@ class Contest(models.Model):
 
     @staticmethod
     def active(for_date=None, strict=False):
-        # strict: for_date, which in general will be "today", must fall within contest dates,
-        #         starting on promo date, ending on end date.
+        # Gets the "active" contest for a given date (generally "today")
+        #
+        # A contest is not considered active during the baseline period.
+        # Therefore, the `for_date` must fall after the promo date.
+        #
+        # strict: `for_date` must fall strictly within the contest dates,
+        #         starting on promo date, ending on end date (inclusive)
+        #
         # If strict is False, then find most recent contest (prior to for_date)
+        #
         if isinstance(for_date, str):
             for_date = datetime.date.fromisoformat(for_date)
         today = datetime.date.today() if for_date is None else for_date

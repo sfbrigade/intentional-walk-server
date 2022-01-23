@@ -30,12 +30,14 @@ class ApiTestCase(TestCase):
     def test_contest_current(self):
         # create a few contests
         contest1 = Contest()
+        contest1.start_baseline = "2020-04-01"
         contest1.start_promo = "2020-04-24"
         contest1.start = "2020-05-01"
         contest1.end = "2020-05-31"
         contest1.save()
 
         contest2 = Contest()
+        contest2.start_baseline = "2020-06-01"
         contest2.start_promo = "2020-06-21"
         contest2.start = "2020-07-01"
         contest2.end = "2020-07-31"

@@ -11,6 +11,7 @@ class TestContest(TestCase):
     # Test a successful creation of a Contest
     def test_create(self):
         contest = Contest()
+        contest.start_baseline = "2020-06-01"
         contest.start_promo = "2020-07-01"
         contest.start = "2020-07-01"
         contest.end = "2020-07-31"
@@ -21,7 +22,17 @@ class TestContest(TestCase):
     def test_validates_dates(self):
         contest = Contest()
 
+        # Start before baseline => error
+        contest.start_baseline = "2020-07-01"
+        contest.start_promo = "2020-06-21"
+        contest.start = "2020-07-01"
+        contest.end = "2020-07-31"
+        with self.assertRaises(ValidationError) as error:
+            contest.save()
+        self.assertEqual(error.exception.message, "Baseline period must begin before contest start")
+
         # Start before promo is error
+        contest.start_baseline = "2020-06-01"
         contest.start_promo = "2020-07-07"
         contest.start = "2020-07-01"
         contest.end = "2020-07-01"
@@ -30,6 +41,7 @@ class TestContest(TestCase):
         self.assertEqual(error.exception.message, "Promotion must start before or at same time as Start")
 
         # Start same as end is error
+        contest.start_baseline = "2020-06-01"
         contest.start_promo = "2020-07-01"
         contest.start = "2020-07-01"
         contest.end = "2020-07-01"
@@ -38,6 +50,7 @@ class TestContest(TestCase):
         self.assertEqual(error.exception.message, "End of contest must be after Start")
 
         # Start after end is error
+        contest.start_baseline = "2020-06-01"
         contest.start_promo = "2020-07-01"
         contest.start = "2020-07-31"
         contest.end = "2020-07-01"
@@ -46,6 +59,7 @@ class TestContest(TestCase):
         self.assertEqual(error.exception.message, "End of contest must be after Start")
 
         # Save a valid contest
+        contest.start_baseline = "2020-06-01"
         contest.start_promo = "2020-06-21"
         contest.start = "2020-07-01"
         contest.end = "2020-07-31"
@@ -55,7 +69,19 @@ class TestContest(TestCase):
         # Editing an existing contest does not raise an error
         contest.end = "2020-07-21"
         contest.save()
+        self.assertEqual("2020-07-21", contest.end)
 
+    def test_overlapping_contests(self):
+        # Save a valid contest
+        existing_contest = Contest()
+        existing_contest.start_baseline = None
+        existing_contest.start_promo = "2020-06-21"
+        existing_contest.start = "2020-07-01"
+        existing_contest.end = "2020-07-31"
+        existing_contest.save()
+        self.assertIsNotNone(existing_contest.pk)
+
+        # Test validation of start/end dates
         contest = Contest()
 
         # New overlapping contests cause errors
@@ -94,15 +120,25 @@ class TestContest(TestCase):
             contest.save()
         self.assertEqual(error.exception.message, "Contest must not overlap another")
 
+        # It IS okay if the baseline or promo date occurs during a different (previous) contest.
+        contest.start_baseline = "2020-07-01"
+        contest.start_promo = "2020-07-21"
+        contest.start = "2020-08-01"
+        contest.end = "2020-08-31"
+        contest.save()
+        self.assertIsNotNone(contest.pk)
+
     def test_active(self):
         # create a few contests
         contest1 = Contest()
+        contest1.start_baseline = "3000-04-01"
         contest1.start_promo = "3000-04-24"
         contest1.start = "3000-05-01"
         contest1.end = "3000-05-31"
         contest1.save()
 
         contest2 = Contest()
+        contest1.start_baseline = "3000-06-01"
         contest2.start_promo = "3000-06-21"
         contest2.start = "3000-07-01"
         contest2.end = "3000-07-31"
@@ -113,8 +149,13 @@ class TestContest(TestCase):
             self.assertIsNotNone(db_obj)
             self.assertEqual(str(create_obj.pk), db_obj.pk)
 
-        # before first promo starts, failure
-        with freeze_time("3000-04-01"):
+        # before first baseline, failure
+        with freeze_time("3000-03-31"):
+            self.assertIsNone(Contest.active())
+            self.assertIsNone(Contest.active(strict=True))
+
+        # after first baseline but before first promo starts, failure
+        with freeze_time("3000-04-02"):
             self.assertIsNone(Contest.active())
             self.assertIsNone(Contest.active(strict=True))
 
@@ -128,7 +169,7 @@ class TestContest(TestCase):
             _assertEqual(contest1, Contest.active())
             _assertEqual(contest1, Contest.active(strict=True))
 
-        # after first contest, before promo starts for next
+        # after first contest, before baseline and promo starts for next
         with freeze_time("3000-06-14"):
             _assertEqual(contest1, Contest.active())
             self.assertIsNone(Contest.active(strict=True))
@@ -155,6 +196,19 @@ class TestContest(TestCase):
 
         # Test with `for_date` and `strict`
         self.assertIsNone(Contest.active(for_date=date(3000,8,14), strict=True))
+
+    def test_for_baseline(self):
+        # create a few contests
+        contest1 = Contest()
+        contest1.start_baseline = "3000-04-01"
+        contest1.start_promo = "3000-04-24"
+        contest1.start = "3000-05-01"
+        contest1.end = "3000-05-31"
+        contest1.save()
+
+        self.assertIsNone(Contest.for_baseline("3000-03-31"))
+        self.assertEqual(str(contest1.pk), Contest.for_baseline("3000-04-01").pk)
+        self.assertIsNone(Contest.for_baseline("3000-05-01"))
 
     def test_associate_contest_with_account(self):
         contest = Contest.objects.create(
