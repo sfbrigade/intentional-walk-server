@@ -123,6 +123,7 @@ class UserListView(generic.ListView):
         active_by_zip = defaultdict(lambda: 0)
         all_users_by_zip = defaultdict(lambda: 0)
         new_signups_by_zip = defaultdict(lambda: 0)
+        max_steps_by_zip = defaultdict(lambda: 0)
 
         # If a contest is specified, include all new signups, regardless of
         # whether they walked during the contest or not.
@@ -158,6 +159,8 @@ class UserListView(generic.ListView):
             user_stats["dw_steps"] = dw_row["dw_steps"]
             user_stats["dw_distance"] = m_to_mi(dw_row["dw_distance"])
             user_stats["num_dws"] = dw_row["dw_count"]
+            max_steps = max_steps_by_zip[acct["zip"]]
+            max_steps_by_zip[acct["zip"]] = max(max_steps, dw_row["dw_steps"])
 
             # Also add recorded walk data
             iw_row = intentional_walks.get(email)
@@ -185,5 +188,6 @@ class UserListView(generic.ListView):
         context["active_by_zip"] = json.dumps(active_by_zip)
         context["all_users_by_zip"] = json.dumps(all_users_by_zip)
         context["new_signups_by_zip"] = json.dumps(new_signups_by_zip)
+        context["max_steps_by_zip"] = json.dumps(max_steps_by_zip)
         context["include_testers"] = include_testers
         return context
