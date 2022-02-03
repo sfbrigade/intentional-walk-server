@@ -61,26 +61,30 @@ def validate_account_input(data: dict):
 def update_account(acct: Account, data: dict):
     # Data fields vary based on registration screen
 
-    # Screen 1: Name, Email, Zip, Age. 
-    # Does not update email
-    if data["email"] is not None:
+    # Screen 1: Name, Email, Zip, Age.
+    # Not possible to update email
+    if data.get("name") is not None:
         acct.name = data["name"]
-        acct.zip = data["zip"]
-        acct.age = data["age"]
-        acct.is_sf_resident = data["zip"] in SAN_FRANCISCO_ZIP_CODES
         acct.is_tester = is_tester(data["name"])
-    
+
+    if data.get("zip") is not None:
+        acct.zip = data["zip"]
+        acct.is_sf_resident = data["zip"] in SAN_FRANCISCO_ZIP_CODES
+
+    if data.get("age") is not None:
+        acct.age = data["age"]
+
     # Screen 2. Latino/Hispanic Origin
     if data.get("is_latino") is not None:
         acct.is_latino = data.get("is_latino")
-    
+
     # Screen 3. Race
     if data.get("race") is not None:
         acct.race = data.get("race", [])
         acct.race_other = data.get("race_other")
-    
+
     # Screen 4. Gender Identity
-    if data.get("gender") is not None:  
+    if data.get("gender") is not None:
         acct.gender = data.get("gender")
         acct.gender_other = data.get("gender_other")
     acct.save()
@@ -101,7 +105,7 @@ class AppUserCreateView(View):
         json_status = validate_request_json(json_data, required_fields=["account_id"])
         if "status" in json_status and json_status["status"] == "error":
             return JsonResponse(json_status)
-        
+
         # Update user attributes.
         device = Device.objects.get(device_id=json_data["account_id"])
         account = Account.objects.get(email=device.account.email)
