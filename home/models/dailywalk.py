@@ -14,7 +14,6 @@ class DailyWalk(models.Model):
     distance = models.FloatField(help_text="Total distance covered")
     device = models.ForeignKey("Device", on_delete=models.CASCADE, help_text="Device the data is coming from")
     account = models.ForeignKey("Account", on_delete=models.CASCADE, help_text="Account the data is linked to")
-    is_baseline = models.BooleanField(default=False, help_text="True if part of contest baseline period (default: False)")
     created = models.DateTimeField(auto_now_add=True, help_text="Record creation timestamp")
     updated = models.DateTimeField(auto_now=True, help_text="Record updation timestamp")
 

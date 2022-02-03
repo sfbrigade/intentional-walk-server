@@ -58,14 +58,10 @@ class DailyWalkCreateView(View):
                 return JsonResponse(json_status)
 
             walk_date = daily_walk_data["date"]
-            is_baseline = daily_walk_data.get("is_baseline", False)
 
-            # Register contest for account if walk_date falls between contest baseline and contest end
+            # Register contest for account if walk_date falls between contest start and contest end
             # (Can be async)
-            if is_baseline:
-                contest = Contest.for_baseline(date.fromisoformat(walk_date))
-            else:
-                contest = Contest.active(for_date=date.fromisoformat(walk_date), strict=True)
+            contest = Contest.active(for_date=date.fromisoformat(walk_date), strict=True)
             if contest is not None:
                 active_contests.add(contest)
 
@@ -80,7 +76,6 @@ class DailyWalkCreateView(View):
                 daily_walk.steps = daily_walk_data["steps"]
                 daily_walk.distance = daily_walk_data["distance"]
                 daily_walk.device_id = json_data["account_id"]
-                daily_walk.is_baseline = is_baseline
                 daily_walk.save()
             except ObjectDoesNotExist:
                 # Creation if object is missing
@@ -88,7 +83,6 @@ class DailyWalkCreateView(View):
                     date=walk_date,
                     steps=daily_walk_data["steps"],
                     distance=daily_walk_data["distance"],
-                    is_baseline=is_baseline,
                     device=device,
                 )
 

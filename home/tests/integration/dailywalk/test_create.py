@@ -133,29 +133,20 @@ class ApiTestCase(TestCase):
         acct = Device.objects.get(device_id=self.device_id).account
         self.assertFalse(acct.contests.exists())
 
-        # Send the request but NOT as baseline data
-        not_baseline_data = {
-            "account_id": "12345",
-            "daily_walks": [{"date": "3000-02-22", "steps": 500, "distance": 1.3}],
-        }
-        response = self.client.post(path=self.url, data=not_baseline_data, content_type=self.content_type)
-        # Check for a successful response by the server
-        self.assertEqual(response.status_code, 200)
-
-        # Verify that the user still has no contests
+        # Verify that the user has no contests
         self.assertFalse(acct.contests.exists())
 
-        # Send another request AS baseline data
+        # Send baseline data
         baseline_data = {
             "account_id": "12345",
-            "daily_walks": [{"date": "3000-02-22", "steps": 500, "distance": 1.3, "is_baseline": True}],
+            "daily_walks": [{"date": "3000-02-22", "steps": 500, "distance": 1.3}],
         }
         response = self.client.post(path=self.url, data=baseline_data, content_type=self.content_type)
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
 
         # Verify that the user still has no contests
-        self.assertIn(str(contest.pk), [c.pk for c in acct.contests.all()])
+        self.assertFalse(acct.contests.exists())
 
 
     # Test creation of a daily walk with an invalid user account
