@@ -81,8 +81,7 @@ class ApiTestCase(TestCase):
     # This would hit the same creation URL
     def test_update_appuser_age(self):
         # UPDATE THE USERS AGE
-        request_params = self.request_params
-        request_params["age"] = 88
+        request_params = {**self.request_params, "age": 88}
 
         # Send the update
         response = self.client.post(path=self.url, data=request_params, content_type=self.content_type)
@@ -104,8 +103,7 @@ class ApiTestCase(TestCase):
     # This would hit the same creation URL
     def test_update_appuser_name(self):
         # UPDATE THE USERS NAME
-        request_params = self.request_params
-        request_params["name"] = "Abhay"
+        request_params = {**self.request_params, "name": "Abhay"}
 
         # Send the update
         response = self.client.post(path=self.url, data=request_params, content_type=self.content_type)
@@ -127,8 +125,7 @@ class ApiTestCase(TestCase):
     # This shouldn't update
     def test_update_appuser_email(self):
         # UPDATE THE USERS EMAIL
-        request_params = self.request_params
-        request_params["email"] = "abhaykashyap@blah.com"
+        request_params = {**self.request_params, "email": "abhaykashyap@blah.com"}
 
         # Register the user first
         response = self.client.post(path=self.url, data=request_params, content_type=self.content_type)

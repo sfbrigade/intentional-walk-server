@@ -106,10 +106,10 @@ class ApiTestCase(TestCase):
 
         # Create the same user but with a different account id
         # This should create a new user
-        self.request_params["account_id"] = "54321"
+        request_params = {**self.request_params, "account_id": "54321"}
 
         # Register the user first
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(path=self.url, data=request_params, content_type=self.content_type)
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -118,20 +118,21 @@ class ApiTestCase(TestCase):
         self.assertEqual(response_data["status"], "success", msg=fail_message)
         self.assertEqual(response_data["message"], "Device registered & account updated successfully", msg=fail_message)
         self.assertEqual(
-            response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message,
+            response_data["payload"]["account_id"], request_params["account_id"], msg=fail_message,
         )
-        user_obj = Account.objects.get(email=self.request_params["email"])
+        user_obj = Account.objects.get(email=request_params["email"])
         for field in ["name", "email", "zip", "age"]:
-            self.assertEqual(getattr(user_obj, field), self.request_params[field], msg=fail_message)
+            self.assertEqual(getattr(user_obj, field), request_params[field], msg=fail_message)
 
     # Test failure while create a new app with missing information
     def test_create_appuser_failure_missing_field_age(self):
         # Required fields for user creation
         # Remove the age field
-        del self.request_params["age"]
+        request_params = self.request_params.copy()
+        del request_params["age"]
 
         # Register the user
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(path=self.url, data=request_params, content_type=self.content_type)
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -146,10 +147,11 @@ class ApiTestCase(TestCase):
     def test_create_appuser_failure_missing_field_device_id(self):
         # Required fields for user creation
         # Remove the account_id field
-        del self.request_params["account_id"]
+        request_params = self.request_params.copy()
+        del request_params["account_id"]
 
         # Register the user
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(path=self.url, data=request_params, content_type=self.content_type)
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -159,10 +161,3 @@ class ApiTestCase(TestCase):
         self.assertEqual(
             response_data["message"], "Required input 'account_id' missing in the request", msg=fail_message,
         )
-
-    # TODO: Test update of user with other demographics (PUT)
-            # "is_latino": False,
-            # "gender": "TM",
-            # "gender_other": None,
-            # "race": ["BL", "OT"],
-            # "race_other": "Some other race",
