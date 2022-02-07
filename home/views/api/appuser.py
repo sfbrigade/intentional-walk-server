@@ -59,17 +59,34 @@ def validate_account_input(data: dict):
         assert False, "'gender_other' should not be specified without 'gender'"
 
 def update_account(acct: Account, data: dict):
-    # Does not update email
-    acct.name = data["name"]
-    acct.zip = data["zip"]
-    acct.age = data["age"]
-    acct.is_sf_resident = data["zip"] in SAN_FRANCISCO_ZIP_CODES
-    acct.is_tester = is_tester(data["name"])
-    acct.is_latino = data.get("is_latino")
-    acct.race = data.get("race", [])
-    acct.race_other = data.get("race_other")
-    acct.gender = data.get("gender")
-    acct.gender_other = data.get("gender_other")
+    # Data fields vary based on registration screen
+
+    # Screen 1: Name, Email, Zip, Age.
+    # Not possible to update email
+    if data.get("name") is not None:
+        acct.name = data["name"]
+        acct.is_tester = is_tester(data["name"])
+
+    if data.get("zip") is not None:
+        acct.zip = data["zip"]
+        acct.is_sf_resident = data["zip"] in SAN_FRANCISCO_ZIP_CODES
+
+    if data.get("age") is not None:
+        acct.age = data["age"]
+
+    # Screen 2. Latino/Hispanic Origin
+    if data.get("is_latino") is not None:
+        acct.is_latino = data.get("is_latino")
+
+    # Screen 3. Race
+    if data.get("race") is not None:
+        acct.race = data.get("race", [])
+        acct.race_other = data.get("race_other")
+
+    # Screen 4. Gender Identity
+    if data.get("gender") is not None:
+        acct.gender = data.get("gender")
+        acct.gender_other = data.get("gender_other")
     acct.save()
 
 # Except from csrf validation
@@ -79,7 +96,29 @@ class AppUserCreateView(View):
     If already present, the same endpoint will update user details except email.
     """
 
-    http_method_names = ["post"]
+    http_method_names = ["post", "put"]
+
+    def put(self, request, *args, **kwargs):
+        json_data = json.loads(request.body)
+
+        # Validate json. If account_id is missing, send back the response message
+        json_status = validate_request_json(json_data, required_fields=["account_id"])
+        if "status" in json_status and json_status["status"] == "error":
+            return JsonResponse(json_status)
+
+        # Update user attributes.
+        device = Device.objects.get(device_id=json_data["account_id"])
+        account = Account.objects.get(email=device.account.email)
+        update_account(account, json_data)
+        message = "Account updated successfully"
+
+        return JsonResponse(
+            {
+                "status": "success",
+                "message": message,
+            }
+        )
+
 
     def post(self, request, *args, **kwargs):
         # Parse the body json
@@ -98,6 +137,7 @@ class AppUserCreateView(View):
         # must be created to separate data. Otherwise, attribution will be to the account
         # email created first.
 
+        # For a participating device
         try:
             # NOTE: Account id here maps to a device id. Perhaps the API definition could
             # be changed in the future
@@ -108,16 +148,17 @@ class AppUserCreateView(View):
                 return JsonResponse({"status": "error", "message": "Email cannot be updated. Contact admin"})
 
             # Otherwise, update the account's other details
-            update_account(device.account, json_data)
+            account = Account.objects.get(email=json_data["email"])
+            update_account(account, json_data)
             message = "Device & account updated successfully"
 
         # This implies that it is a new device
         except ObjectDoesNotExist:
             # Check if the user account exists. If not, create it
-            account_updated = False
             try:
                 account = Account.objects.get(email=json_data["email"])
                 update_account(account, json_data)
+                message = "Account updated successfully"
                 account_updated = True
             except ObjectDoesNotExist:
                 # Partially create account first, with required fields
@@ -127,7 +168,8 @@ class AppUserCreateView(View):
                     zip=json_data["zip"],
                     age=json_data["age"],
                 )
-                update_account(account, json_data)
+                account_updated = False
+
 
             # Create a new device object and link it to the account
             device = Device.objects.create(device_id=json_data["account_id"], account=account)
