@@ -49,6 +49,8 @@ class DailyWalkCreateView(View):
             "payload": {"account_id": device.device_id, "daily_walks": [],},
         }
 
+        active_contests = set()
+
         for daily_walk_data in json_data["daily_walks"]:
             # Validate data
             json_status = validate_request_json(daily_walk_data, required_fields=["date", "steps", "distance"],)
@@ -56,6 +58,12 @@ class DailyWalkCreateView(View):
                 return JsonResponse(json_status)
 
             walk_date = daily_walk_data["date"]
+
+            # Register contest for account if walk_date falls between contest start and contest end
+            # (Can be async)
+            contest = Contest.active(for_date=date.fromisoformat(walk_date), strict=True)
+            if contest is not None:
+                active_contests.add(contest)
 
             # Check if there is already an entry for this date. If there is, update the entry
             # NOTE: By definition, there should be one and only one entry for a given email and date
@@ -78,20 +86,18 @@ class DailyWalkCreateView(View):
                     device=device,
                 )
 
-            # Register contest for account if walk_date falls strictly within contest dates
-            # (Can be async)
-            contest = Contest.active(for_date=date.fromisoformat(walk_date), strict=True)
-            if contest is not None:
-                try:
-                    acct = device.account
-                    acct.contests.add(contest)
-                except:
-                    logger.error("Could not add contest to account!", exc_info=True)
-
             # Update the json object
             json_response["payload"]["daily_walks"].append(
                 {"date": daily_walk.date, "steps": daily_walk.steps, "distance": daily_walk.distance}
             )
+
+        # Associate contest with user (account)
+        for contest in active_contests:
+            try:
+                acct = device.account
+                acct.contests.add(contest)
+            except:
+                logger.error(f"Could not associate contest {contest} with account {acct}!", exc_info=True)
 
         return JsonResponse(json_response)
 

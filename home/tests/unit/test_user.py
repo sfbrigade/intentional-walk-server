@@ -99,26 +99,26 @@ class TestUserListView(TestCase):
         client = Client()
         response = client.get("/users/")
         user_stats_list = response.context_data["user_stats_list"]
-        self.assertEquals(2, len(user_stats_list))
+        self.assertEqual(2, len(user_stats_list))
         user_stats = {row["account"]["email"]: row for row in user_stats_list}
         plum_data = user_stats["plum@clue.net"]
         mustard_data = user_stats["mustard@clue.net"]
-        self.assertEquals(20, plum_data["num_dws"])
-        self.assertEquals(20, mustard_data["num_dws"])
-        self.assertEquals(10, plum_data["num_rws"])
-        self.assertEquals(10, mustard_data["num_rws"])
+        self.assertEqual(20, plum_data["num_dws"])
+        self.assertEqual(20, mustard_data["num_dws"])
+        self.assertEqual(10, plum_data["num_rws"])
+        self.assertEqual(10, mustard_data["num_rws"])
 
     def test_UserListView_with_contest_id(self):
         client = Client()
         response = client.get("/users/", {"contest_id": self.contest.contest_id})
         user_stats_list = response.context_data["user_stats_list"]
-        self.assertEquals(2, len(user_stats_list))
+        self.assertEqual(2, len(user_stats_list))
         user_stats = {row["account"]["email"]: row for row in user_stats_list}
         plum_data = user_stats["plum@clue.net"]
         mustard_data = user_stats["mustard@clue.net"]
         # dw: [8, 9. 10, 11, 12, 13, 14]
-        self.assertEquals(7, plum_data["num_dws"])
-        self.assertEquals(7, mustard_data["num_dws"])
+        self.assertEqual(7, plum_data["num_dws"])
+        self.assertEqual(7, mustard_data["num_dws"])
         # iw: [8, 10, 12, 14]
-        self.assertEquals(4, plum_data["num_rws"])
-        self.assertEquals(4, mustard_data["num_rws"])
+        self.assertEqual(4, plum_data["num_rws"])
+        self.assertEqual(4, mustard_data["num_rws"])

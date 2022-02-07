@@ -55,6 +55,7 @@ class ApiTestCase(TestCase):
     def test_create_dailywalk(self):
         # Create a contest
         contest = Contest()
+        contest.start_baseline = "3000-01-01"
         contest.start_promo = "3000-02-01"
         contest.start = "3000-02-01"
         contest.end = "3000-02-28"
@@ -99,6 +100,7 @@ class ApiTestCase(TestCase):
     def test_create_dailywalk_outside_contests(self):
         # Create a contest
         contest = Contest()
+        contest.start_baseline = None
         contest.start_promo = "3000-03-01"
         contest.start = "3000-03-01"
         contest.end = "3000-03-31"
@@ -110,6 +112,36 @@ class ApiTestCase(TestCase):
 
         # Send the request
         response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+
+        # Verify that the user still has no contests
+        self.assertFalse(acct.contests.exists())
+
+
+    # Test that daily walk data sent as baseline data shows up as baseline data
+    def test_create_baseline_dailywalk(self):
+        # Create a contest
+        contest = Contest()
+        contest.start_baseline = "3000-02-01"
+        contest.start_promo = "3000-03-01"
+        contest.start = "3000-03-01"
+        contest.end = "3000-03-31"
+        contest.save()
+
+        # Verify that the user has no contests
+        acct = Device.objects.get(device_id=self.device_id).account
+        self.assertFalse(acct.contests.exists())
+
+        # Verify that the user has no contests
+        self.assertFalse(acct.contests.exists())
+
+        # Send baseline data
+        baseline_data = {
+            "account_id": "12345",
+            "daily_walks": [{"date": "3000-02-22", "steps": 500, "distance": 1.3}],
+        }
+        response = self.client.post(path=self.url, data=baseline_data, content_type=self.content_type)
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
 

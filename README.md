@@ -2,6 +2,10 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/sfbrigade/intentional-walk-server/badge.svg?branch=master)](https://coveralls.io/github/sfbrigade/intentional-walk-server?branch=master)
 
+## API
+
+See [Wiki](https://github.com/sfbrigade/intentional-walk-server/wiki)
+
 ## Docker-based Development Setup
 
 1. Install Docker Desktop: https://www.docker.com/products/docker-desktop
@@ -127,12 +131,14 @@ server container and perform the following actions within the container CLI.
    $ docker-compose up
    ```
 
- * To log in to the running server container:
+ * To run commands within the server container, use the Docker Desktop UI to open a shell inside the running server container. Alternatively, with the containers running, open a new terminal window, change directory (`cd`) to the root directory of this project, and run:
 
    ```
    $ docker-compose exec server bash -l
    ```
-   If missing module, re-build the server container
+
+   If you are missing modules, re-build the server (see below).
+
 
  * To stop all the containers, in case things didn't shutdown properly with CTRL-C:
 
@@ -146,11 +152,14 @@ server container and perform the following actions within the container CLI.
    $ docker-compose run --rm server bash -l
    ```
 
- * To re-build the server container:
+ * To re-build the server container (e.g., when you are missing a new modules):
 
    ```
    $ docker-compose build server
    ```
+
+   Alternatively, you can use to Docker Desktop UI to re-build the server or db container.
+
 
 ## Docker Troubleshooting
 
