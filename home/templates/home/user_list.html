@@ -45,7 +45,7 @@
     <div style="display: none" id="active-by-zip" data-json="{{ active_by_zip }}"></div>
     <div style="display: none" id="all-users-by-zip" data-json="{{ all_users_by_zip }}"></div>
     <div style="display: none" id="new-signups-by-zip" data-json="{{ new_signups_by_zip }}"></div>
-    <div style="display: none" id="max-steps-by-zip" data-json="{{ max_steps_by_zip }}"></div>
+    <div style="display: none" id="steps-by-zip" data-json="{{ steps_by_zip }}"></div>
 
     <div class="row justify-content-center">
         <!-- D3 SVG: Choropleth (intensity) map of users -->
@@ -70,15 +70,15 @@
                 <dd id="geo-info-newsignups" class="col-sm-2"></dd>
             </dl>
             <dl class="row">
-                <dt class="col-sm-6">Max steps:</dt>
-                <dd id="geo-info-maxsteps" class="col-sm-2"></dd>
+                <dt class="col-sm-6">Median steps:</dt>
+                <dd id="geo-info-median-steps" class="col-sm-2"></dd>
             </dl>
         </div>
 
         <!-- D3 SVG: Choropleth (intensity) map of steps -->
         <div class="col-lg-3 row justify-content-center" style="margin-left: -75px;">
             <svg id="intensity-map-2" width="380" height="300"></svg>
-            <div id="map-label-2" class="row map-title">Max steps by zip code</div>
+            <div id="map-label-2" class="row map-title">Median steps by zip code</div>
         </div>
     </div>
 
@@ -182,8 +182,11 @@
     const sumNewSignupsByZip = Object.values(newSignupsByZip).reduce((a, b) => a + b);
     const maxNewSignupsByZip = Math.max(...Object.values(newSignupsByZip));
 
-    const maxStepsByZip = JSON.parse(document.getElementById("max-steps-by-zip").getAttribute("data-json"));
-    const maxMaxStepsByZip = Math.max(...Object.values(maxStepsByZip));
+    const stepsByZip = JSON.parse(document.getElementById("steps-by-zip").getAttribute("data-json"));
+    const medianStepsByZip = Object.fromEntries(Object.entries(stepsByZip).map(elem => [elem[0], d3.median(elem[1])]));
+    const maxMedianStepsByZip = Math.max(...Object.values(medianStepsByZip));
+    // This is computed so we can show the median of all steps when no zip is selected
+    const medianOfAllSteps = Math.round(d3.median(Object.values(stepsByZip).flat()));
 
     // The svg
     const svg = d3.select("svg#intensity-map"),
@@ -208,7 +211,7 @@
         // .range(d3.schemeBlues[7]);
 
     const colorScale2 = d3.scaleLinear()
-        .domain([1, Math.floor(maxMaxStepsByZip)])
+        .domain([1, Math.floor(maxMedianStepsByZip)])
         .range(["#EEEEEE", "#2B388F"]);
         // .range(d3.schemePurples[7]);
 
@@ -221,12 +224,12 @@
       const allUsers = allUsersByZip[d.id] || 0;
       const active = activeByZip[d.id] || 0;
       const newSignups = newSignupsByZip[d.id] || 0;
-      const maxSteps = maxStepsByZip[d.id] || 0;
+      const medianSteps = medianStepsByZip[d.id] || 0;
       d3.select("#geo-info-name").text(d.zip ? `${d.name} (${d.zip})` : "");
       d3.select("#geo-info-participants").text(allUsers);
       d3.select("#geo-info-active").text(active);
       d3.select("#geo-info-newsignups").text(newSignups);
-      d3.select("#geo-info-maxsteps").text(maxSteps.toLocaleString("en-US"));
+      d3.select("#geo-info-median-steps").text(medianSteps.toLocaleString("en-US"));
     }
 
     function defaultNeighborhoodDetail() {
@@ -234,7 +237,7 @@
       d3.select("#geo-info-participants").text(sumUsersbyZip);
       d3.select("#geo-info-active").text(sumActivebyZip);
       d3.select("#geo-info-newsignups").text(sumNewSignupsByZip);
-      d3.select("#geo-info-maxsteps").text(maxMaxStepsByZip.toLocaleString("en-US"));
+      d3.select("#geo-info-median-steps").text(medianOfAllSteps.toLocaleString("en-US"));
     }
 
     function ready(error, topo) {
@@ -273,7 +276,7 @@
               // set the color of each neighborhood
               .attr("fill", function (d) {
                   // Keys of d: {id, type, properties: {id, neighborhood}}
-                  d.total = maxStepsByZip[d.id] || 0;
+                  d.total = medianStepsByZip[d.id] || 0;
                   d.name = d.properties.neighborhood;
                   d.zip = d.properties.id;
                   return colorScale2(d.total);

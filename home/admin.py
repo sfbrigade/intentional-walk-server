@@ -12,7 +12,7 @@ class DeviceAdmin(admin.ModelAdmin):
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ["name", "email", "age",  "zip", "created", "updated"]
+    list_display = ["name", "email", "is_tester", "is_sf_resident", "created", "updated"]
     list_display_links = ["email", "name"]
     ordering = ["-created"]
     search_fields = ["email", "name", "zip"]
