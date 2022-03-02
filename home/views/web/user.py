@@ -17,7 +17,7 @@ from home.utils import localize
 logger = logging.getLogger(__name__)
 ACCOUNT_FIELDS = ["email", "name", "age", "zip", "is_tester", "created"]
 
-### HELPER FUNCTIONS
+### HELPER CLASS/FUNCTIONS
 def get_daily_walk_summaries(**filters):
     dw = (
         DailyWalk.objects.filter(**filters)
@@ -123,7 +123,7 @@ class UserListView(generic.ListView):
         active_by_zip = defaultdict(lambda: 0)
         all_users_by_zip = defaultdict(lambda: 0)
         new_signups_by_zip = defaultdict(lambda: 0)
-        max_steps_by_zip = defaultdict(lambda: 0)
+        steps_by_zip = defaultdict(list)
 
         # If a contest is specified, include all new signups, regardless of
         # whether they walked during the contest or not.
@@ -159,8 +159,6 @@ class UserListView(generic.ListView):
             user_stats["dw_steps"] = dw_row["dw_steps"]
             user_stats["dw_distance"] = m_to_mi(dw_row["dw_distance"])
             user_stats["num_dws"] = dw_row["dw_count"]
-            max_steps = max_steps_by_zip[acct["zip"]]
-            max_steps_by_zip[acct["zip"]] = max(max_steps, dw_row["dw_steps"])
 
             # Also add recorded walk data
             iw_row = intentional_walks.get(email)
@@ -175,7 +173,12 @@ class UserListView(generic.ListView):
 
             # Put user_stats (row) back into container
             user_stats_container[email] = user_stats
-            active_by_zip[acct["zip"]] += 1
+
+            # Map stats
+            zipcode = acct["zip"]
+            active_by_zip[zipcode] += 1
+            steps_list = steps_by_zip[zipcode]
+            steps_list.append(dw_row["dw_steps"])
 
         for user in user_stats_container.values():
             all_users_by_zip[user["account"]["zip"]] += 1
@@ -188,6 +191,6 @@ class UserListView(generic.ListView):
         context["active_by_zip"] = json.dumps(active_by_zip)
         context["all_users_by_zip"] = json.dumps(all_users_by_zip)
         context["new_signups_by_zip"] = json.dumps(new_signups_by_zip)
-        context["max_steps_by_zip"] = json.dumps(max_steps_by_zip)
+        context["steps_by_zip"] = json.dumps(steps_by_zip)
         context["include_testers"] = include_testers
         return context
