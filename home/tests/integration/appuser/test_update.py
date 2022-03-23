@@ -41,7 +41,7 @@ class ApiTestCase(TestCase):
         # UPDATE USER DEMOGRAPHICS
         request_params = {
             "account_id": self.account_id,
-            "is_latino": False,
+            "is_latino": "YE",
         }
 
         # Register the user
@@ -65,13 +65,15 @@ class ApiTestCase(TestCase):
             "gender_other": None,
             "race": ["BL", "OT"],
             "race_other": "Some other race",
+            "sexual_orien": "DA",
+            "sexual_orien_other": None,
         }
 
         response = self.client.put(path=self.url, data=request_params, content_type=self.content_type)
         self.assertEqual(response.status_code, 200)
         user_obj = Account.objects.get(email=self.email)
 
-        for field in ["gender", "gender_other", "race_other"]:
+        for field in ["gender", "gender_other", "race_other", "sexual_orien", "sexual_orien_other"]:
             self.assertEqual(getattr(user_obj, field), request_params[field], msg=fail_message)
         self.assertSetEqual(user_obj.race, set(request_params["race"]), msg=fail_message)
 

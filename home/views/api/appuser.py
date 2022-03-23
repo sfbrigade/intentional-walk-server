@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
 
 from home.models import Account, Device
-from home.models.account import SAN_FRANCISCO_ZIP_CODES, GenderLabels, RaceLabels
+from home.models.account import SAN_FRANCISCO_ZIP_CODES, GenderLabels, IsLatinoLabels, RaceLabels, SexualOrientationLabels
 from .utils import validate_request_json
 
 
@@ -20,14 +20,16 @@ def is_tester(name_field: str) -> bool:
 def validate_account_input(data: dict):
     """
     Validation of account data input:
-        * name:         not empty
-        * zip:          length between 5 and 10
-        * age:          between 1 and 200
-        * is_latino:    boolean required
-        * race:         values must be in RaceLabels
-        * race_other:   must (only) be specified when race includes 'OT'
-        * gender:       value must be in GenderLabels
-        * gender_other: must (only) be specified when gender is 'OT'
+        * name:                 not empty
+        * zip:                  length between 5 and 10
+        * age:                  between 1 and 200
+        * is_latino:            value must be in IsLatinoLabels
+        * race:                 values must be in RaceLabels
+        * race_other:           must (only) be specified when race includes 'OT'
+        * gender:               value must be in GenderLabels
+        * gender_other:         must (only) be specified when gender is 'OT'
+        * sexual_orien:         value must be in SexualOrientationLabels
+        * sexual_orien_other:   must (only) be specified when sexual_orien is 'OT'
 
     """
     if data.get("name") is not None: # Required field but existence checked in validate_request_json
@@ -37,7 +39,9 @@ def validate_account_input(data: dict):
     if data.get("age") is not None: # Required field but existence checked in validate_request_json
         assert data["age"] > 1 and data["age"] < 200, "Invalid age"
     if data.get("is_latino") is not None:
-        assert isinstance(data["is_latino"], bool), "Invalid value for 'is_latino'"
+        is_latino = data["is_latino"]
+        assert is_latino in IsLatinoLabels.__members__, \
+            f"Invalid is latino or hispanic selection '{is_latino}'"
     if data.get("race") is not None:
         for item in data["race"]:
             assert item in RaceLabels.__members__, f"Invalid race selection '{item}'"
@@ -57,6 +61,16 @@ def validate_account_input(data: dict):
             assert data.get("gender_other") is None, "'gender_other' should not be specified without 'OT'"
     elif data.get("gender_other") is not None:
         assert False, "'gender_other' should not be specified without 'gender'"
+    if data.get("sexual_orien") is not None:
+        sexual_orientation = data["sexual_orien"]
+        assert sexual_orientation in SexualOrientationLabels.__members__, \
+            f"Invalid sexual orientation selection '{sexual_orientation}'"
+        if data["sexual_orien"] == "OT":
+            assert len(data.get("sexual_orien_other", "")) > 0, "Must specify 'other' sexual orientation"
+        else:
+            assert data.get("sexual_orien_other") is None, "'sexual_orien_other' should not be specified without 'OT'"
+    elif data.get("sexual_orien_other") is not None:
+        assert False, "'sexual_orien_other' should not be specified without 'gender'"
 
 def update_account(acct: Account, data: dict):
     # Data fields vary based on registration screen
@@ -87,6 +101,11 @@ def update_account(acct: Account, data: dict):
     if data.get("gender") is not None:
         acct.gender = data.get("gender")
         acct.gender_other = data.get("gender_other")
+
+    # Screen 5. Sexual Orientation
+    if data.get("sexual_orien") is not None:
+        acct.sexual_orien = data.get("sexual_orien")
+        acct.sexual_orien_other = data.get("sexual_orien_other")
     acct.save()
 
 # Except from csrf validation
@@ -188,6 +207,17 @@ class AppUserCreateView(View):
                 "message": message,
                 "payload": {
                     "account_id": device.device_id,
+                    "name": account.name,
+                    "email": account.email,
+                    "zip": account.zip,
+                    "age": account.age,
+                    "is_latino": account.is_latino,
+                    "race": list(account.race),
+                    "race_other": account.race_other,
+                    "gender": account.gender,
+                    "gender_other": account.gender_other,
+                    "sexual_orien": account.sexual_orien,
+                    "sexual_orien_other": account.sexual_orien_other,
                 },
             }
         )
