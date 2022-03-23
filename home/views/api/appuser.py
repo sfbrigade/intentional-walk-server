@@ -207,6 +207,17 @@ class AppUserCreateView(View):
                 "message": message,
                 "payload": {
                     "account_id": device.device_id,
+                    "name": account.name,
+                    "email": account.email,
+                    "zip": account.zip,
+                    "age": account.age,
+                    "is_latino": account.is_latino,
+                    "race": list(account.race),
+                    "race_other": account.race_other,
+                    "gender": account.gender,
+                    "gender_other": account.gender_other,
+                    "sexual_orien": account.sexual_orien,
+                    "sexual_orien_other": account.sexual_orien_other,
                 },
             }
         )

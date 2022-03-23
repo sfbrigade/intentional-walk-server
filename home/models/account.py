@@ -55,7 +55,6 @@ class Account(models.Model):
     age = models.IntegerField(help_text="User's age")
     is_sf_resident = models.BooleanField(null=True, help_text="Whether the user is a SF resident or not, based on zip")
     is_latino = models.CharField(max_length=2, null=True, blank=True, help_text="Latino or Hispanic origin")
-    # race is a reverse foreign key (see Race model)
     race = SetField(models.CharField(max_length=2, choices=list(RaceLabels.__members__.items())), default=list, blank=True)
     race_other = models.CharField(max_length=75, null=True, blank=True, help_text="Free-form text field for 'race' value 'OT'")
     gender = models.CharField(max_length=2, null=True, blank=True, help_text="Self-identified gender identity of user")
