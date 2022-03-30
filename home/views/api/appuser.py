@@ -186,6 +186,8 @@ class AppUserCreateView(View):
                     name=json_data["name"],
                     zip=json_data["zip"],
                     age=json_data["age"],
+                    is_tester=is_tester(json_data["name"]),
+                    is_sf_resident=json_data["zip"] in SAN_FRANCISCO_ZIP_CODES,
                 )
                 account_updated = False
 

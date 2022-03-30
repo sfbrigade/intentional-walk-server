@@ -17,6 +17,14 @@ class ApiTestCase(TestCase):
             "age": 99,
             "account_id": "12345",
         }
+        self.expected_response = {
+            "name": "John Doe",
+            "email": "john@blah.com",
+            "zip": "72185",
+            "age": 99,
+            "is_tester": False,
+            "is_sf_resident": False,
+        }
         # Content type
         self.content_type = "application/json"
 
@@ -39,8 +47,45 @@ class ApiTestCase(TestCase):
             response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message,
         )
         user_obj = Account.objects.get(email=self.request_params["email"])
-        for field in ["name", "email", "zip", "age"]:
-            self.assertEqual(getattr(user_obj, field), self.request_params[field], msg=f"{field}")
+
+        for field, expected_value in self.expected_response.items():
+            self.assertEqual(getattr(user_obj, field), expected_value, msg=f"{field}")
+
+    # Test creation of a new "Tester" app user
+    def test_create_tester_appuser_success(self):
+        # Set up request and response for a Tester user based in SF
+        request_params = self.request_params.copy()
+        request_params.update({
+            "name": "Tester John",
+            "zip": "94105",
+        })
+        expected_response = self.expected_response.copy()
+        expected_response.update({
+            "name": "Tester John",
+            "zip": "94105",
+            "is_tester": True,
+            "is_sf_resident": True,
+        })
+
+        # Register the user
+        response = self.client.post(path=self.url, data=request_params, content_type=self.content_type)
+
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "success", msg=fail_message)
+        self.assertEqual(
+            response_data["message"], "Device registered & account registered successfully", msg=fail_message
+        )
+        self.assertEqual(
+            response_data["payload"]["account_id"], request_params["account_id"], msg=fail_message,
+        )
+        user_obj = Account.objects.get(email=request_params["email"])
+
+        for field, expected_value in expected_response.items():
+            self.assertEqual(getattr(user_obj, field), expected_value, msg=f"{field}")
 
     # Test creation of a duplicate user
     # This should default to an update
