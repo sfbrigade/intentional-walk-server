@@ -121,6 +121,7 @@ class IntentionalWalkListView(View):
         for intentional_walk in intentional_walks:
             intentional_walk_list.append(
                 {
+                    "event_id": intentional_walk.event_id,
                     "start": intentional_walk.start,
                     "end": intentional_walk.end,
                     "steps": intentional_walk.steps,
