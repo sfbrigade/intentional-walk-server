@@ -1,4 +1,3 @@
-import io
 import csv
 import logging
 
@@ -6,96 +5,211 @@ from collections import defaultdict
 from datetime import date, timedelta
 from django.http import HttpResponse
 
-from home.models import Account, Contest, Device, DailyWalk, IntentionalWalk
-from home.templatetags.format_helpers import m_to_mi
+from home.models import Account, Contest
 from home.utils import localize
-from home.views.web.user import ACCOUNT_FIELDS, get_contest_walks, get_new_signups
+from home.views.web.user import ACCOUNT_FIELDS, get_contest_walks, get_new_signups, get_daily_walks_in_time_range
 
 
 logger = logging.getLogger(__name__)
 
+
+USER_AGG_CSV_BASE_HEADER = [
+    "Participant Name", "Date Enrolled", "Email", "Zip Code",
+    "Sexual Orientation", "Sexual Orientation Other",
+    "Gender Identity", "Gender Identity Other",
+    "Race", "Race Other",
+    "Is Latino", "Age", "Is New Signup", "Active During Contest",
+    "Total Daily Walks During Contest", "Total Daily Walks During Baseline",
+    "Total Steps During Contest", "Total Steps During Baseline",
+    "Total Recorded Walks During Contest", "Total Recorded Walks During Baseline",
+    "Total Recorded Steps During Contest", "Total Recorded Steps During Baseline",    
+    "Total Recorded Walk Time During Contest", "Total Recorded Walk Time During Baseline",    
+]
+
+
 def yesno(value: bool) -> str:
     return "yes" if value else "no"
 
+
+def _get_user_agg_csv_header(start_date: date, end_date: date) -> list:
+    header = USER_AGG_CSV_BASE_HEADER[:]
+
+    baseline_and_contest_dates = [
+        start_date+timedelta(days=x)
+        for x in range((end_date - start_date).days + 1)
+    ]
+    
+    for d in baseline_and_contest_dates:
+        header.append(d)
+
+    return header
+
+
+def _acct_to_row_data(
+    acct: dict, 
+    new_signup_emails: set,
+    active_during_contest: bool
+) -> dict:
+    return {
+        "Participant Name": acct["name"],
+        "Date Enrolled": acct["created"],
+        "Email": acct["email"],
+        "Zip Code": acct["zip"],
+        "Sexual Orientation": acct["sexual_orien"],
+        "Sexual Orientation Other": acct["sexual_orien_other"],
+        "Gender Identity": acct["gender"],
+        "Gender Identity Other": acct["gender_other"],
+        "Race": acct["race"],
+        "Race Other": acct["race_other"],
+        "Is Latino": acct["is_latino"],
+        "Age": acct["age"],
+        "Is New Signup": yesno(acct["email"] in new_signup_emails),
+        "Active During Contest": yesno(active_during_contest),
+     }
+
+
+def _get_rows_for_new_signups_without_walks(contest: Contest, user_emails_with_walks: set, new_signups: dict) -> list:
+    rows = []
+    for acct in new_signups.values():
+        if acct["email"] not in user_emails_with_walks:
+            row_data = _acct_to_row_data(
+                acct, new_signups, active_during_contest=False)
+            rows.append(row_data)
+
+    return rows
+
+
+def _get_user_summary_acct_and_walk_data(
+        contest: Contest,
+        user_emails: set,
+        new_signup_emails: set,
+        daily_walks_summary_contest: dict,
+        intentional_walks_summary_contest: dict,
+        daily_walks_summary_baseline: dict,
+        intentional_walks_summary_baseline: dict,
+) -> dict:
+    summary_acct_and_walk_data_per_user = defaultdict(dict)
+
+    # Add all accounts found in filtered walk summary data
+    for email in user_emails:
+        acct = Account.objects.values(*ACCOUNT_FIELDS).get(email=email)
+
+        # Skip testers
+        if acct.get("is_tester"):
+            continue
+
+        # Don't include those who signed up after the contest ended
+        if contest and acct["created"] > localize(contest.end):
+            continue
+
+        dw_contest = daily_walks_summary_contest.get(email, {})
+        iw_contest = intentional_walks_summary_contest.get(email, {})
+        dw_baseline = daily_walks_summary_baseline.get(email, {})
+        iw_baseline = intentional_walks_summary_baseline.get(email, {})
+
+        summary_acct_and_walk_data_per_user[email] = _acct_to_row_data(
+            acct, new_signup_emails, active_during_contest=True)
+
+        summary_acct_and_walk_data_per_user[email].update({
+            "Total Daily Walks During Baseline": dw_baseline.get("dw_count"),
+            "Total Daily Walks During Contest": dw_contest.get("dw_count"),
+            "Total Steps During Baseline": dw_baseline.get("dw_steps"),
+            "Total Steps During Contest": dw_contest.get("dw_steps"),
+            "Total Recorded Walks During Baseline": iw_baseline.get("rw_count"),
+            "Total Recorded Walks During Contest": iw_contest.get("rw_count"),
+            "Total Recorded Steps During Baseline": iw_baseline.get("rw_steps"),
+            "Total Recorded Steps During Contest": iw_contest.get("rw_steps"),
+            "Total Recorded Walk Time During Baseline": (
+                                                                iw_contest.get("rw_total_walk_time").total_seconds()
+                                                                - iw_contest.get("rw_pause_time")
+                                                        ) / 60.0 if iw_contest else None,
+            "Total Recorded Walk Time During Contest": (
+                                                               iw_contest.get("rw_total_walk_time").total_seconds()
+                                                               - iw_contest.get("rw_pause_time")
+                                                       ) / 60.0 if iw_contest else None,
+        })
+
+    return summary_acct_and_walk_data_per_user
+
+
+def _get_user_daily_step_counts(start_baseline: date, contest: Contest, user_emails: set) -> dict:
+    daily_step_counts_by_user = defaultdict(dict)
+    daily_walks_in_range = get_daily_walks_in_time_range(start_date=start_baseline, end_date=contest.end)
+
+    for dw in daily_walks_in_range:
+        daily_step_counts_by_user[dw.account.email][dw.date] = dw.steps
+
+    return daily_step_counts_by_user
+
+
 def user_agg_csv_view(request) -> HttpResponse:
-    if request.user.is_authenticated:
-        # GET method with param `contest_id`
-        contest_id = request.GET.get("contest_id")
-        # Parse params
-        contest = Contest.objects.get(pk=contest_id) if contest_id else None
-        start_date = contest.start if contest_id else None
-        end_date = contest.end if contest_id else None
-
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="users_agg.csv"'
-
-        csv_header = [
-            "email", "name", "zip", "age", "account_created",
-            "is_tester", "new_signup", "active_during_contest",
-            "num_daily_walks", "total_steps", "total_distance(miles)",
-            "num_recorded_walks", "num_recorded_steps",
-            "total_recorded_distance(miles)", "total_recorded_walk_time",
-        ]
-        writer = csv.DictWriter(response, fieldnames=csv_header)
-        writer.writeheader()
-
-        daily_walks, intentional_walks = get_contest_walks(contest)
-        new_signups = {
-            a["email"]: a for a in get_new_signups(contest, include_testers=False)
-        } if contest else dict()
-
-        for acct in new_signups.values():
-            if acct["email"] not in daily_walks:
-                row_data = {
-                    **acct,
-                    "account_created": acct["created"],
-                    "new_signup": yesno(True), # new signup
-                    "active_during_contest": yesno(False), # inactive
-                    "num_daily_walks": 0,
-                    "num_recorded_walks": 0,
-                }
-                row_data.pop("created")
-                # row_data.pop("is_tester")
-                writer.writerow(row_data)
-
-        # Add all accounts found in filtered daily walk data
-        for email, dw_row in daily_walks.items():
-            acct = Account.objects.values(*ACCOUNT_FIELDS).get(
-                email=email
-            )
-
-            # Skip testers
-            if acct.get("is_tester"):
-                continue
-
-            # Don't include those who signed up after the contest ended
-            if contest and acct["created"] > localize(contest.end):
-                continue
-
-            iw_row = intentional_walks.get(email, {})
-
-            row_data = {
-                **acct,
-                "account_created": acct["created"],
-                "new_signup": yesno(email in new_signups),
-                "active_during_contest": yesno(True),
-                "num_daily_walks": dw_row["dw_count"],
-                "total_steps": dw_row["dw_steps"],
-                "total_distance(miles)": m_to_mi(dw_row["dw_distance"]),
-                "num_recorded_walks": iw_row.get("rw_count"),
-                "num_recorded_steps": iw_row.get("rw_steps"),
-                "total_recorded_distance(miles)": iw_row.get("rw_distance"),
-                "total_recorded_walk_time": (
-                    iw_row["rw_total_walk_time"].total_seconds()
-                    - iw_row["rw_pause_time"]
-                ) / 60 if iw_row else None,  # minutes
-            }
-            row_data.pop("created")
-            writer.writerow(row_data)
-
-        return response
-    else:
+    if not request.user.is_authenticated:
         return HttpResponse("You are not authorized to view this!")
+
+    # GET method with param `contest_id`
+    contest_id = request.GET.get("contest_id")
+    # Parse params
+    if contest_id is None:
+        return HttpResponse("You are not authorized to view this!")
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="users_agg.csv"'
+
+    contest = Contest.objects.get(pk=contest_id)
+
+    # Calculate baseline date
+    if not hasattr(contest, "start_baseline") or contest.start_baseline is None:
+        start_baseline = contest.start - timedelta(days=30)
+    else:
+        start_baseline = contest.start_baseline
+
+    csv_header = _get_user_agg_csv_header(start_date=start_baseline, end_date=contest.end)
+    writer = csv.DictWriter(response, fieldnames=csv_header)
+    writer.writeheader()
+
+    # Get all walk summary data
+    (daily_walks_summary_contest,
+     intentional_walks_summary_contest,
+     daily_walks_summary_baseline,
+     intentional_walks_summary_baseline) = get_contest_walks(contest, include_baseline=True)
+
+    daily_walks_summary_contest = daily_walks_summary_contest or {}
+    intentional_walks_summary_contest = intentional_walks_summary_contest or {}
+    daily_walks_summary_baseline = daily_walks_summary_baseline or {}
+    intentional_walks_summary_baseline = intentional_walks_summary_baseline or {}
+
+    user_emails_with_walks = (
+            daily_walks_summary_contest.keys() |
+            intentional_walks_summary_contest.keys() |
+            daily_walks_summary_baseline.keys() |
+            intentional_walks_summary_baseline.keys()
+    )
+
+    new_signups_sans_testers = {
+        a["email"]: a for a in get_new_signups(contest, include_testers=False)
+    }
+
+    csv_rows = _get_rows_for_new_signups_without_walks(contest, user_emails_with_walks, new_signups_sans_testers)
+
+    summary_acct_and_walk_data_by_user = _get_user_summary_acct_and_walk_data(
+        contest,
+        user_emails_with_walks,
+        new_signups_sans_testers.keys(),
+        daily_walks_summary_contest,
+        intentional_walks_summary_contest,
+        daily_walks_summary_baseline,
+        intentional_walks_summary_baseline,
+    )
+    daily_step_counts_by_user = _get_user_daily_step_counts(start_baseline, contest, user_emails_with_walks)
+
+    for email in user_emails_with_walks:
+        row = summary_acct_and_walk_data_by_user[email]
+        row.update(daily_step_counts_by_user[email])
+        csv_rows.append(row)
+
+    writer.writerows(csv_rows)
+
+    return response
 
 
 def users_csv_view(request) -> HttpResponse:
@@ -139,7 +253,8 @@ def daily_walks_csv_view(request) -> HttpResponse:
         end_date_str = request.GET.get("end_date")
         # Parse params
         # TODO: consider date validation
-        start_date = date.fromisoformat(start_date_str) if start_date_str else None
+        start_date = date.fromisoformat(
+            start_date_str) if start_date_str else None
         end_date = date.fromisoformat(end_date_str) if end_date_str else None
 
         response = HttpResponse(content_type='text/csv')
@@ -186,7 +301,8 @@ def intentional_walks_csv_view(request) -> HttpResponse:
         end_date_str = request.GET.get("end_date")
         # Parse params
         # TODO: consider date validation
-        start_date = date.fromisoformat(start_date_str) if start_date_str else None
+        start_date = date.fromisoformat(
+            start_date_str) if start_date_str else None
         end_date = date.fromisoformat(end_date_str) if end_date_str else None
 
         response = HttpResponse(content_type='text/csv')
