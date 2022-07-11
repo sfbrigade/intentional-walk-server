@@ -1,5 +1,5 @@
 # Import API views
-from .api.appuser import AppUserCreateView
+from .api.appuser import AppUserCreateView, AppUserDeleteView
 from .api.dailywalk import DailyWalkCreateView, DailyWalkListView
 from .api.intentionalwalk import IntentionalWalkView, IntentionalWalkListView
 from .api.contest import ContestCurrentView
