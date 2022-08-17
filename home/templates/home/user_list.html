@@ -139,6 +139,8 @@
 {% endblock %}
 
 {% block post_scripts %}
+
+{% if current_contest %}
 <script>
     // *** DATATABLE TOOLBAR (checkbox) ***
     const table = $('#all_users').DataTable({
@@ -171,22 +173,22 @@
     const sf_geojson = "/static/SanFrancisco.Neighborhoods.json";
     // const userdata = "/data/users_agg.csv";
     const allUsersByZip = JSON.parse(document.getElementById("all-users-by-zip").getAttribute("data-json"));
-    const sumUsersbyZip = Object.values(allUsersByZip).reduce((a, b) => a + b);
+    const sumUsersbyZip = Object.values(allUsersByZip).reduce((a, b) => a + b, 0);
     const maxUsersByZip = Math.max(...Object.values(allUsersByZip));
 
     const activeByZip = JSON.parse(document.getElementById("active-by-zip").getAttribute("data-json"));
-    const sumActivebyZip = Object.values(activeByZip).reduce((a, b) => a + b);
+    const sumActivebyZip = Object.values(activeByZip).reduce((a, b) => a + b, 0);
     const maxActiveByZip = Math.max(...Object.values(activeByZip));
 
     const newSignupsByZip = JSON.parse(document.getElementById("new-signups-by-zip").getAttribute("data-json"));
-    const sumNewSignupsByZip = Object.values(newSignupsByZip).reduce((a, b) => a + b);
+    const sumNewSignupsByZip = Object.values(newSignupsByZip).reduce((a, b) => a + b, 0);
     const maxNewSignupsByZip = Math.max(...Object.values(newSignupsByZip));
 
     const stepsByZip = JSON.parse(document.getElementById("steps-by-zip").getAttribute("data-json"));
     const medianStepsByZip = Object.fromEntries(Object.entries(stepsByZip).map(elem => [elem[0], d3.median(elem[1])]));
     const maxMedianStepsByZip = Math.max(...Object.values(medianStepsByZip));
     // This is computed so we can show the median of all steps when no zip is selected
-    const medianOfAllSteps = Math.round(d3.median(Object.values(stepsByZip).flat()));
+    const medianOfAllSteps = Math.round(d3.median(Object.values(stepsByZip).flat()) || 0);
 
     // The svg
     const svg = d3.select("svg#intensity-map"),
@@ -286,4 +288,5 @@
     }
 
 </script>
+{% endif %}
 {% endblock %}
