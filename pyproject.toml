@@ -19,6 +19,7 @@ whitenoise = "^5.0.1"
 uuid = "^1.30"
 faker = "^8.11.0"
 django-postgres-setfield = "^0.0.1"
+black = "^22.8.0"
 
 [tool.poetry.dev-dependencies]
 freezegun = "^1.1.0"
