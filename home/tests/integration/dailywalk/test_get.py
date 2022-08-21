@@ -25,7 +25,9 @@ class ApiTestCase(TestCase):
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
         self.assertEqual(
-            response_data["message"], "Device registered & account registered successfully", msg=fail_message
+            response_data["message"],
+            "Device registered & account registered successfully",
+            msg=fail_message,
         )
 
         # Create three daily walks
@@ -39,7 +41,9 @@ class ApiTestCase(TestCase):
         }
         # Create daily walks
         response = self.client.post(
-            path="/api/dailywalk/create", data=self.daily_walks, content_type="application/json",
+            path="/api/dailywalk/create",
+            data=self.daily_walks,
+            content_type="application/json",
         )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
@@ -47,7 +51,11 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Dailywalks recorded successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Dailywalks recorded successfully",
+            msg=fail_message,
+        )
 
         # Details for Daily walk list view
         self.url = "/api/dailywalk/get"
@@ -60,7 +68,11 @@ class ApiTestCase(TestCase):
         self.request_params["account_id"] = "0000000"
 
         # Send the request
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -74,7 +86,11 @@ class ApiTestCase(TestCase):
         )
 
     def test_dailywalk_get(self):
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -90,7 +106,9 @@ class ApiTestCase(TestCase):
             self.assertIn("distance", walk, msg=fail_message)
         # Check if total steps is correct
         self.assertEqual(
-            response_data["total_steps"], sum([dw["steps"] for dw in self.daily_walks["daily_walks"]]), msg=fail_message
+            response_data["total_steps"],
+            sum([dw["steps"] for dw in self.daily_walks["daily_walks"]]),
+            msg=fail_message,
         )
         # Check if total distance is correct
         self.assertEqual(
@@ -99,14 +117,22 @@ class ApiTestCase(TestCase):
             msg=fail_message,
         )
         # Check if the number of events match
-        self.assertEqual(len(response_data["daily_walks"]), len(self.daily_walks["daily_walks"]), msg=fail_message)
+        self.assertEqual(
+            len(response_data["daily_walks"]),
+            len(self.daily_walks["daily_walks"]),
+            msg=fail_message,
+        )
         # Check if they have the same exact data
         # Note that the response will always be ordered by the latest date
         self.assertEqual(
             response_data["daily_walks"],
             sorted(
                 [
-                    {"date": dw["date"], "steps": dw["steps"], "distance": dw["distance"]}
+                    {
+                        "date": dw["date"],
+                        "steps": dw["steps"],
+                        "distance": dw["distance"],
+                    }
                     for dw in self.daily_walks["daily_walks"]
                 ],
                 key=lambda x: x["date"],
@@ -137,7 +163,11 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Device registered & account updated successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Device registered & account updated successfully",
+            msg=fail_message,
+        )
 
         # Create a third account from a different device but with the same email
         response = self.client.post(
@@ -158,7 +188,11 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Device registered & account updated successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Device registered & account updated successfully",
+            msg=fail_message,
+        )
 
         # Create additional walks
         new_daily_walks = {
@@ -169,7 +203,9 @@ class ApiTestCase(TestCase):
             ],
         }
         response = self.client.post(
-            path="/api/dailywalk/create", data=new_daily_walks, content_type="application/json",
+            path="/api/dailywalk/create",
+            data=new_daily_walks,
+            content_type="application/json",
         )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
@@ -177,7 +213,11 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Dailywalks recorded successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Dailywalks recorded successfully",
+            msg=fail_message,
+        )
 
         # Update the daily walks for the tests to run
         # Note that to aggregate data, the updated event for "2020-02-12" from account
@@ -197,7 +237,9 @@ class ApiTestCase(TestCase):
             ],
         }
         response = self.client.post(
-            path="/api/dailywalk/create", data=new_daily_walks, content_type="application/json",
+            path="/api/dailywalk/create",
+            data=new_daily_walks,
+            content_type="application/json",
         )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
@@ -205,12 +247,20 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Dailywalks recorded successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Dailywalks recorded successfully",
+            msg=fail_message,
+        )
 
         # Update the daily walks for the tests to run
         self.daily_walks["daily_walks"] += new_daily_walks["daily_walks"]
 
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -226,7 +276,9 @@ class ApiTestCase(TestCase):
             self.assertIn("distance", walk, msg=fail_message)
         # Check if total steps is correct
         self.assertEqual(
-            response_data["total_steps"], sum([dw["steps"] for dw in self.daily_walks["daily_walks"]]), msg=fail_message
+            response_data["total_steps"],
+            sum([dw["steps"] for dw in self.daily_walks["daily_walks"]]),
+            msg=fail_message,
         )
         # Check if total steps is correct
         self.assertEqual(
@@ -235,14 +287,22 @@ class ApiTestCase(TestCase):
             msg=fail_message,
         )
         # Check if the number of events match
-        self.assertEqual(len(response_data["daily_walks"]), len(self.daily_walks["daily_walks"]), msg=fail_message)
+        self.assertEqual(
+            len(response_data["daily_walks"]),
+            len(self.daily_walks["daily_walks"]),
+            msg=fail_message,
+        )
         # Check if they have the same exact data
         # Note that the response will always be ordered by the latest date
         self.assertEqual(
             response_data["daily_walks"],
             sorted(
                 [
-                    {"date": dw["date"], "steps": dw["steps"], "distance": dw["distance"]}
+                    {
+                        "date": dw["date"],
+                        "steps": dw["steps"],
+                        "distance": dw["distance"],
+                    }
                     for dw in self.daily_walks["daily_walks"]
                 ],
                 key=lambda x: x["date"],

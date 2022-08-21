@@ -1,23 +1,34 @@
 import itertools
 import json
 import logging
-
 from collections import defaultdict
 from datetime import date, timedelta
-from django import template
-from django.views import View, generic
-from django.db.models import Count, F, Sum
 from typing import Optional
 
-from home.models import Account, DailyWalk, IntentionalWalk, Contest
+from django import template
+from django.db.models import Count, F, Sum
+from django.views import View, generic
+
+from home.models import Account, Contest, DailyWalk, IntentionalWalk
 from home.templatetags.format_helpers import m_to_mi
 from home.utils import localize
 
-
 logger = logging.getLogger(__name__)
-ACCOUNT_FIELDS = ["email", "name", "age", "zip", "is_tester", "created",
-                  "gender", "gender_other", "race", "race_other", "is_latino",
-                  "sexual_orien", "sexual_orien_other"]
+ACCOUNT_FIELDS = [
+    "email",
+    "name",
+    "age",
+    "zip",
+    "is_tester",
+    "created",
+    "gender",
+    "gender_other",
+    "race",
+    "race_other",
+    "is_latino",
+    "sexual_orien",
+    "sexual_orien_other",
+]
 
 # HELPER CLASS/FUNCTIONS
 
@@ -63,8 +74,12 @@ def get_daily_walks_in_time_range(start_date: date, end_date: date):
     return dw
 
 
-def get_contest_walks(contest: Optional[Contest], include_baseline: bool = False):
-    assert not (contest is None and include_baseline is True)  # No concept of baseline without contest
+def get_contest_walks(
+    contest: Optional[Contest], include_baseline: bool = False
+):
+    assert not (
+        contest is None and include_baseline is True
+    )  # No concept of baseline without contest
 
     # DailyWalk and IntentionalWalk accessors
     daily_walks = DailyWalk.objects
@@ -79,22 +94,33 @@ def get_contest_walks(contest: Optional[Contest], include_baseline: bool = False
         # Create filters for query
         dw_contest_filters["date__range"] = (contest.start, contest.end)
         iw_contest_filters["start__gte"] = localize(contest.start)
-        iw_contest_filters["end__lt"] = localize(contest.end) + timedelta(days=1)
+        iw_contest_filters["end__lt"] = localize(contest.end) + timedelta(
+            days=1
+        )
 
     dw_contest_summaries = get_daily_walk_summaries(**dw_contest_filters)
     iw_contest_summaries = get_intentional_walk_summaries(**iw_contest_filters)
 
-    if include_baseline and contest is not None:  # No concept of baseline without a contest
-        start_baseline = getattr(contest, "start_baseline", None) or (contest.start - timedelta(days=30))
+    if (
+        include_baseline and contest is not None
+    ):  # No concept of baseline without a contest
+        start_baseline = getattr(contest, "start_baseline", None) or (
+            contest.start - timedelta(days=30)
+        )
         dw_baseline_filters = {
-            "date__range": (start_baseline, contest.start - timedelta(days=1))  # start and end range both inclusive
+            "date__range": (
+                start_baseline,
+                contest.start - timedelta(days=1),
+            )  # start and end range both inclusive
         }
         iw_baseline_filters = {
             "start__gte": localize(start_baseline),  # inclusive
             "end__lt": contest.start,  # exclusive
         }
         dw_baseline_summaries = get_daily_walk_summaries(**dw_baseline_filters)
-        iw_baseline_summaries = get_intentional_walk_summaries(**iw_baseline_filters)
+        iw_baseline_summaries = get_intentional_walk_summaries(
+            **iw_baseline_filters
+        )
     else:
         dw_baseline_summaries = None
         iw_baseline_summaries = None
@@ -104,7 +130,7 @@ def get_contest_walks(contest: Optional[Contest], include_baseline: bool = False
         dw_contest_summaries,
         iw_contest_summaries,
         dw_baseline_summaries,
-        iw_baseline_summaries
+        iw_baseline_summaries,
     )
 
 
@@ -115,9 +141,8 @@ def get_new_signups(contest: Contest, include_testers=False):
             localize(contest.end),
         )
     )
-    return [
-        a for a in accounts if include_testers or not a.get("is_tester")
-    ]
+    return [a for a in accounts if include_testers or not a.get("is_tester")]
+
 
 ########################################################################
 # VIEW(S)
@@ -148,8 +173,9 @@ class UserListView(generic.ListView):
         # Default href for download button
         context["download_url"] = "/data/users_agg.csv"
 
-        contest = Contest.objects.get(
-            contest_id=contest_id) if contest_id else None
+        contest = (
+            Contest.objects.get(contest_id=contest_id) if contest_id else None
+        )
         daily_walks, intentional_walks, _, _ = get_contest_walks(contest)
 
         # Prepare loading of data into context
@@ -179,9 +205,7 @@ class UserListView(generic.ListView):
 
         # Add all accounts found in filtered daily walk data
         for email, dw_row in daily_walks.items():
-            acct = Account.objects.values(*ACCOUNT_FIELDS).get(
-                email=email
-            )
+            acct = Account.objects.values(*ACCOUNT_FIELDS).get(email=email)
 
             # Skip testers unless include_testers
             if not include_testers and acct.get("is_tester"):
@@ -192,7 +216,8 @@ class UserListView(generic.ListView):
                 continue
 
             user_stats = user_stats_container.get(
-                email, dict(new_signup=False))
+                email, dict(new_signup=False)
+            )
             user_stats["account"] = acct
             user_stats["dw_steps"] = dw_row["dw_steps"]
             user_stats["dw_distance"] = m_to_mi(dw_row["dw_distance"])

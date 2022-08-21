@@ -1,18 +1,19 @@
 import json
-from django.http import HttpResponseRedirect, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views import View, generic
-from django.utils.decorators import method_decorator
+
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponseRedirect, JsonResponse
+from django.utils.decorators import method_decorator
+from django.views import View, generic
+from django.views.decorators.csrf import csrf_exempt
 
 from home.models import Account, Device, IntentionalWalk
+
 from .utils import validate_request_json
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class IntentionalWalkView(View):
-    """View to create Intentional Walks
-    """
+    """View to create Intentional Walks"""
 
     model = IntentionalWalk
     http_method_names = ["post"]
@@ -21,7 +22,10 @@ class IntentionalWalkView(View):
         json_data = json.loads(request.body)
 
         # Validate json. If any field is missing, send back the response message
-        json_status = validate_request_json(json_data, required_fields=["account_id", "intentional_walks"],)
+        json_status = validate_request_json(
+            json_data,
+            required_fields=["account_id", "intentional_walks"],
+        )
         if "status" in json_status and json_status["status"] == "error":
             return JsonResponse(json_status)
 
@@ -39,14 +43,25 @@ class IntentionalWalkView(View):
         json_response = {
             "status": "success",
             "message": "Intentional Walks recorded successfully",
-            "payload": {"account_id": device.device_id, "intentional_walks": []},
+            "payload": {
+                "account_id": device.device_id,
+                "intentional_walks": [],
+            },
         }
 
         # Loop through all the intentional walks
         for intentional_walk_data in json_data["intentional_walks"]:
 
             json_status = validate_request_json(
-                intentional_walk_data, required_fields=["event_id", "start", "end", "steps", "pause_time", "distance"],
+                intentional_walk_data,
+                required_fields=[
+                    "event_id",
+                    "start",
+                    "end",
+                    "steps",
+                    "pause_time",
+                    "distance",
+                ],
             )
             if "status" in json_status and json_status["status"] == "error":
                 return JsonResponse(json_status)
@@ -79,13 +94,14 @@ class IntentionalWalkView(View):
         return JsonResponse(json_response)
 
     def http_method_not_allowed(self, request):
-        return JsonResponse({"status": "error", "message": "Method not allowed!"})
+        return JsonResponse(
+            {"status": "error", "message": "Method not allowed!"}
+        )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class IntentionalWalkListView(View):
-    """View to retrieve Intentional Walks
-    """
+    """View to retrieve Intentional Walks"""
 
     model = IntentionalWalk
     http_method_names = ["post"]
@@ -94,7 +110,9 @@ class IntentionalWalkListView(View):
         json_data = json.loads(request.body)
 
         # Validate json. If any field is missing, send back the response message
-        json_status = validate_request_json(json_data, required_fields=["account_id"])
+        json_status = validate_request_json(
+            json_data, required_fields=["account_id"]
+        )
         if "status" in json_status and json_status["status"] == "error":
             return JsonResponse(json_status)
 
@@ -110,7 +128,9 @@ class IntentionalWalkListView(View):
             )
 
         # Get walks from all the accounts tied to the email
-        intentional_walks = IntentionalWalk.objects.filter(account__email=device.account.email)
+        intentional_walks = IntentionalWalk.objects.filter(
+            account__email=device.account.email
+        )
 
         # Hacky serializer
         total_steps = 0
@@ -134,7 +154,9 @@ class IntentionalWalkListView(View):
             total_walk_time += intentional_walk.walk_time
             total_distance += intentional_walk.distance
             total_pause_time += intentional_walk.pause_time
-        intentional_walk_list = sorted(intentional_walk_list, key=lambda x: x["start"], reverse=True)
+        intentional_walk_list = sorted(
+            intentional_walk_list, key=lambda x: x["start"], reverse=True
+        )
         payload = {
             "intentional_walks": intentional_walk_list,
             "total_steps": total_steps,
@@ -147,4 +169,6 @@ class IntentionalWalkListView(View):
         return JsonResponse(payload)
 
     def http_method_not_allowed(self, request):
-        return JsonResponse({"status": "error", "message": "Method not allowed!"})
+        return JsonResponse(
+            {"status": "error", "message": "Method not allowed!"}
+        )

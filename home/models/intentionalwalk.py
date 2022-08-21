@@ -1,5 +1,7 @@
 import time
+
 from django.db import models
+
 from home.templatetags.format_helpers import m_to_mi
 
 
@@ -8,17 +10,32 @@ class IntentionalWalk(models.Model):
     Stores a single intentional/recorded walk from a user/account. It is always
     linked to the specific device identifier :model: `home.Device`
     """
+
     # event id will be a v4 random uuid generated on the client
     event_id = models.CharField(max_length=250, unique=True)
     # Walk meta
-    start = models.DateTimeField(help_text="Timestamp when the intentional walk started")
-    end = models.DateTimeField(help_text="Timestamp when the intentional walk ended")
+    start = models.DateTimeField(
+        help_text="Timestamp when the intentional walk started"
+    )
+    end = models.DateTimeField(
+        help_text="Timestamp when the intentional walk ended"
+    )
     steps = models.IntegerField(help_text="Number of steps recorded")
     pause_time = models.FloatField(help_text="Total time paused (in seconds)")
     distance = models.FloatField(help_text="Total distance covered")
-    device = models.ForeignKey("Device", on_delete=models.CASCADE, help_text="Device the data is coming from")
-    account = models.ForeignKey("Account", on_delete=models.CASCADE, help_text="Account the data is linked to")
-    created = models.DateTimeField(auto_now_add=True, help_text="Record creation timestamp")
+    device = models.ForeignKey(
+        "Device",
+        on_delete=models.CASCADE,
+        help_text="Device the data is coming from",
+    )
+    account = models.ForeignKey(
+        "Account",
+        on_delete=models.CASCADE,
+        help_text="Account the data is linked to",
+    )
+    created = models.DateTimeField(
+        auto_now_add=True, help_text="Record creation timestamp"
+    )
 
     @property
     def walk_time(self):
@@ -27,7 +44,10 @@ class IntentionalWalk(models.Model):
     @property
     def walk_time_repr(self):
         return time.strftime(
-            "%Hh %Mm %Ss", time.gmtime(int((self.end - self.start).total_seconds() - self.pause_time)),
+            "%Hh %Mm %Ss",
+            time.gmtime(
+                int((self.end - self.start).total_seconds() - self.pause_time)
+            ),
         )
 
     @property
@@ -40,7 +60,10 @@ class IntentionalWalk(models.Model):
 
     @property
     def speed_mph(self):
-        return (self.distance_in_miles / ((self.end - self.start).total_seconds() - self.pause_time)) * 3600
+        return (
+            self.distance_in_miles
+            / ((self.end - self.start).total_seconds() - self.pause_time)
+        ) * 3600
 
     # Auto populate the account field from the device field
     def save(self, *args, **kwargs):

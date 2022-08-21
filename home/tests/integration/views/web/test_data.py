@@ -1,14 +1,13 @@
 import csv
 import io
-
 from collections import defaultdict
 from datetime import date, datetime, timedelta
-from freezegun import freeze_time
-from pytz import utc
 from typing import Dict, List
 
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
+from freezegun import freeze_time
+from pytz import utc
 
 from home.utils.generators import (
     AccountGenerator,
@@ -26,7 +25,8 @@ class Login:
 
     def __init__(self):
         User.objects.create_user(
-            username=self.username, password=self.password)
+            username=self.username, password=self.password
+        )
 
 
 class TestCsvViews(TestCase):
@@ -60,7 +60,9 @@ class TestCsvViews(TestCase):
         iwalks1 = IntentionalWalkGenerator(device1)
         for dt in range(5):
             # Set dates on walks to [2, 4, 6, 8, 10] (3000-03)
-            t = utc.localize(datetime(3000, 3, 2, 10, 0)) + timedelta(days=(dt * 2))
+            t = utc.localize(datetime(3000, 3, 2, 10, 0)) + timedelta(
+                days=(dt * 2)
+            )
             next(iwalks0.generate(1, start=t, end=(t + timedelta(hours=2))))
             next(iwalks1.generate(1, start=t, end=(t + timedelta(hours=2))))
 
@@ -89,7 +91,9 @@ class TestCsvViews(TestCase):
                 "sexual_orien": "OT",
                 "sexual_orien_other": "Pansexual",
             }
-            new_signup_without_walks = next(AccountGenerator().generate(1, **acct_params))
+            new_signup_without_walks = next(
+                AccountGenerator().generate(1, **acct_params)
+            )
 
         params = {
             "start_baseline": date(3000, 2, 28),
@@ -112,12 +116,14 @@ class TestCsvViews(TestCase):
         reader = csv.DictReader(io.StringIO(content))
 
         headers = reader.fieldnames
-        expected_headers = USER_AGG_CSV_BASE_HEADER[:] + [str(date(3000, 2, 28) + timedelta(days=dt))
-                                                          for dt in range(15)]
+        expected_headers = USER_AGG_CSV_BASE_HEADER[:] + [
+            str(date(3000, 2, 28) + timedelta(days=dt)) for dt in range(15)
+        ]
         self.assertEquals(headers, expected_headers)
 
         rows = list(reader)
         import pytest
+
         self.assertEqual(3, len(rows))
 
         rows_by_email = {r["Email"]: r for r in rows}
@@ -125,42 +131,61 @@ class TestCsvViews(TestCase):
             expected_row = row.copy()
 
             if email == "custom@gmail.com":
-                expected_row.update({
-                    "Email": "custom@gmail.com",
-                    "Race Other": "Arab",
-                    "Gender Identity": "OT",
-                    "Gender Identity Other": "Gender Queer",
-                    "Sexual Orientation": "OT",
-                    "Sexual Orientation Other": "Pansexual",
-                    "Is New Signup": "yes",
-                    "Active During Contest": "no",
-                })
-                expected_row.update({k: "" for k in expected_headers[14:]})  # Empty walk data
+                expected_row.update(
+                    {
+                        "Email": "custom@gmail.com",
+                        "Race Other": "Arab",
+                        "Gender Identity": "OT",
+                        "Gender Identity Other": "Gender Queer",
+                        "Sexual Orientation": "OT",
+                        "Sexual Orientation Other": "Pansexual",
+                        "Is New Signup": "yes",
+                        "Active During Contest": "no",
+                    }
+                )
+                expected_row.update(
+                    {k: "" for k in expected_headers[14:]}
+                )  # Empty walk data
                 self.assertEqual(row, expected_row)
-                self.assertIn(row["Race"], {"{'OT', 'BL'}", "{'BL', 'OT'}"})  # order is non-deterministic
+                self.assertIn(
+                    row["Race"], {"{'OT', 'BL'}", "{'BL', 'OT'}"}
+                )  # order is non-deterministic
 
             else:
-                expected_row.update({
-                    "Active During Contest": "yes",
-                    "Total Daily Walks During Contest": "4",  # Daily walks on 3-7 through 3-10
-                    "Total Daily Walks During Baseline": "6",  # Daily walks on 3-1 through 3-6 (before contest start)
-                    "Total Recorded Walks During Contest": "2",  # Intentional walks on 3-8, 3-10
-                    "Total Recorded Walks During Baseline": "3",  # Intentional walks on 3-2, 3-4, 3-6
-                    "3000-02-28": "",
-                    "3000-03-11": "",
-                    "3000-03-12": "",
-                    "3000-03-13": "",
-                    "3000-03-14": "",
-                })
+                expected_row.update(
+                    {
+                        "Active During Contest": "yes",
+                        "Total Daily Walks During Contest": "4",  # Daily walks on 3-7 through 3-10
+                        "Total Daily Walks During Baseline": "6",  # Daily walks on 3-1 through 3-6 (before contest start)
+                        "Total Recorded Walks During Contest": "2",  # Intentional walks on 3-8, 3-10
+                        "Total Recorded Walks During Baseline": "3",  # Intentional walks on 3-2, 3-4, 3-6
+                        "3000-02-28": "",
+                        "3000-03-11": "",
+                        "3000-03-12": "",
+                        "3000-03-13": "",
+                        "3000-03-14": "",
+                    }
+                )
 
-                walk_days = [date(3000, 3, 1) + timedelta(days=d) for d in range(10)]  # generated daily walks
+                walk_days = [
+                    date(3000, 3, 1) + timedelta(days=d) for d in range(10)
+                ]  # generated daily walks
                 for walk_day in walk_days:
-                    self.assertIsNot(row[str(walk_day)], '')  # Some amt of steps on these days in contest/baseline
+                    self.assertIsNot(
+                        row[str(walk_day)], ""
+                    )  # Some amt of steps on these days in contest/baseline
 
-                for col_name in ["Total Steps During Contest", "Total Steps During Baseline",
-                                 "Total Recorded Steps During Contest", "Total Recorded Steps During Baseline",
-                                 "Total Recorded Walk Time During Contest", "Total Recorded Walk Time During Baseline"]:
-                    self.assertIsNot(row[col_name], '')  # Should be populated from generated dw/iw data
+                for col_name in [
+                    "Total Steps During Contest",
+                    "Total Steps During Baseline",
+                    "Total Recorded Steps During Contest",
+                    "Total Recorded Steps During Baseline",
+                    "Total Recorded Walk Time During Contest",
+                    "Total Recorded Walk Time During Baseline",
+                ]:
+                    self.assertIsNot(
+                        row[col_name], ""
+                    )  # Should be populated from generated dw/iw data
 
     # Test csv response of daily walks
     def test_daily_walks_csv_view(self):
@@ -191,9 +216,11 @@ class TestCsvViews(TestCase):
 
             for walk in walks:
                 self.assertGreaterEqual(
-                    date.fromisoformat(walk["date"]), start_date)
+                    date.fromisoformat(walk["date"]), start_date
+                )
                 self.assertLessEqual(
-                    date.fromisoformat(walk["date"]), end_date)
+                    date.fromisoformat(walk["date"]), end_date
+                )
 
     # Test csv response of intentional (recorded) walks
     def test_intentional_walks_csv_view(self):
