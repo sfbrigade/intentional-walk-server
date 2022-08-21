@@ -75,6 +75,12 @@ server container and perform the following actions within the container CLI.
    # python manage.py migrate
    ```
 
+ * To collect staticfiles (required for admin interface):
+
+   ```
+   # python manage.py collectstatic
+   ```
+
  * To restore a database backup:
 
    ```

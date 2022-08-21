@@ -19,7 +19,7 @@ load_dotenv(find_dotenv())
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__) / ".." / ".."
-PROJECT_ROOT = BASE_DIR / "home"
+PROJECT_ROOT = BASE_DIR
 STATIC_ROOT = PROJECT_ROOT / "static"
 
 # Quick-start development settings - unsuitable for production
@@ -131,9 +131,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
+<<<<<<< HEAD
 STATIC_URL = "/static/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+=======
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+>>>>>>> e085882 (change: move ./home/static to ./static)
 
 # Logging
 LOGGING = {
