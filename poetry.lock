@@ -175,6 +175,19 @@ python-dateutil = ">=2.4"
 text-unidecode = "1.3"
 
 [[package]]
+name = "flake8"
+version = "5.0.4"
+description = "the modular source code checker: pep8 pyflakes and co"
+category = "main"
+optional = false
+python-versions = ">=3.6.1"
+
+[package.dependencies]
+mccabe = ">=0.7.0,<0.8.0"
+pycodestyle = ">=2.9.0,<2.10.0"
+pyflakes = ">=2.5.0,<2.6.0"
+
+[[package]]
 name = "freezegun"
 version = "1.1.0"
 description = "Let your Python tests travel through time"
@@ -221,6 +234,14 @@ python-versions = "*"
 [package.dependencies]
 python-dateutil = ">=1.3,<2.0 || >2.0"
 pytz = "*"
+
+[[package]]
+name = "mccabe"
+version = "0.7.0"
+description = "McCabe checker, plugin for flake8"
+category = "main"
+optional = false
+python-versions = ">=3.6"
 
 [[package]]
 name = "more-itertools"
@@ -295,6 +316,22 @@ description = "library with cross-python path, ini-parsing, io, code, log facili
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[[package]]
+name = "pycodestyle"
+version = "2.9.1"
+description = "Python style guide checker"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
+name = "pyflakes"
+version = "2.5.0"
+description = "passive checker of Python programs"
+category = "main"
+optional = false
+python-versions = ">=3.6"
 
 [[package]]
 name = "pyparsing"
@@ -497,7 +534,7 @@ brotli = ["Brotli"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "95f59c0474cdae26e0f5c954459583abf7dbf96461ccc2c5fbf828f156612a53"
+content-hash = "1b16fa083357d49b38574cd14c62a5b8253349c83519cb264f6a52783cd83ecc"
 
 [metadata.files]
 asgiref = [
@@ -630,6 +667,10 @@ faker = [
     {file = "Faker-8.16.0-py3-none-any.whl", hash = "sha256:bb10913b9d3ac2aa37180f816c82040e81f9e0c32cb08445533f293cec8930bf"},
     {file = "Faker-8.16.0.tar.gz", hash = "sha256:d70b375d0af0e4c3abd594003691a1055a96281a414884e623d27bccc7d781da"},
 ]
+flake8 = [
+    {file = "flake8-5.0.4-py2.py3-none-any.whl", hash = "sha256:7a1cf6b73744f5806ab95e526f6f0d8c01c66d7bbe349562d22dfca20610b248"},
+    {file = "flake8-5.0.4.tar.gz", hash = "sha256:6fbe320aad8d6b95cec8b8e47bc933004678dc63095be98528b7bdd2a9f510db"},
+]
 freezegun = [
     {file = "freezegun-1.1.0-py2.py3-none-any.whl", hash = "sha256:2ae695f7eb96c62529f03a038461afe3c692db3465e215355e1bb4b0ab408712"},
     {file = "freezegun-1.1.0.tar.gz", hash = "sha256:177f9dd59861d871e27a484c3332f35a6e3f5d14626f2bf91be37891f18927f3"},
@@ -644,6 +685,10 @@ idna = [
 ]
 libfaketime = [
     {file = "libfaketime-2.0.0.tar.gz", hash = "sha256:a63b3f359f6f15f7b814ebfe1e4a9642bd481178223f0d97aab1a537475876df"},
+]
+mccabe = [
+    {file = "mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e"},
+    {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
 ]
 more-itertools = [
     {file = "more-itertools-8.11.0.tar.gz", hash = "sha256:0a2fd25d343c08d7e7212071820e7e7ea2f41d8fb45d6bc8a00cd6ce3b7aab88"},
@@ -685,6 +730,14 @@ psycopg2 = [
 py = [
     {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},
     {file = "py-1.11.0.tar.gz", hash = "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"},
+]
+pycodestyle = [
+    {file = "pycodestyle-2.9.1-py2.py3-none-any.whl", hash = "sha256:d1735fc58b418fd7c5f658d28d943854f8a849b01a5d0a1e6f3f3fdd0166804b"},
+    {file = "pycodestyle-2.9.1.tar.gz", hash = "sha256:2c9607871d58c76354b697b42f5d57e1ada7d261c261efac224b664affdc5785"},
+]
+pyflakes = [
+    {file = "pyflakes-2.5.0-py2.py3-none-any.whl", hash = "sha256:4579f67d887f804e67edb544428f264b7b24f435b263c4614f384135cea553d2"},
+    {file = "pyflakes-2.5.0.tar.gz", hash = "sha256:491feb020dca48ccc562a8c0cbe8df07ee13078df59813b83959cbdada312ea3"},
 ]
 pyparsing = [
     {file = "pyparsing-2.4.7-py2.py3-none-any.whl", hash = "sha256:ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b"},
