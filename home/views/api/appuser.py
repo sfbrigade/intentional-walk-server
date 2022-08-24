@@ -108,7 +108,7 @@ def update_account(acct: Account, data: dict):
         acct.sexual_orien_other = data.get("sexual_orien_other")
     acct.save()
 
-# Except from csrf validation
+# Exempt from csrf validation
 @method_decorator(csrf_exempt, name="dispatch")
 class AppUserCreateView(View):
     """API interface to register a device and a user account on app install.
@@ -221,6 +221,42 @@ class AppUserCreateView(View):
                     "sexual_orien": account.sexual_orien,
                     "sexual_orien_other": account.sexual_orien_other,
                 },
+            }
+        )
+
+    def http_method_not_allowed(self, request):
+        return JsonResponse({"status": "error", "message": "Method not allowed!"})
+
+
+# Exempt from csrf validation
+@method_decorator(csrf_exempt, name="dispatch")
+class AppUserDeleteView(View):
+    """API interface to delete a user account"""
+
+    http_method_names = ["delete"]
+
+    def delete(self, request, *args, **kwargs):
+        json_data = json.loads(request.body)
+
+        # Validate json. If account_id is missing, send back the response message
+        json_status = validate_request_json(json_data, required_fields=["account_id"])
+        if "status" in json_status and json_status["status"] == "error":
+            return JsonResponse(json_status)
+
+        # Look for specified user/device account
+        try:
+            device = Device.objects.get(device_id=json_data["account_id"])
+        except ObjectDoesNotExist:
+            return JsonResponse({"status": "error", "message": "Cannot find user with specified account id.",})
+
+        account = Account.objects.get(email=device.account.email)
+        account.delete()
+        device.delete()
+
+        return JsonResponse(
+            {
+                "status": "success",
+                "message": "Account deleted successfully",
             }
         )
 

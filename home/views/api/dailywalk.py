@@ -14,7 +14,7 @@ from .utils import validate_request_json
 
 logger = logging.getLogger(__name__)
 
-# Except from csrf validation
+# Exempt from csrf validation
 @method_decorator(csrf_exempt, name="dispatch")
 class DailyWalkCreateView(View):
     """View to create or update a list of dailywalks from a registered device
