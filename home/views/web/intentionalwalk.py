@@ -1,12 +1,10 @@
 import datetime
 import itertools
-import json
-from collections import Counter
 
 from django.db.models import Sum
-from django.views import View, generic
+from django.views import generic
 
-from home.models import Account, DailyWalk, Device, IntentionalWalk
+from home.models import Account, DailyWalk, IntentionalWalk
 from home.templatetags.format_helpers import m_to_mi
 
 # Date range for data aggregation
@@ -82,7 +80,8 @@ class IntentionalWalkWebView(generic.ListView):
         context["cumu_recorded_walks_stats"] = []
         total = {"count": 0, "steps": 0, "time": 0, "miles": 0}
         for date, stat_obj in context["daily_recorded_walks_stats"]:
-            # NOTE: Counters represent 0 counts as an empty dict and wont guarantee keys existence
+            # NOTE: Counters represent 0 counts as an empty dict and wont
+            # guarantee keys existence
             total["count"] += stat_obj["count"]
             total["steps"] += stat_obj["steps"]
             total["time"] += stat_obj["time"]

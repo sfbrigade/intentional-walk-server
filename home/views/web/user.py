@@ -1,13 +1,11 @@
-import itertools
 import json
 import logging
 from collections import defaultdict
 from datetime import date, timedelta
 from typing import Optional
 
-from django import template
 from django.db.models import Count, F, Sum
-from django.views import View, generic
+from django.views import generic
 
 from home.models import Account, Contest, DailyWalk, IntentionalWalk
 from home.templatetags.format_helpers import m_to_mi
@@ -80,10 +78,6 @@ def get_contest_walks(
     assert not (
         contest is None and include_baseline is True
     )  # No concept of baseline without contest
-
-    # DailyWalk and IntentionalWalk accessors
-    daily_walks = DailyWalk.objects
-    intentional_walks = IntentionalWalk.objects
 
     # Initialize filters for querying contest
     dw_contest_filters = {}
@@ -249,8 +243,9 @@ class UserListView(generic.ListView):
         context["user_stats_list"] = user_stats_container.values()
         context["contests"] = Contest.objects.all()
 
-        # This allows us to place json (string) data into the `data-json` prop of a <div />
-        # (Probably not ideal but enables us to pass data to <script /> for mapping.)
+        # This allows us to place json (string) data into the `data-json` prop
+        # of a <div /> (Probably not ideal but enables us to pass data to
+        # <script /> for mapping.)
         context["active_by_zip"] = json.dumps(active_by_zip)
         context["all_users_by_zip"] = json.dumps(all_users_by_zip)
         context["new_signups_by_zip"] = json.dumps(new_signups_by_zip)

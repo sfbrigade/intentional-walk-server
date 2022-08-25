@@ -1,5 +1,4 @@
 from django.db import models
-
 from home.templatetags.format_helpers import m_to_mi
 
 
@@ -7,7 +6,8 @@ from home.templatetags.format_helpers import m_to_mi
 class DailyWalk(models.Model):
     """
     Stores a single daily walk. This is unique for any given date and registered
-    account. It is always linked to the specific device identifier :model: `home.Device`
+    account. It is always linked to the specific device identifier
+    :model: `home.Device`
     """
 
     date = models.DateField(

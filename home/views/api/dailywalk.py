@@ -3,16 +3,17 @@ import logging
 from datetime import date
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
-from django.views import View, generic
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from home.models import Account, Contest, DailyWalk, Device
+from home.models import Contest, DailyWalk, Device
 
 from .utils import validate_request_json
 
 logger = logging.getLogger(__name__)
+
 
 # Exempt from csrf validation
 @method_decorator(csrf_exempt, name="dispatch")
@@ -40,14 +41,18 @@ class DailyWalkCreateView(View):
             return JsonResponse(
                 {
                     "status": "error",
-                    "message": f"Unregistered device - {json_data['account_id']}. Please register first!",
+                    "message": (
+                        "Unregistered device - "
+                        f"{json_data['account_id']}."
+                        " Please register first!"
+                    ),
                 }
             )
 
         # Json response template
         json_response = {
             "status": "success",
-            "message": f"Dailywalks recorded successfully",
+            "message": "Dailywalks recorded successfully",
             "payload": {
                 "account_id": device.device_id,
                 "daily_walks": [],
@@ -67,19 +72,23 @@ class DailyWalkCreateView(View):
 
             walk_date = daily_walk_data["date"]
 
-            # Register contest for account if walk_date falls between contest start and contest end
-            # (Can be async)
+            # Register contest for account if walk_date falls between contest
+            # start and contest end (Can be async)
             contest = Contest.active(
                 for_date=date.fromisoformat(walk_date), strict=True
             )
             if contest is not None:
                 active_contests.add(contest)
 
-            # Check if there is already an entry for this date. If there is, update the entry
-            # NOTE: By definition, there should be one and only one entry for a given email and date
-            # NOTE: This is a potential vulnerability. Since there is no email authentication at the moment,
-            # anyone can simply spoof an email id with a new device and overwrite daily walk data for the target email
-            # This is also a result of no session auth (can easily hit the api directly)
+            # Check if there is already an entry for this date. If there is,
+            # update the entry.
+            # NOTE: By definition, there should be one and only one entry for
+            # a given email and date.
+            # NOTE: This is a potential vulnerability. Since there is no email
+            # authentication at the moment, anyone can simply spoof an email
+            # id with a new device and overwrite daily walk data for the
+            # target email. This is also a result of no session auth
+            # (can easily hit the api directly)
             try:
                 # Updation
                 daily_walk = DailyWalk.objects.get(
@@ -112,9 +121,10 @@ class DailyWalkCreateView(View):
             try:
                 acct = device.account
                 acct.contests.add(contest)
-            except:
+            except Exception:
                 logger.error(
-                    f"Could not associate contest {contest} with account {acct}!",
+                    "Could not associate contest "
+                    f"{contest} with account {acct}!",
                     exc_info=True,
                 )
 
@@ -151,16 +161,21 @@ class DailyWalkListView(View):
             return JsonResponse(
                 {
                     "status": "error",
-                    "message": f"Unregistered device - {json_data['account_id']}. Please register first!",
+                    "message": (
+                        "Unregistered device - "
+                        f"{json_data['account_id']}."
+                        " Please register first!"
+                    ),
                 }
             )
 
         # Get walks from tied to this account
-        # NOTE: This is very hacky and cannot distinguish between legit and fake users
-        # Someone can simply install the app on a new device and use a known email id
-        # and have the metrics simply aggregated.
-        # For the simple use case, this is likely not an issue and would need to be
-        # handled manually if needed
+        # NOTE: This is very hacky and cannot distinguish between legit and
+        # fake users.
+        # Someone can simply install the app on a new device and use a known
+        # email id and have the metrics simply aggregated.
+        # For the simple use case, this is likely not an issue and would need
+        # to be handled manually if needed
         daily_walks = DailyWalk.objects.filter(
             account__email=device.account.email
         )

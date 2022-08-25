@@ -1,9 +1,7 @@
 from datetime import date, datetime, timedelta
 
 from django.test import Client, TestCase
-from pytz import utc
-
-from home.models import Account, Contest, DailyWalk, Device, IntentionalWalk
+from home.models import Contest
 from home.utils import localize
 from home.utils.generators import (
     AccountGenerator,
@@ -15,6 +13,7 @@ from home.views.web.user import (
     get_daily_walk_summaries,
     get_intentional_walk_summaries,
 )
+from pytz import utc
 
 
 class TestUserListView(TestCase):
@@ -51,7 +50,8 @@ class TestUserListView(TestCase):
         iw_plum = IntentionalWalkGenerator([device_plum])
         iw_mustard = IntentionalWalkGenerator([device_mustard])
         for dt in range(10):
-            # Set dates on walks to [2, 4, 6, 8, 10, 12, 14, 16, 18, 20] (3000-03)
+            # Set dates on walks to
+            # [2, 4, 6, 8, 10, 12, 14, 16, 18, 20] (3000-03)
             t = utc.localize(datetime(3000, 3, 2, 10, 0)) + timedelta(
                 days=(dt * 2)
             )

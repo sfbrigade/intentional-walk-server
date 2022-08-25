@@ -1,6 +1,5 @@
 from django.test import TestCase
 
-from home.models import Account
 from home.views.api.appuser import is_tester, validate_account_input
 
 

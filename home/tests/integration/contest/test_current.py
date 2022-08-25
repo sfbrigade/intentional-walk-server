@@ -1,8 +1,5 @@
-import datetime
-
 from django.test import Client, TestCase
 from freezegun import freeze_time
-
 from home.models import Contest
 
 
@@ -28,7 +25,7 @@ class ApiTestCase(TestCase):
         self.assertEqual(response_data["status"], "error", msg=fail_message)
         self.assertEqual(
             response_data["message"],
-            f"There are no contests",
+            "There are no contests",
             msg=fail_message,
         )
 
@@ -63,7 +60,7 @@ class ApiTestCase(TestCase):
             )
             self.assertEqual(
                 response_data["message"],
-                f"There are no contests",
+                "There are no contests",
                 msg=fail_message,
             )
 

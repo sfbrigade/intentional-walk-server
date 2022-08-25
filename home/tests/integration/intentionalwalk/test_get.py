@@ -1,5 +1,3 @@
-import datetime
-
 from dateutil import parser
 from django.test import Client, TestCase
 
@@ -105,7 +103,9 @@ class ApiTestCase(TestCase):
         self.assertEqual(response_data["status"], "error", msg=fail_message)
         self.assertEqual(
             response_data["message"],
-            f'Unregistered device - {self.request_params["account_id"]}. Please register first!',
+            "Unregistered device - "
+            f'{self.request_params["account_id"]}.'
+            " Please register first!",
             msg=fail_message,
         )
 
@@ -214,10 +214,12 @@ class ApiTestCase(TestCase):
             msg=fail_message,
         )
 
-    # Check if walks across multiple accounts tied to the same email are aggregated
+    # Check if walks across multiple accounts tied to the same
+    # email are aggregated
     def test_intentionalwalk_get_aggregated(self):
 
-        # Create a second account from a different device but with the same email
+        # Create a second account from a different device but with
+        # the same email
         response = self.client.post(
             path="/api/appuser/create",
             data={

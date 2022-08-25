@@ -1,11 +1,9 @@
 import datetime
 import itertools
-import json
-from collections import Counter
 
-from django.views import View, generic
+from django.views import generic
 
-from home.models import Account, DailyWalk, Device, IntentionalWalk
+from home.models import Account, DailyWalk
 from home.templatetags.format_helpers import m_to_mi
 
 # Date range for data aggregation
