@@ -45,3 +45,27 @@ html, body {
 #map-label-2 {
     color: #2B388F;
 }
+
+.graph-title {
+    font-family: 'Rajdhani';
+    font-weight: bold;
+    font-size: 1.25em;
+}
+
+.label {
+    font-family: 'Rajdhani';
+    font-weight: bold;
+}
+
+.tooltip-text {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #222;
+    color: #fff !important;
+    border-radius: 4px;
+}
+.tooltip, .tooltip-text {
+    cursor: default;
+}
