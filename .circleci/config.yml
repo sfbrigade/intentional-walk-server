@@ -28,6 +28,10 @@ jobs:
           paths:
             - /home/circleci/.cache/pypoetry/virtualenvs
       - run:
+          name: Run linter checks
+          command: |
+            poetry run black --check home server manage.py
+      - run:
           name: Run Pytest, report coverage
           command: |
             poetry run coverage run --omit="/home/circleci/.cache/pypoetry/virtualenvs/*" -m pytest
