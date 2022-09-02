@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+import datetime
+
+>>>>>>> master
 from django.test import Client, TestCase
 from freezegun import freeze_time
 from home.models import Contest

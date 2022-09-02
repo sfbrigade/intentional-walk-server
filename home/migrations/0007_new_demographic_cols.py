@@ -1,4 +1,5 @@
 from django.db import migrations, models
+
 from home.models.account import SAN_FRANCISCO_ZIP_CODES
 
 """
@@ -55,9 +56,7 @@ class Migration(migrations.Migration):
             model_name="account",
             name="is_sf_resident",
             field=models.BooleanField(
-                help_text=(
-                    "Whether the user is a SF resident or not, based on zip"
-                ),
+                help_text="Whether the user is a SF resident or not, based on zip",
                 null=True,
             ),
         ),
