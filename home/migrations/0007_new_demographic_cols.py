@@ -1,5 +1,4 @@
 from django.db import migrations, models
-
 from home.models.account import SAN_FRANCISCO_ZIP_CODES
 
 """
@@ -7,7 +6,8 @@ This migration adds new demographic fields into Account:
  * is_latino: Latino/Hispanic origin
  * is_sf_resident: whether the user is a SF resident or not (based on zip)
 
-It also creates a new table of Race (many-to-many relationship of users and races)
+It also creates a new table of Race
+(many-to-many relationship of users and races)
 """
 
 
@@ -55,7 +55,9 @@ class Migration(migrations.Migration):
             model_name="account",
             name="is_sf_resident",
             field=models.BooleanField(
-                help_text="Whether the user is a SF resident or not, based on zip",
+                help_text=(
+                    "Whether the user is a SF resident or not, based on zip"
+                ),
                 null=True,
             ),
         ),

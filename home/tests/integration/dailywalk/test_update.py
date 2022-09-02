@@ -81,7 +81,7 @@ class ApiTestCase(TestCase):
         self.assertEqual(response_data["status"], "success", msg=fail_message)
         self.assertEqual(
             response_data["message"],
-            f"Dailywalks recorded successfully",
+            "Dailywalks recorded successfully",
             msg=fail_message,
         )
         self.assertEqual(

@@ -1,6 +1,5 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 
-from django.http import HttpResponse
 from django.utils import timezone
 
 

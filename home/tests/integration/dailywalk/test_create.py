@@ -1,5 +1,4 @@
 from django.test import Client, TestCase
-
 from home.models import Contest, Device
 
 
@@ -190,7 +189,9 @@ class ApiTestCase(TestCase):
         self.assertEqual(response_data["status"], "error", msg=fail_message)
         self.assertEqual(
             response_data["message"],
-            f'Unregistered device - {self.request_params["account_id"]}. Please register first!',
+            "Unregistered device - "
+            f'{self.request_params["account_id"]}.'
+            " Please register first!",
             msg=fail_message,
         )
 

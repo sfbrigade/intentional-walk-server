@@ -1,0 +1,5 @@
+[flake8]
+max-line-length = 80
+per-file-ignores =
+    home/views/__init__.py: F401
+    home/models/__init__.py: F401

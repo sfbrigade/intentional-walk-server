@@ -32,6 +32,18 @@ tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)"
 tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins"]
 
 [[package]]
+name = "autoflake"
+version = "1.5.3"
+description = "Removes unused imports and unused variables"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+pyflakes = ">=1.1.0"
+toml = ">=0.10.2"
+
+[[package]]
 name = "black"
 version = "22.8.0"
 description = "The uncompromising code formatter."
@@ -175,6 +187,19 @@ python-dateutil = ">=2.4"
 text-unidecode = "1.3"
 
 [[package]]
+name = "flake8"
+version = "5.0.4"
+description = "the modular source code checker: pep8 pyflakes and co"
+category = "main"
+optional = false
+python-versions = ">=3.6.1"
+
+[package.dependencies]
+mccabe = ">=0.7.0,<0.8.0"
+pycodestyle = ">=2.9.0,<2.10.0"
+pyflakes = ">=2.5.0,<2.6.0"
+
+[[package]]
 name = "freezegun"
 version = "1.1.0"
 description = "Let your Python tests travel through time"
@@ -218,6 +243,14 @@ python-versions = "*"
 [package.dependencies]
 python-dateutil = ">=1.3,<2.0 || >2.0"
 pytz = "*"
+
+[[package]]
+name = "mccabe"
+version = "0.7.0"
+description = "McCabe checker, plugin for flake8"
+category = "main"
+optional = false
+python-versions = ">=3.6"
 
 [[package]]
 name = "more-itertools"
@@ -292,6 +325,22 @@ description = "library with cross-python path, ini-parsing, io, code, log facili
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[[package]]
+name = "pycodestyle"
+version = "2.9.1"
+description = "Python style guide checker"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
+name = "pyflakes"
+version = "2.5.0"
+description = "passive checker of Python programs"
+category = "main"
+optional = false
+python-versions = ">=3.6"
 
 [[package]]
 name = "pyparsing"
@@ -423,6 +472,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "toml"
+version = "0.10.2"
+description = "Python Library for Tom's Obvious, Minimal Language"
+category = "main"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+
+[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -481,12 +538,13 @@ brotli = ["brotli"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "95f59c0474cdae26e0f5c954459583abf7dbf96461ccc2c5fbf828f156612a53"
+content-hash = "0b31f6582b3db7971780df23582b68228bdb1dc3b5fc3c97a1d490bc497abf7f"
 
 [metadata.files]
 asgiref = []
 atomicwrites = []
 attrs = []
+autoflake = []
 black = []
 certifi = []
 charset-normalizer = []
@@ -499,10 +557,12 @@ django = []
 django-postgres-setfield = []
 docopt = []
 faker = []
+flake8 = []
 freezegun = []
 gunicorn = []
 idna = []
 libfaketime = []
+mccabe = []
 more-itertools = []
 mypy-extensions = []
 packaging = []
@@ -511,6 +571,8 @@ platformdirs = []
 pluggy = []
 psycopg2 = []
 py = []
+pycodestyle = []
+pyflakes = []
 pyparsing = []
 pytest = []
 pytest-django = []
@@ -522,6 +584,7 @@ requests = []
 six = []
 sqlparse = []
 text-unidecode = []
+toml = []
 tomli = []
 typing-extensions = []
 urllib3 = []

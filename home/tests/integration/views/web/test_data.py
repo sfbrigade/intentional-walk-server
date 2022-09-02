@@ -7,7 +7,6 @@ from typing import Dict, List
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from freezegun import freeze_time
-from pytz import utc
 
 from home.utils.generators import (
     AccountGenerator,
@@ -17,6 +16,7 @@ from home.utils.generators import (
     IntentionalWalkGenerator,
 )
 from home.views.web.data import USER_AGG_CSV_BASE_HEADER
+from pytz import utc
 
 
 class Login:
@@ -91,9 +91,7 @@ class TestCsvViews(TestCase):
                 "sexual_orien": "OT",
                 "sexual_orien_other": "Pansexual",
             }
-            new_signup_without_walks = next(
-                AccountGenerator().generate(1, **acct_params)
-            )
+            next(AccountGenerator().generate(1, **acct_params))
 
         params = {
             "start_baseline": date(3000, 2, 28),
@@ -122,7 +120,6 @@ class TestCsvViews(TestCase):
         self.assertEquals(headers, expected_headers)
 
         rows = list(reader)
-        import pytest
 
         self.assertEqual(3, len(rows))
 
@@ -155,10 +152,14 @@ class TestCsvViews(TestCase):
                 expected_row.update(
                     {
                         "Active During Contest": "yes",
-                        "Total Daily Walks During Contest": "4",  # Daily walks on 3-7 through 3-10
-                        "Total Daily Walks During Baseline": "6",  # Daily walks on 3-1 through 3-6 (before contest start)
-                        "Total Recorded Walks During Contest": "2",  # Intentional walks on 3-8, 3-10
-                        "Total Recorded Walks During Baseline": "3",  # Intentional walks on 3-2, 3-4, 3-6
+                        # Daily walks on 3-7 through 3-10
+                        "Total Daily Walks During Contest": "4",
+                        # Daily walks on 3-1 through 3-6 (before contest start)
+                        "Total Daily Walks During Baseline": "6",
+                        # Intentional walks on 3-8, 3-10
+                        "Total Recorded Walks During Contest": "2",
+                        # Intentional walks on 3-2, 3-4, 3-6
+                        "Total Recorded Walks During Baseline": "3",
                         "3000-02-28": "",
                         "3000-03-11": "",
                         "3000-03-12": "",

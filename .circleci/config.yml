@@ -30,6 +30,7 @@ jobs:
           name: Run linter checks
           command: |
             poetry run black --check home server manage.py
+            poetry run flake8 --count home server manage.py
       - run:
           name: Run Pytest, report coverage
           command: |

@@ -1,6 +1,5 @@
 import random
 from datetime import date, timedelta
-from enum import Enum
 from typing import List, Optional
 from uuid import uuid4
 
@@ -64,7 +63,7 @@ class DeviceGenerator:
 
     def generate(self, n: int, **kwargs):
         if not self.accounts and "account" not in kwargs:
-            raise InputError("Must provide an Account object as `account`")
+            raise ValueError("Must provide an Account object as `account`")
 
         for _ in range(n):
             params = {**self.random_params(), **kwargs}
@@ -87,7 +86,7 @@ class DailyWalkGenerator:
 
     def generate(self, n: int, **kwargs):
         if not self.devices and "device" not in kwargs:
-            raise InputError("Must provide a Device object as `device`")
+            raise ValueError("Must provide a Device object as `device`")
 
         for _ in range(n):
             params = {**self.random_params(), **kwargs}
@@ -109,7 +108,7 @@ class IntentionalWalkGenerator:
     def __init__(self, devices: List[str]):
         self.fake = Faker()
         if not devices:
-            raise InputError("Must provide a non-empty list of device ids")
+            raise ValueError("Must provide a non-empty list of device ids")
         self.devices = devices
 
     def generate(self, n: int, **kwargs):

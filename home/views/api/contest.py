@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -20,7 +20,7 @@ class ContestCurrentView(View):
             return JsonResponse(
                 {
                     "status": "error",
-                    "message": f"There are no contests",
+                    "message": "There are no contests",
                 }
             )
         return JsonResponse(

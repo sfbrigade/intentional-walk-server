@@ -1,8 +1,6 @@
-import csv
+import sys
 
 from django.core.management.base import BaseCommand
-from django.db import connection
-
 from home.models import Contest, DailyWalk
 
 
@@ -14,7 +12,10 @@ class Command(BaseCommand):
 
     help = "Backfill data"
     choices = {
-        "account_contests": "Use dailywalks to backfill account_contests relationship (many-to-many)",
+        "account_contests": (
+            "Use dailywalks to backfill account_contests"
+            " relationship (many-to-many)"
+        ),
     }
 
     def add_arguments(self, parser):
@@ -23,7 +24,10 @@ class Command(BaseCommand):
         # Backfill table home_account_contests (contests by account)
         subparser_account_contests = subparsers.add_parser(
             "account_contests",
-            help="Use dailywalks to backfill account_contests relationship (many-to-many)",
+            help=(
+                "Use dailywalks to backfill account_contests"
+                " relationship (many-to-many)"
+            ),
         )
         subparser_account_contests.add_argument(
             "--dry_run", "-N", action="store_true", help="Dry run (no-op)"
@@ -42,11 +46,17 @@ class Command(BaseCommand):
         )
         subparser_account_contests_opts.add_argument(
             "--contest_date",
-            help="Select contest to populate by any date during the contest (or multiple if separated by commas)",
+            help=(
+                "Select contest to populate by any date during the"
+                " contest (or multiple if separated by commas)"
+            ),
         )
         subparser_account_contests_opts.add_argument(
             "--contest_id",
-            help="Select contest to populate by contest_id. (Separate multiple by commas.)",
+            help=(
+                "Select contest to populate by contest_id."
+                " (Separate multiple by commas.)"
+            ),
         )
 
     def handle(self, *args, **options):

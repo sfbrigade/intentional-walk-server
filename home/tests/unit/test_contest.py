@@ -1,9 +1,8 @@
-from datetime import date, datetime
+from datetime import date
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from freezegun import freeze_time
-
 from home.models import Account, Contest
 
 
@@ -141,7 +140,8 @@ class TestContest(TestCase):
             error.exception.message, "Contest must not overlap another"
         )
 
-        # It IS okay if the baseline or promo date occurs during a different (previous) contest.
+        # It IS okay if the baseline or promo date occurs during a different
+        # (previous) contest.
         contest.start_baseline = "2020-07-01"
         contest.start_promo = "2020-07-21"
         contest.start = "2020-08-01"

@@ -74,9 +74,9 @@ class IsLatinoLabels(Enum):
 # Note: Maybe inherit from Django's User model?
 class Account(models.Model):
     """
-    Stores a single user account as identified by email. This is created when the
-    app is installed and the user signs up for the first time and is has multiple
-    devices - :model: `home.Device` associated with it
+    Stores a single user account as identified by email. This is created when
+    the app is installed and the user signs up for the first time and is has
+    multiple devices - :model: `home.Device` associated with it
     """
 
     email = models.EmailField(

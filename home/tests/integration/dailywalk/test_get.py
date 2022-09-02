@@ -81,7 +81,9 @@ class ApiTestCase(TestCase):
         self.assertEqual(response_data["status"], "error", msg=fail_message)
         self.assertEqual(
             response_data["message"],
-            f'Unregistered device - {self.request_params["account_id"]}. Please register first!',
+            "Unregistered device - "
+            f'{self.request_params["account_id"]}.'
+            " Please register first!",
             msg=fail_message,
         )
 
@@ -141,10 +143,12 @@ class ApiTestCase(TestCase):
             msg=fail_message,
         )
 
-    # Check if walks across multiple accounts tied to the same email are aggregated
+    # Check if walks across multiple accounts tied to the same
+    # email are aggregated
     def test_dailywalk_get_aggregated(self):
 
-        # Create a second account from a different device but with the same email
+        # Create a second account from a different device but
+        # with the same email
         response = self.client.post(
             path="/api/appuser/create",
             data={
@@ -220,15 +224,16 @@ class ApiTestCase(TestCase):
         )
 
         # Update the daily walks for the tests to run
-        # Note that to aggregate data, the updated event for "2020-02-12" from account
-        # "99999" must be used instead of the update from "54321"
+        # Note that to aggregate data, the updated event for "2020-02-12"
+        # from account "99999" must be used instead of the update from "54321"
         # So pop that entry from new_daily_walks & update daily walks
         new_daily_walks["daily_walks"].pop(0)
         self.daily_walks["daily_walks"] += new_daily_walks["daily_walks"]
 
-        # Create another entry for the same first date but from a different account
-        # This should create a new row but when aggregating data, this entry should
-        # supercede the older entry for the same day from the different account
+        # Create another entry for the same first date but from a different
+        # account. This should create a new row but when aggregating data,
+        # this entry should supercede the older entry for the same day from
+        # the different account
         new_daily_walks = {
             "account_id": "99999",
             "daily_walks": [

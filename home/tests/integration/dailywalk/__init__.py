@@ -1,2 +1,1 @@
-
-
+# home.tests.integration.dailywalk

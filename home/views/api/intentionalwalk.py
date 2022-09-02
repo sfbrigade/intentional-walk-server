@@ -1,12 +1,12 @@
 import json
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
-from django.views import View, generic
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from home.models import Account, Device, IntentionalWalk
+from home.models import Device, IntentionalWalk
 
 from .utils import validate_request_json
 
@@ -36,7 +36,11 @@ class IntentionalWalkView(View):
             return JsonResponse(
                 {
                     "status": "error",
-                    "message": f"Unregistered device - {json_data['account_id']}. Please register first!",
+                    "message": (
+                        "Unregistered device - "
+                        f"{json_data['account_id']}."
+                        " Please register first!"
+                    ),
                 }
             )
 
@@ -86,7 +90,7 @@ class IntentionalWalkView(View):
                         "pause_time": intentional_walk.pause_time,
                     }
                 )
-            except:
+            except Exception:
                 # IntentionalWalk records are immutable- so ignore any errors
                 # that might occur if the record already exists, etc...
                 pass
@@ -123,7 +127,11 @@ class IntentionalWalkListView(View):
             return JsonResponse(
                 {
                     "status": "error",
-                    "message": f"Unregistered device - {json_data['account_id']}. Please register first!",
+                    "message": (
+                        "Unregistered device - "
+                        f"{json_data['account_id']}."
+                        " Please register first!"
+                    ),
                 }
             )
 

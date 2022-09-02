@@ -1,4 +1,3 @@
-import csv
 import os
 import sys
 
@@ -14,7 +13,10 @@ class Command(BaseCommand):
             print("This command is not allowed on a production server.")
             sys.exit(1)
 
-        question = "\nAre you sure you want to truncate all tables? (Type `yes` exactly): "
+        question = (
+            "\nAre you sure you want to truncate all tables?"
+            " (Type `yes` exactly): "
+        )
         answer = input(question)
         if answer == "yes":
             cursor = connection.cursor()
