@@ -25,7 +25,9 @@ class ApiTestCase(TestCase):
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
         self.assertEqual(
-            response_data["message"], "Device registered & account registered successfully", msg=fail_message
+            response_data["message"],
+            "Device registered & account registered successfully",
+            msg=fail_message,
         )
 
         # Details for Daily walk even creation
@@ -51,15 +53,27 @@ class ApiTestCase(TestCase):
     def test_create_intentionalwalk(self):
 
         # Send the request
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Intentional Walks recorded successfully", msg=fail_message)
-        self.assertEqual(response_data["payload"]["account_id"], self.request_params["account_id"], msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Intentional Walks recorded successfully",
+            msg=fail_message,
+        )
+        self.assertEqual(
+            response_data["payload"]["account_id"],
+            self.request_params["account_id"],
+            msg=fail_message,
+        )
         self.assertEqual(
             response_data["payload"]["intentional_walks"][0]["event_id"],
             self.request_params["intentional_walks"][0]["event_id"],
@@ -97,7 +111,11 @@ class ApiTestCase(TestCase):
         self.request_params["account_id"] = "0000000"
 
         # Send the request
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -116,7 +134,11 @@ class ApiTestCase(TestCase):
         del self.request_params["intentional_walks"][0]["steps"]
 
         # Send the request
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -124,5 +146,7 @@ class ApiTestCase(TestCase):
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "error", msg=fail_message)
         self.assertEqual(
-            response_data["message"], "Required input 'steps' missing in the request", msg=fail_message,
+            response_data["message"],
+            "Required input 'steps' missing in the request",
+            msg=fail_message,
         )

@@ -1,4 +1,5 @@
 import datetime
+
 from dateutil import parser
 from django.test import Client, TestCase
 
@@ -27,7 +28,9 @@ class ApiTestCase(TestCase):
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
         self.assertEqual(
-            response_data["message"], "Device registered & account registered successfully", msg=fail_message
+            response_data["message"],
+            "Device registered & account registered successfully",
+            msg=fail_message,
         )
 
         # Create three intentional walks
@@ -62,7 +65,9 @@ class ApiTestCase(TestCase):
         }
         # Create intentional walks
         response = self.client.post(
-            path="/api/intentionalwalk/create", data=self.intentional_walks, content_type="application/json",
+            path="/api/intentionalwalk/create",
+            data=self.intentional_walks,
+            content_type="application/json",
         )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
@@ -70,7 +75,11 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Intentional Walks recorded successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Intentional Walks recorded successfully",
+            msg=fail_message,
+        )
 
         # Details for intentional walk list view
         self.url = "/api/intentionalwalk/get"
@@ -83,7 +92,11 @@ class ApiTestCase(TestCase):
         self.request_params["account_id"] = "0000000"
 
         # Send the request
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -97,7 +110,11 @@ class ApiTestCase(TestCase):
         )
 
     def test_intentionalwalk_get(self):
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -119,24 +136,42 @@ class ApiTestCase(TestCase):
         # Check if total steps is correct
         self.assertEqual(
             response_data["total_steps"],
-            sum([dw["steps"] for dw in self.intentional_walks["intentional_walks"]]),
+            sum(
+                [
+                    dw["steps"]
+                    for dw in self.intentional_walks["intentional_walks"]
+                ]
+            ),
             msg=fail_message,
         )
         self.assertEqual(
             response_data["total_distance"],
-            sum([dw["distance"] for dw in self.intentional_walks["intentional_walks"]]),
+            sum(
+                [
+                    dw["distance"]
+                    for dw in self.intentional_walks["intentional_walks"]
+                ]
+            ),
             msg=fail_message,
         )
         self.assertEqual(
             response_data["total_pause_time"],
-            sum([dw["pause_time"] for dw in self.intentional_walks["intentional_walks"]]),
+            sum(
+                [
+                    dw["pause_time"]
+                    for dw in self.intentional_walks["intentional_walks"]
+                ]
+            ),
             msg=fail_message,
         )
         self.assertEqual(
             response_data["total_walk_time"],
             sum(
                 [
-                    (parser.parse(dw["end"]) - parser.parse(dw["start"])).total_seconds() - dw["pause_time"]
+                    (
+                        parser.parse(dw["end"]) - parser.parse(dw["start"])
+                    ).total_seconds()
+                    - dw["pause_time"]
                     for dw in self.intentional_walks["intentional_walks"]
                 ]
             ),
@@ -144,19 +179,37 @@ class ApiTestCase(TestCase):
         )
         # Check if the number of events match
         self.assertEqual(
-            len(response_data["intentional_walks"]), len(self.intentional_walks["intentional_walks"]), msg=fail_message
+            len(response_data["intentional_walks"]),
+            len(self.intentional_walks["intentional_walks"]),
+            msg=fail_message,
         )
 
         # Check if they have the same exact data
         # Remove timestamp strings since formatting is different
         self.assertEqual(
             [
-                {"steps": dw["steps"], "distance": dw["distance"], "pause_time": dw["pause_time"]}
-                for dw in sorted(response_data["intentional_walks"], key=lambda x: x["start"], reverse=True)
+                {
+                    "steps": dw["steps"],
+                    "distance": dw["distance"],
+                    "pause_time": dw["pause_time"],
+                }
+                for dw in sorted(
+                    response_data["intentional_walks"],
+                    key=lambda x: x["start"],
+                    reverse=True,
+                )
             ],
             [
-                {"steps": dw["steps"], "distance": dw["distance"], "pause_time": dw["pause_time"]}
-                for dw in sorted(self.intentional_walks["intentional_walks"], key=lambda x: x["start"], reverse=True)
+                {
+                    "steps": dw["steps"],
+                    "distance": dw["distance"],
+                    "pause_time": dw["pause_time"],
+                }
+                for dw in sorted(
+                    self.intentional_walks["intentional_walks"],
+                    key=lambda x: x["start"],
+                    reverse=True,
+                )
             ],
             msg=fail_message,
         )
@@ -183,7 +236,11 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Device registered & account updated successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Device registered & account updated successfully",
+            msg=fail_message,
+        )
 
         # Create a third account from a different device but with the same email
         response = self.client.post(
@@ -204,7 +261,11 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Device registered & account updated successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Device registered & account updated successfully",
+            msg=fail_message,
+        )
 
         # Create additional walks
         new_intentional_walks = {
@@ -228,9 +289,13 @@ class ApiTestCase(TestCase):
                 },
             ],
         }
-        self.intentional_walks["intentional_walks"] += new_intentional_walks["intentional_walks"]
+        self.intentional_walks["intentional_walks"] += new_intentional_walks[
+            "intentional_walks"
+        ]
         response = self.client.post(
-            path="/api/intentionalwalk/create", data=new_intentional_walks, content_type="application/json",
+            path="/api/intentionalwalk/create",
+            data=new_intentional_walks,
+            content_type="application/json",
         )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
@@ -238,7 +303,11 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Intentional Walks recorded successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Intentional Walks recorded successfully",
+            msg=fail_message,
+        )
 
         new_intentional_walks = {
             "account_id": "99999",
@@ -253,9 +322,13 @@ class ApiTestCase(TestCase):
                 },
             ],
         }
-        self.intentional_walks["intentional_walks"] += new_intentional_walks["intentional_walks"]
+        self.intentional_walks["intentional_walks"] += new_intentional_walks[
+            "intentional_walks"
+        ]
         response = self.client.post(
-            path="/api/intentionalwalk/create", data=new_intentional_walks, content_type="application/json",
+            path="/api/intentionalwalk/create",
+            data=new_intentional_walks,
+            content_type="application/json",
         )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
@@ -263,9 +336,17 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(response_data["message"], "Intentional Walks recorded successfully", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Intentional Walks recorded successfully",
+            msg=fail_message,
+        )
 
-        response = self.client.post(path=self.url, data=self.request_params, content_type=self.content_type)
+        response = self.client.post(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -287,24 +368,42 @@ class ApiTestCase(TestCase):
         # Check if total steps is correct
         self.assertEqual(
             response_data["total_steps"],
-            sum([dw["steps"] for dw in self.intentional_walks["intentional_walks"]]),
+            sum(
+                [
+                    dw["steps"]
+                    for dw in self.intentional_walks["intentional_walks"]
+                ]
+            ),
             msg=fail_message,
         )
         self.assertEqual(
             response_data["total_distance"],
-            sum([dw["distance"] for dw in self.intentional_walks["intentional_walks"]]),
+            sum(
+                [
+                    dw["distance"]
+                    for dw in self.intentional_walks["intentional_walks"]
+                ]
+            ),
             msg=fail_message,
         )
         self.assertEqual(
             response_data["total_pause_time"],
-            sum([dw["pause_time"] for dw in self.intentional_walks["intentional_walks"]]),
+            sum(
+                [
+                    dw["pause_time"]
+                    for dw in self.intentional_walks["intentional_walks"]
+                ]
+            ),
             msg=fail_message,
         )
         self.assertEqual(
             response_data["total_walk_time"],
             sum(
                 [
-                    (parser.parse(dw["end"]) - parser.parse(dw["start"])).total_seconds() - dw["pause_time"]
+                    (
+                        parser.parse(dw["end"]) - parser.parse(dw["start"])
+                    ).total_seconds()
+                    - dw["pause_time"]
                     for dw in self.intentional_walks["intentional_walks"]
                 ]
             ),
@@ -312,19 +411,37 @@ class ApiTestCase(TestCase):
         )
         # Check if the number of events match
         self.assertEqual(
-            len(response_data["intentional_walks"]), len(self.intentional_walks["intentional_walks"]), msg=fail_message
+            len(response_data["intentional_walks"]),
+            len(self.intentional_walks["intentional_walks"]),
+            msg=fail_message,
         )
 
         # Check if they have the same exact data
         # Remove timestamp strings since formatting is different
         self.assertEqual(
             [
-                {"steps": dw["steps"], "distance": dw["distance"], "pause_time": dw["pause_time"]}
-                for dw in sorted(response_data["intentional_walks"], key=lambda x: x["start"], reverse=True)
+                {
+                    "steps": dw["steps"],
+                    "distance": dw["distance"],
+                    "pause_time": dw["pause_time"],
+                }
+                for dw in sorted(
+                    response_data["intentional_walks"],
+                    key=lambda x: x["start"],
+                    reverse=True,
+                )
             ],
             [
-                {"steps": dw["steps"], "distance": dw["distance"], "pause_time": dw["pause_time"]}
-                for dw in sorted(self.intentional_walks["intentional_walks"], key=lambda x: x["start"], reverse=True)
+                {
+                    "steps": dw["steps"],
+                    "distance": dw["distance"],
+                    "pause_time": dw["pause_time"],
+                }
+                for dw in sorted(
+                    self.intentional_walks["intentional_walks"],
+                    key=lambda x: x["start"],
+                    reverse=True,
+                )
             ],
             msg=fail_message,
         )

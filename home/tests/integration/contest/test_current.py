@@ -1,4 +1,5 @@
 import datetime
+
 from django.test import Client, TestCase
 from freezegun import freeze_time
 
@@ -16,7 +17,9 @@ class ApiTestCase(TestCase):
 
     def test_contest_current_error(self):
         # Send the request
-        response = self.client.get(path=self.url, content_type=self.content_type)
+        response = self.client.get(
+            path=self.url, content_type=self.content_type
+        )
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
@@ -24,7 +27,9 @@ class ApiTestCase(TestCase):
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "error", msg=fail_message)
         self.assertEqual(
-            response_data["message"], f"There are no contests", msg=fail_message,
+            response_data["message"],
+            f"There are no contests",
+            msg=fail_message,
         )
 
     def test_contest_current(self):
@@ -45,83 +50,129 @@ class ApiTestCase(TestCase):
 
         # before first promo starts, failure
         with freeze_time("2020-04-01"):
-            response = self.client.get(path=self.url, content_type=self.content_type)
+            response = self.client.get(
+                path=self.url, content_type=self.content_type
+            )
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
             # Parse the response
             response_data = response.json()
             fail_message = f"Server response - {response_data}"
-            self.assertEqual(response_data["status"], "error", msg=fail_message)
             self.assertEqual(
-                response_data["message"], f"There are no contests", msg=fail_message,
+                response_data["status"], "error", msg=fail_message
+            )
+            self.assertEqual(
+                response_data["message"],
+                f"There are no contests",
+                msg=fail_message,
             )
 
         # after promo starts for first contest
         with freeze_time("2020-04-28"):
-            response = self.client.get(path=self.url, content_type=self.content_type)
+            response = self.client.get(
+                path=self.url, content_type=self.content_type
+            )
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
             # Parse the response
             response_data = response.json()
             fail_message = f"Server response - {response_data}"
-            self.assertEqual(response_data["status"], "success", msg=fail_message)
-            self.assertEqual(response_data["payload"]["contest_id"], str(contest1.pk))
-            self.assertEqual(response_data["payload"]["start_promo"], "2020-04-24")
+            self.assertEqual(
+                response_data["status"], "success", msg=fail_message
+            )
+            self.assertEqual(
+                response_data["payload"]["contest_id"], str(contest1.pk)
+            )
+            self.assertEqual(
+                response_data["payload"]["start_promo"], "2020-04-24"
+            )
             self.assertEqual(response_data["payload"]["start"], "2020-05-01")
             self.assertEqual(response_data["payload"]["end"], "2020-05-31")
 
         # during first contest
         with freeze_time("2020-05-15"):
-            response = self.client.get(path=self.url, content_type=self.content_type)
+            response = self.client.get(
+                path=self.url, content_type=self.content_type
+            )
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
             # Parse the response
             response_data = response.json()
             fail_message = f"Server response - {response_data}"
-            self.assertEqual(response_data["status"], "success", msg=fail_message)
-            self.assertEqual(response_data["payload"]["contest_id"], str(contest1.pk))
-            self.assertEqual(response_data["payload"]["start_promo"], "2020-04-24")
+            self.assertEqual(
+                response_data["status"], "success", msg=fail_message
+            )
+            self.assertEqual(
+                response_data["payload"]["contest_id"], str(contest1.pk)
+            )
+            self.assertEqual(
+                response_data["payload"]["start_promo"], "2020-04-24"
+            )
             self.assertEqual(response_data["payload"]["start"], "2020-05-01")
             self.assertEqual(response_data["payload"]["end"], "2020-05-31")
 
         # after first contest, before promo starts for next
         with freeze_time("2020-06-14"):
-            response = self.client.get(path=self.url, content_type=self.content_type)
+            response = self.client.get(
+                path=self.url, content_type=self.content_type
+            )
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
             # Parse the response
             response_data = response.json()
             fail_message = f"Server response - {response_data}"
-            self.assertEqual(response_data["status"], "success", msg=fail_message)
-            self.assertEqual(response_data["payload"]["contest_id"], str(contest1.pk))
-            self.assertEqual(response_data["payload"]["start_promo"], "2020-04-24")
+            self.assertEqual(
+                response_data["status"], "success", msg=fail_message
+            )
+            self.assertEqual(
+                response_data["payload"]["contest_id"], str(contest1.pk)
+            )
+            self.assertEqual(
+                response_data["payload"]["start_promo"], "2020-04-24"
+            )
             self.assertEqual(response_data["payload"]["start"], "2020-05-01")
             self.assertEqual(response_data["payload"]["end"], "2020-05-31")
 
         # after promo starts for next
         with freeze_time("2020-06-28"):
-            response = self.client.get(path=self.url, content_type=self.content_type)
+            response = self.client.get(
+                path=self.url, content_type=self.content_type
+            )
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
             # Parse the response
             response_data = response.json()
             fail_message = f"Server response - {response_data}"
-            self.assertEqual(response_data["status"], "success", msg=fail_message)
-            self.assertEqual(response_data["payload"]["contest_id"], str(contest2.pk))
-            self.assertEqual(response_data["payload"]["start_promo"], "2020-06-21")
+            self.assertEqual(
+                response_data["status"], "success", msg=fail_message
+            )
+            self.assertEqual(
+                response_data["payload"]["contest_id"], str(contest2.pk)
+            )
+            self.assertEqual(
+                response_data["payload"]["start_promo"], "2020-06-21"
+            )
             self.assertEqual(response_data["payload"]["start"], "2020-07-01")
             self.assertEqual(response_data["payload"]["end"], "2020-07-31")
 
         # after last contest
         with freeze_time("2020-08-14"):
-            response = self.client.get(path=self.url, content_type=self.content_type)
+            response = self.client.get(
+                path=self.url, content_type=self.content_type
+            )
             # Check for a successful response by the server
             self.assertEqual(response.status_code, 200)
             # Parse the response
             response_data = response.json()
             fail_message = f"Server response - {response_data}"
-            self.assertEqual(response_data["status"], "success", msg=fail_message)
-            self.assertEqual(response_data["payload"]["contest_id"], str(contest2.pk))
-            self.assertEqual(response_data["payload"]["start_promo"], "2020-06-21")
+            self.assertEqual(
+                response_data["status"], "success", msg=fail_message
+            )
+            self.assertEqual(
+                response_data["payload"]["contest_id"], str(contest2.pk)
+            )
+            self.assertEqual(
+                response_data["payload"]["start_promo"], "2020-06-21"
+            )
             self.assertEqual(response_data["payload"]["start"], "2020-07-01")
             self.assertEqual(response_data["payload"]["end"], "2020-07-31")

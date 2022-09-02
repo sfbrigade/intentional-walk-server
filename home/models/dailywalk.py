@@ -1,4 +1,5 @@
 from django.db import models
+
 from home.templatetags.format_helpers import m_to_mi
 
 
@@ -9,13 +10,27 @@ class DailyWalk(models.Model):
     account. It is always linked to the specific device identifier :model: `home.Device`
     """
 
-    date = models.DateField(help_text="The specific date for which the steps are recorded")
+    date = models.DateField(
+        help_text="The specific date for which the steps are recorded"
+    )
     steps = models.IntegerField(help_text="Number of steps recorded")
     distance = models.FloatField(help_text="Total distance covered")
-    device = models.ForeignKey("Device", on_delete=models.CASCADE, help_text="Device the data is coming from")
-    account = models.ForeignKey("Account", on_delete=models.CASCADE, help_text="Account the data is linked to")
-    created = models.DateTimeField(auto_now_add=True, help_text="Record creation timestamp")
-    updated = models.DateTimeField(auto_now=True, help_text="Record updation timestamp")
+    device = models.ForeignKey(
+        "Device",
+        on_delete=models.CASCADE,
+        help_text="Device the data is coming from",
+    )
+    account = models.ForeignKey(
+        "Account",
+        on_delete=models.CASCADE,
+        help_text="Account the data is linked to",
+    )
+    created = models.DateTimeField(
+        auto_now_add=True, help_text="Record creation timestamp"
+    )
+    updated = models.DateTimeField(
+        auto_now=True, help_text="Record updation timestamp"
+    )
 
     @property
     def distance_in_miles(self):
@@ -32,5 +47,7 @@ class DailyWalk(models.Model):
     class Meta:
         ordering = ("-date",)
         constraints = [
-            models.UniqueConstraint(fields=["account", "date"], name="account_date"),
+            models.UniqueConstraint(
+                fields=["account", "date"], name="account_date"
+            ),
         ]

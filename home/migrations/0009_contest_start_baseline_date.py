@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('home', '0008_alter_gender_race_fields_setfield'),
+        ("home", "0008_alter_gender_race_fields_setfield"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='contest',
-            name='start_baseline',
-            field=models.DateField(blank=True, help_text='Start of baseline period (prior to contest start)', null=True),
+            model_name="contest",
+            name="start_baseline",
+            field=models.DateField(
+                blank=True,
+                help_text="Start of baseline period (prior to contest start)",
+                null=True,
+            ),
         ),
     ]

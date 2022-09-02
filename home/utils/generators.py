@@ -1,14 +1,20 @@
 import random
-
 from datetime import date, timedelta
-from django.utils import timezone
 from enum import Enum
-from faker import Faker
 from typing import List, Optional
 from uuid import uuid4
 
+from django.utils import timezone
+from faker import Faker
+
 from home.models import Account, Contest, DailyWalk, Device, IntentionalWalk
-from home.models.account import GenderLabels, IsLatinoLabels, RaceLabels, SAN_FRANCISCO_ZIP_CODES, SexualOrientationLabels
+from home.models.account import (
+    SAN_FRANCISCO_ZIP_CODES,
+    GenderLabels,
+    IsLatinoLabels,
+    RaceLabels,
+    SexualOrientationLabels,
+)
 
 
 class AccountGenerator:
@@ -31,10 +37,11 @@ class AccountGenerator:
         racial_background = set()
         num_races = random.randint(1, 3)
         for x in range(num_races):
-            racial_background.add(random.choice(
-                [enm.name for enm in self.races]))
+            racial_background.add(
+                random.choice([enm.name for enm in self.races])
+            )
         if "DA" in racial_background:
-            racial_background = {'DA'}
+            racial_background = {"DA"}
         gender_background = random.choice([en.name for en in self.genders])
         return dict(
             email=self.fake.unique.email(),
@@ -43,9 +50,9 @@ class AccountGenerator:
             zip=random.choice(self.zips),
             age=random.randint(10, 100),
             gender=gender_background,
-            gender_other='Gender Queer' if gender_background == 'OT' else None,
+            gender_other="Gender Queer" if gender_background == "OT" else None,
             race=racial_background,
-            race_other='Middle Eastern' if "OT" in racial_background else None,
+            race_other="Middle Eastern" if "OT" in racial_background else None,
             sexual_orien=random.choice([en.name for en in self.sexual_oriens]),
             is_latino=random.choice([en.name for en in self.ethnicity]),
         )

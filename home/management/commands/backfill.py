@@ -28,10 +28,14 @@ class Command(BaseCommand):
         subparser_account_contests.add_argument(
             "--dry_run", "-N", action="store_true", help="Dry run (no-op)"
         )
-        subparser_account_contests.set_defaults(func=self._backfill_account_contests)
+        subparser_account_contests.set_defaults(
+            func=self._backfill_account_contests
+        )
 
         subparser_account_contests_opts = (
-            subparser_account_contests.add_mutually_exclusive_group(required=True)
+            subparser_account_contests.add_mutually_exclusive_group(
+                required=True
+            )
         )
         subparser_account_contests_opts.add_argument(
             "--all", action="store_true", help="Populate all contests"
