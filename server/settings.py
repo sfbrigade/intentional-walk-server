@@ -19,8 +19,7 @@ load_dotenv(find_dotenv())
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__) / ".." / ".."
-PROJECT_ROOT = BASE_DIR / "home"
-STATIC_ROOT = PROJECT_ROOT / "static"
+PROJECT_ROOT = BASE_DIR
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -29,8 +28,20 @@ STATIC_ROOT = PROJECT_ROOT / "static"
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.getenv("DEBUG"))
+PRODUCTION = os.getenv("DEPLOY_ENV") == "production"
+DEBUG = bool(os.getenv("DEBUG", not PRODUCTION))
 
+# Static files configuration
+STATIC_URL = "static/"
+STATICFILES_DIRS = [PROJECT_ROOT / "static"]
+STATIC_ROOT = PROJECT_ROOT / "staticfiles"
+
+if PRODUCTION:
+    STATICFILES_STORAGE = (
+        "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    )
+
+# Host configuration
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
 
@@ -42,16 +53,24 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
     "django.contrib.admindocs",
     "django.contrib.humanize",
     "home.apps.HomeConfig",
 ]
 
+if PRODUCTION:
+    INSTALLED_APPS.append("whitenoise.runserver_nostatic")
+INSTALLED_APPS.append("django.contrib.staticfiles")
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+]
+
+if PRODUCTION:
+    MIDDLEWARE.append("whitenoise.middleware.WhiteNoiseMiddleware")
+
+MIDDLEWARE += [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -131,7 +150,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = "/static/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
