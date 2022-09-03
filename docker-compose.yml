@@ -4,6 +4,8 @@ services:
     image: postgres:12
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
   server:
     build: .
     env_file:
@@ -12,3 +14,6 @@ services:
       - ${PORT:-8000}:8000
     depends_on:
       - db
+
+volumes:
+  postgres-data: {}
