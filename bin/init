@@ -30,8 +30,8 @@ if [ $RESULT -ne 0 ]; then
 
   echo "Done importing random SQL data to the new database."
   echo "To create a superuser, run a bash shell in the \
-intentional-walk-server-server docker container and create one:"
-  echo '    `docker exec -it <container> /bin/bash`
+server docker container and create one:"
+  echo '    `docker compose exec server bash -l`
     `/app# python3 manage.py createsuperuser`
 '
 fi
