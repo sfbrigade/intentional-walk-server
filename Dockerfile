@@ -1,4 +1,5 @@
 FROM python:3.8
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Install postgres client
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add - && \
@@ -11,13 +12,12 @@ RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key ad
 RUN curl https://cli-assets.heroku.com/install.sh | sh
 
 # Install poetry
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
 # Add files
 ADD . /app
 WORKDIR /app
 
 # Run poetry to install dependencies
-RUN . $HOME/.poetry/env && \
-    poetry config virtualenvs.create false && \
+RUN poetry config virtualenvs.create false && \
     poetry install

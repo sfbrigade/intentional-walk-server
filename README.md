@@ -23,6 +23,7 @@ See [Wiki](https://github.com/sfbrigade/intentional-walk-server/wiki)
 
    It will take a while the first time you run this command to download and
    build the images to run the web application code in a Docker "container".
+   In addition, random database data is generated during this process.
 
 4. Now you should be able to open the web app in your browser at: http://localhost:8000/
 
@@ -85,6 +86,13 @@ server container and perform the following actions within the container CLI.
 
    ```
    # bin/pg_restore_dump <name of backup.dump>
+   ```
+
+ * To generate a random database dump for development
+
+   ```
+   # python scripts/dummydata.py --help
+   # python scripts/dummydata.py > data.dump
    ```
 
 ## Heroku deployment info

@@ -15,6 +15,10 @@ jobs:
           POSTGRES_HOST_AUTH_METHOD=trust
     steps:
       - checkout
+      - run:
+          name: Install latest Poetry
+          command: |
+            curl -sSL https://install.python-poetry.org | python3 -
       - restore_cache:
           keys:
             - deps-{{ checksum "poetry.lock" }}

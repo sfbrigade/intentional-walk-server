@@ -21,4 +21,17 @@ if [ $RESULT -ne 0 ]; then
   DB_NAME=${DATABASE_URL##*/}
   psql ${DB_HOST} -c "CREATE DATABASE ${DB_NAME};"
   python manage.py migrate
+
+  echo "Generating random SQL data..."
+  sql="$(python3 /app/scripts/dummydata.py --accounts 100)"
+
+  echo "Importing random SQL data..."
+  echo $sql | psql --quiet "${DATABASE_URL}"
+
+  echo "Done importing random SQL data to the new database."
+  echo "To create a superuser, run a bash shell in the \
+server docker container and create one:"
+  echo '    `docker compose exec server bash -l`
+    `/app# python3 manage.py createsuperuser`
+'
 fi
