@@ -2,7 +2,6 @@ from datetime import date, datetime, timedelta
 
 from django.test import Client, TestCase
 from home.models import Contest
-
 from home.utils import localize
 from home.utils.generators import (
     AccountGenerator,
@@ -14,7 +13,6 @@ from home.views.web.user import (
     get_daily_walk_summaries,
     get_intentional_walk_summaries,
 )
-
 from pytz import utc
 
 
@@ -34,6 +32,16 @@ class TestUserListView(TestCase):
                 name="Colonel Mustard",
             )
         )
+
+        # Set mustard.created as if they created the account right
+        # after contest.start_promo located at the bottom of this
+        # function.
+        # We have to do this because the Account model automatically
+        # adds a NOW() when created, so we set it after creation.
+        t = utc.localize(datetime(3000, 3, 2, 10, 0))
+        mustard.created = t
+        mustard.save()
+
         # Device associated with Plum
         device_plum = next(DeviceGenerator([plum]).generate(1))
         # Device associated with Mustard
@@ -45,8 +53,17 @@ class TestUserListView(TestCase):
         for dt in range(20):
             # Set dates on walks to 3000-03-01 to 3000-03-20
             t = utc.localize(datetime(3000, 3, 1, 10, 0)) + timedelta(days=dt)
-            next(dw_plum.generate(1, date=t, steps=100, distance=50))
-            next(dw_mustard.generate(1, date=t, steps=200, distance=100))
+            next(
+                dw_plum.generate(
+                    1, account_id=plum.id, date=t, steps=100, distance=50
+                )
+            )
+
+            next(
+                dw_mustard.generate(
+                    1, account_id=mustard.id, date=t, steps=200, distance=100
+                )
+            )
 
         # Generate intentional walks (5, every other day)
         iw_plum = IntentionalWalkGenerator([device_plum])
@@ -144,3 +161,41 @@ class TestUserListView(TestCase):
         # iw: [8, 10, 12, 14]
         self.assertEqual(4, plum_data["num_rws"])
         self.assertEqual(4, mustard_data["num_rws"])
+
+    def test_UserListView_user_counts(self):
+        client = Client()
+        response = client.get(
+            "/users/", {"contest_id": self.contest.contest_id}
+        )
+
+        # We have two users, plum and mustard.
+        self.assertEqual(response.context_data["cnt_users"], 2)
+
+        # Only mustard created their account during this contest range.
+        self.assertEqual(response.context_data["cnt_signups"], 1)
+
+        # Both users have recorded walks in the contest we're looking at.
+        self.assertEqual(response.context_data["cnt_active_users"], 2)
+
+        # But only mustard is new.
+        self.assertEqual(response.context_data["cnt_new_active_users"], 1)
+
+
+class TestUserListViewEmptyContest(TestCase):
+    def setUp(self):
+        self.contest = Contest.objects.create(
+            start_promo="3000-03-01",
+            start="3000-03-08",
+            end="3000-03-14",
+        )
+
+    def test_UserListViewEmptyContest_user_counts(self):
+        client = Client()
+        response = client.get(
+            "/users/", {"contest_id": self.contest.contest_id}
+        )
+
+        self.assertEqual(response.context_data["cnt_users"], 0)
+        self.assertEqual(response.context_data["cnt_signups"], 0)
+        self.assertEqual(response.context_data["cnt_active_users"], 0)
+        self.assertEqual(response.context_data["cnt_new_active_users"], 0)

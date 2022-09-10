@@ -1,5 +1,6 @@
 {% extends 'home/base.html' %}
 {% load format_helpers %}
+{% load static %}
 
 {% block content %}
 
@@ -37,9 +38,8 @@
     </div>
 </div>
 
+{% if current_contest %}
 <div class="container-fluid" id="contest-maps-container">
-
-    {% if current_contest %}
 
     <!-- JSON data (TODO: find alternative to stuffing data into div) -->
     <div style="display: none" id="active-by-zip" data-json="{{ active_by_zip }}"></div>
@@ -81,10 +81,22 @@
             <div id="map-label-2" class="row map-title">Median steps by zip code</div>
         </div>
     </div>
-
-    {% endif %}
-
 </div>
+
+<div class="container">
+    <div class="row justify-content-center" style="display: flex">
+        <div class="col-lg-1"></div>
+        <div class="col-lg-4 justify-content-center">
+            <div id="account-bar-graph-1"></div>
+        </div>
+        <div class="col-lg-2"></div>
+        <div class="col-lg-4 justify-content-center">
+            <div id="account-bar-graph-2"></div>
+        </div>
+        <div class="col-lg-1"></div>
+    </div>
+</div>
+{% endif %}
 
 <div class="container-fluid" style="padding: 25px;">
     <div class="home-row table-responsive" style="font-size: 1.2em">
@@ -139,9 +151,10 @@
 {% endblock %}
 
 {% block post_scripts %}
+<script type="text/javascript" src="{% static 'home/user_plots.js' %}"></script>
 
 {% if current_contest %}
-<script>
+<script type="text/javascript">
     // *** DATATABLE TOOLBAR (checkbox) ***
     const table = $('#all_users').DataTable({
       dom: "<'toolbar'>Blftrip",
@@ -286,6 +299,20 @@
               .on("mouseover", updateNeighborhoodDetail)
               .on("mouseout", defaultNeighborhoodDetail);
     }
+
+    bootstrapUserBar(
+        "#account-bar-graph-1",
+        "Total users",
+        {{ cnt_users }},
+        {{ cnt_signups }}
+    );
+
+    bootstrapUserBar(
+        "#account-bar-graph-2",
+        "Total active users",
+        {{ cnt_active_users }},
+        {{ cnt_new_active_users }}
+    );
 
 </script>
 {% endif %}

@@ -4,7 +4,7 @@ from collections import defaultdict
 from datetime import date, timedelta
 from typing import Optional
 
-from django.db.models import Count, F, Sum
+from django.db.models import Count, Exists, F, OuterRef, Sum
 from django.views import generic
 
 from home.models import Account, Contest, DailyWalk, IntentionalWalk
@@ -251,4 +251,35 @@ class UserListView(generic.ListView):
         context["new_signups_by_zip"] = json.dumps(new_signups_by_zip)
         context["steps_by_zip"] = json.dumps(steps_by_zip)
         context["include_testers"] = include_testers
+
+        if contest is not None:
+            # The following statements are responsible for giving the context
+            # data needed to render user count bar graphs for a particular
+            # contest.
+
+            # Include a count of all users in the database.
+            context["cnt_users"] = Account.objects.count()
+
+            # Include a count of new signups in the database.
+            new_signups = Account.objects.filter(
+                created__gte=localize(contest.start_promo),
+            )
+            context["cnt_signups"] = new_signups.count()
+
+            # Include a counter of active users for this contest found
+            # in the database.
+            dw_query = DailyWalk.objects.filter(
+                account=OuterRef("id"),
+                date__gte=contest.start,
+            )
+            active_users = Account.objects.filter(Exists(dw_query))
+            context["cnt_active_users"] = active_users.count()
+
+            # Include a counter of **new** active users for this contest
+            # found in the database.
+            new_active_users = active_users.filter(
+                created__gte=localize(contest.start_promo),
+            )
+            context["cnt_new_active_users"] = new_active_users.count()
+
         return context
