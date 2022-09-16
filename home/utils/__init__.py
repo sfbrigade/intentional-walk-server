@@ -13,3 +13,8 @@ def localize(d: Union[date, datetime]) -> datetime:
         dt = datetime.combine(d, datetime.min.time())
     tz = timezone.get_default_timezone()
     return dt.astimezone(tz)
+
+
+def now() -> datetime:
+    tz = timezone.get_default_timezone()
+    return datetime.now(tz=tz)
