@@ -184,6 +184,70 @@ def _get_user_daily_step_counts(
     return daily_step_counts_by_user
 
 
+def all_user_stats_csv_view(request) -> HttpResponse:
+    columns = [
+        "Participant Name",
+        "Date Enrolled",
+        "Email",
+        "Zip Code",
+        "Sexual Orientation",
+        "Sexual Orientation Other",
+        "Gender Identity",
+        "Gender Identity Other",
+        "Race",
+        "Race Other",
+        "Is Latino",
+        "Age",
+        "Total Daily Walks",
+        "Total Daily Steps",
+        "Total Recorded Walks",
+        "Total Recorded Steps",
+    ]
+
+    users = Account.objects.order_by("created").order_by("name").all()
+    output = []
+    for user in users:
+        daily_walks = user.dailywalk_set.values("steps")
+        cnt_daily = len(daily_walks)
+        daily_steps = sum([w.get("steps") for w in daily_walks])
+
+        rec_walks = user.intentionalwalk_set.values("steps")
+        cnt_recorded = len(rec_walks)
+        rec_steps = sum([w.get("steps") for w in rec_walks])
+
+        output.append(
+            {
+                "Participant Name": user.name,
+                "Date Enrolled": user.created,
+                "Email": user.email,
+                "Zip Code": user.zip,
+                "Sexual Orientation": user.sexual_orien,
+                "Sexual Orientation Other": user.sexual_orien_other,
+                "Gender Identity": user.gender,
+                "Gender Identity Other": user.gender_other,
+                "Race": user.race,
+                "Race Other": user.race_other,
+                "Is Latino": user.is_latino,
+                "Age": user.age,
+                "Total Daily Walks": cnt_daily,
+                "Total Daily Steps": daily_steps,
+                "Total Recorded Walks": cnt_recorded,
+                "Total Recorded Steps": rec_steps,
+            }
+        )
+
+    response = HttpResponse(content_type="text/csv")
+    response[
+        "Content-Disposition"
+    ] = 'attachment; filename="all_users_stats.csv"'
+
+    writer = csv.DictWriter(response, fieldnames=columns)
+    writer.writeheader()
+    writer.writerows(output)
+
+    return response
+
+
 def user_agg_csv_view(request) -> HttpResponse:
     if not request.user.is_authenticated:
         return HttpResponse("You are not authorized to view this!")
