@@ -58,6 +58,11 @@ urlpatterns = [
         name="intentionalwalk_get",
     ),
     path(
+        "api/currency/get",
+        views.CurrencyView.as_view(),
+        name="currency_get",
+    ),
+    path(
         "api/contest/current",
         views.ContestCurrentView.as_view(),
         name="contest_current",
