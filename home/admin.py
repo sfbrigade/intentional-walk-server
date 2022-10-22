@@ -8,7 +8,7 @@ class DeviceAdmin(admin.ModelAdmin):
     list_display = ["account", "device_id", "created"]
     list_display_links = ["account"]
     ordering = ["-created"]
-    search_fields = ["account"]
+    search_fields = ["account__name__icontains", "account__email__icontains"]
 
 
 @admin.register(Account)
@@ -32,7 +32,7 @@ class DailyWalkAdmin(admin.ModelAdmin):
     list_display_links = ["account", "date", "steps", "distance"]
     readonly_fields = ["account", "created", "updated"]
     ordering = ["-date"]
-    search_fields = ["account"]
+    search_fields = ["account__name__icontains", "account__email__icontains"]
 
 
 @admin.register(IntentionalWalk)
@@ -41,7 +41,7 @@ class IntentionalWalkAdmin(admin.ModelAdmin):
     list_display_links = ["account", "start", "end", "steps", "distance"]
     readonly_fields = ["account", "created"]
     ordering = ["-start"]
-    search_fields = ["account"]
+    search_fields = ["account__name__icontains", "account__email__icontains"]
 
 
 @admin.register(Contest)
