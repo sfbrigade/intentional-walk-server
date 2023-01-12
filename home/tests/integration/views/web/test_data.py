@@ -40,11 +40,12 @@ class TestCsvViews(TestCase):
         Login()
 
         # Generate fake accounts
-        accounts = list(AccountGenerator().generate(2))
+        cls.accounts = list(AccountGenerator().generate(2))
+
         # Device associated with accounts[0]
-        device0 = list(DeviceGenerator(accounts[0:1]).generate(1))
+        device0 = list(DeviceGenerator(cls.accounts[0:1]).generate(1))
         # Device associated with accounts[1]
-        device1 = list(DeviceGenerator(accounts[1:2]).generate(1))
+        device1 = list(DeviceGenerator(cls.accounts[1:2]).generate(1))
 
         # Generate daily walks (10 per device)
         dwalks0 = DailyWalkGenerator(device0)
@@ -76,6 +77,70 @@ class TestCsvViews(TestCase):
         for row in rows:
             grouped[row[key]].append(row)
         return grouped
+
+    def test_all_user_stats_csv_view(self):
+        client = Client()
+        self.assertTrue(self.login(client))
+
+        params = {
+            "start_baseline": date(3000, 2, 28),
+            "start_promo": date(3000, 3, 1),
+            "start": date(3000, 3, 7),
+            "end": date(3000, 3, 14),
+        }
+        next(ContestGenerator().generate(1, **params)).pk
+
+        response = client.get("/data/all_user_stats.csv")
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("text/csv", response["Content-Type"])
+        content = response.content.decode("utf-8")
+        reader = csv.DictReader(io.StringIO(content))
+
+        headers = reader.fieldnames
+        self.assertEqual(
+            headers,
+            [
+                "Participant Name",
+                "Date Enrolled",
+                "Email",
+                "Zip Code",
+                "Sexual Orientation",
+                "Sexual Orientation Other",
+                "Gender Identity",
+                "Gender Identity Other",
+                "Race",
+                "Race Other",
+                "Is Latino",
+                "Age",
+                "Total Daily Walks",
+                "Total Daily Steps",
+                "Total Recorded Walks",
+                "Total Recorded Steps",
+            ],
+        )
+
+        rows = list(reader)
+        # Order accounts in ascending order based on the name, to match
+        # the backend's production, which orders records by
+        # ascending order (created, name).
+        for i, account in enumerate(
+            sorted(self.accounts, key=lambda a: a.name)
+        ):
+            row = rows[i]
+            self.assertEqual(account.name, row.get("Participant Name"))
+            self.assertEqual(account.email, row.get("Email"))
+            self.assertEqual(account.zip, row.get("Zip Code"))
+            self.assertEqual(
+                account.sexual_orien, row.get("Sexual Orientation")
+            )
+            self.assertEqual(account.gender, row.get("Gender Identity"))
+            self.assertEqual(account.is_latino, row.get("Is Latino"))
+            self.assertEqual(account.age, int(row.get("Age")))
+            self.assertEqual(set(account.race), eval(row.get("Race")))
+            self.assertGreater(int(row.get("Total Daily Walks")), 0)
+            self.assertGreater(int(row.get("Total Daily Steps")), 0)
+            self.assertGreater(int(row.get("Total Recorded Walks")), 0)
+            self.assertGreater(int(row.get("Total Recorded Steps")), 0)
 
     def test_user_agg_csv_view(self):
         c = Client()
@@ -117,7 +182,7 @@ class TestCsvViews(TestCase):
         expected_headers = USER_AGG_CSV_BASE_HEADER[:] + [
             str(date(3000, 2, 28) + timedelta(days=dt)) for dt in range(15)
         ]
-        self.assertEquals(headers, expected_headers)
+        self.assertEqual(headers, expected_headers)
 
         rows = list(reader)
 

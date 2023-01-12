@@ -16,6 +16,11 @@ urlpatterns = [
         views.user_agg_csv_view,
         name="users_agg_csv_view",
     ),
+    path(
+        "data/all_user_stats.csv",
+        views.all_user_stats_csv_view,
+        name="all_user_stats_csv_view",
+    ),
     path("data/users.csv", views.users_csv_view, name="users_csv_view"),
     path(
         "data/daily_walks.csv",
