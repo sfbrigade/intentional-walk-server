@@ -1,18 +1,21 @@
-import json
-import logging
-from collections import defaultdict
 from datetime import date, timedelta
 from typing import Optional
+
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+
+from home.models import Contest, DailyWalk, Device
 
 from django.db.models import Count, Exists, F, OuterRef, Sum
 from django.views import generic
 
 from home.models import Account, Contest, DailyWalk, IntentionalWalk
-from home.templatetags.format_helpers import m_to_mi
 from home.utils import localize
+from collections import Counter
 
 
-logger = logging.getLogger(__name__)
 ACCOUNT_FIELDS = [
     "email",
     "name",
@@ -28,8 +31,6 @@ ACCOUNT_FIELDS = [
     "sexual_orien",
     "sexual_orien_other",
 ]
-
-# HELPER CLASS/FUNCTIONS
 
 
 def get_daily_walk_summaries(**filters):
@@ -129,33 +130,17 @@ def get_contest_walks(
     )
 
 
-def get_new_signups(contest: Contest, include_testers=False):
-    accounts = Account.objects.values(*ACCOUNT_FIELDS).filter(
-        created__range=(
-            localize(contest.start_promo),
-            localize(contest.end),
-        )
-    )
-    return [a for a in accounts if include_testers or not a.get("is_tester")]
 
 
-########################################################################
-# VIEW(S)
-########################################################################
-#
-# User list page
-#       Puts "user_stats_list" -> context
-#       which is a list of rows containing user stats to be displayed
-#       (see home/tempolates/home/user_list.html)
-#
+@method_decorator(csrf_exempt, name="dispatch")
+class LeaderboardListView(View):
+    """View to retrieve leaderboard"""
 
+    http_method_names = ["get"]
 
-class UserListView(generic.ListView):
-    template_name = "home/user_list.html"
-    model = Account
+        
 
-    # Augment context data to
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, request, *args, **kwargs):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
 
@@ -177,11 +162,7 @@ class UserListView(generic.ListView):
         user_stats_container = {}
         context["user_stats_list"] = []
 
-        # `zipcounts` holds user counts by zip code for visualization
-        active_by_zip = defaultdict(lambda: 0)
-        all_users_by_zip = defaultdict(lambda: 0)
-        new_signups_by_zip = defaultdict(lambda: 0)
-        steps_by_zip = defaultdict(list)
+
 
         # If a contest is specified, include all new signups, regardless of
         # whether they walked during the contest or not.
@@ -190,13 +171,13 @@ class UserListView(generic.ListView):
             context["current_contest"] = contest
             context["download_url"] += f"?contest_id={contest_id}"
 
-            # Find everyone who signed up during the constest
-            for acct in get_new_signups(contest, include_testers):
-                if acct["email"] not in daily_walks:
-                    user_stats_container[acct["email"]] = dict(
-                        new_signup=True, account=acct
-                    )
-                    new_signups_by_zip[acct["zip"]] += 1
+            # # Find everyone who signed up during the constest
+            # for acct in get_new_signups(contest, include_testers):
+            #     if acct["email"] not in daily_walks:
+            #         user_stats_container[acct["email"]] = dict(
+            #             new_signup=True, account=acct
+            #         )
+            #         new_signups_by_zip[acct["zip"]] += 1
 
         # Add all accounts found in filtered daily walk data
         for email, dw_row in daily_walks.items():
@@ -215,8 +196,8 @@ class UserListView(generic.ListView):
             )
             user_stats["account"] = acct
             user_stats["dw_steps"] = dw_row["dw_steps"]
-            user_stats["dw_distance"] = m_to_mi(dw_row["dw_distance"])
-            user_stats["num_dws"] = dw_row["dw_count"]
+            #user_stats["dw_distance"] = m_to_mi(dw_row["dw_distance"])
+            #user_stats["num_dws"] = dw_row["dw_count"]
 
             # Also add recorded walk data
             iw_row = intentional_walks.get(email)
@@ -232,54 +213,61 @@ class UserListView(generic.ListView):
             # Put user_stats (row) back into container
             user_stats_container[email] = user_stats
 
-            # Map stats
-            zipcode = acct["zip"]
-            active_by_zip[zipcode] += 1
-            steps_list = steps_by_zip[zipcode]
-            steps_list.append(dw_row["dw_steps"])
-
-        for user in user_stats_container.values():
-            all_users_by_zip[user["account"]["zip"]] += 1
+         
 
         context["user_stats_list"] = user_stats_container.values()
         context["contests"] = Contest.objects.all()
 
-        # This allows us to place json (string) data into the `data-json` prop
-        # of a <div /> (Probably not ideal but enables us to pass data to
-        # <script /> for mapping.)
-        context["active_by_zip"] = json.dumps(active_by_zip)
-        context["all_users_by_zip"] = json.dumps(all_users_by_zip)
-        context["new_signups_by_zip"] = json.dumps(new_signups_by_zip)
-        context["steps_by_zip"] = json.dumps(steps_by_zip)
-        context["include_testers"] = include_testers
+      
 
-        if contest is not None:
-            # The following statements are responsible for giving the context
-            # data needed to render user count bar graphs for a particular
-            # contest.
-
-            # Include a count of all users in the database.
-            context["cnt_users"] = Account.objects.count()
-
-            # Include a count of new signups in the database.
-            new_signups = Account.objects.filter(
-                created__gte=localize(contest.start_promo),
-            )
-            context["cnt_signups"] = new_signups.count()
-
-            # Include a counter of active users for this contest found
-            # in the database.
-            dw_query = DailyWalk.objects.filter(
-                account=OuterRef("id"),
-                date__gte=contest.start,
-            )
-            active_users = Account.objects.filter(Exists(dw_query))
-            context["cnt_active_users"] = active_users.count()
-
-            # Include a counter of **new** active users for this contest
-            # found in the database.
-            new_active_users = active_users.filter(
-                created__gte=localize(contest.start_promo),
-            )
-            context["cnt_new_active_users"] = new_active_users.count()
         return context
+    
+    def get(self, request, *args, **kwargs):
+        user_stats_container = {}
+        #context["user_stats_list"] = []
+
+        contest = Contest.active()
+
+        daily_walks, intentional_walks, _, _ = get_contest_walks(contest)
+
+        # get the current/next Contest
+   
+        leaderboard = {}
+        user_steps={}
+        for email, dw_row in daily_walks.items():
+            acct = Account.objects.values(*ACCOUNT_FIELDS).get(email=email)
+
+            # Skip testers unless include_testers
+            #if not include_testers and acct.get("is_tester"):
+             #   continue
+
+            # Don't include those who signed up after the contest ended
+            if contest and acct["created"] > localize(contest.end):
+                continue
+
+            user_stats = user_stats_container.get(
+                email, dict(new_signup=False)
+            )
+            user_stats["account"] = acct
+            user_stats["dw_steps"] = dw_row["dw_steps"]
+            user_steps[email] = dw_row["dw_steps"]
+            user_stats_container[email] = user_stats
+
+
+        leaderboard = (dict(Counter(user_steps).most_common(10)))
+
+
+        if contest is None:
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "message": "There are no contests",
+                }
+            )
+        return JsonResponse(
+            {
+                "leaderboard": leaderboard,
+           
+            }
+         )
+    
