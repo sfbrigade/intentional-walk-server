@@ -11,7 +11,6 @@ from home.models import Account, Contest, DailyWalk, IntentionalWalk
 from home.templatetags.format_helpers import m_to_mi
 from home.utils import localize
 
-
 logger = logging.getLogger(__name__)
 ACCOUNT_FIELDS = [
     "email",
@@ -282,4 +281,5 @@ class UserListView(generic.ListView):
                 created__gte=localize(contest.start_promo),
             )
             context["cnt_new_active_users"] = new_active_users.count()
+            
         return context

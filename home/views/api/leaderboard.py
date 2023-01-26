@@ -1,16 +1,12 @@
 from datetime import date, timedelta
 from typing import Optional
-
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-
-from home.models import Contest, DailyWalk, Device
-
-from django.db.models import Count, Exists, F, OuterRef, Sum
-from django.views import generic
-
+from home.models import Contest, DailyWalk
+#Device
+from django.db.models import Count, F, Sum
 from home.models import Account, Contest, DailyWalk, IntentionalWalk
 from home.utils import localize
 from collections import Counter
@@ -218,22 +214,20 @@ class LeaderboardListView(View):
         context["user_stats_list"] = user_stats_container.values()
         context["contests"] = Contest.objects.all()
 
-      
-
         return context
     
     def get(self, request, *args, **kwargs):
         user_stats_container = {}
         #context["user_stats_list"] = []
-
+        
         contest = Contest.active()
-
+        
         daily_walks, intentional_walks, _, _ = get_contest_walks(contest)
-
         # get the current/next Contest
-   
+        
         leaderboard = {}
         user_steps={}
+
         for email, dw_row in daily_walks.items():
             acct = Account.objects.values(*ACCOUNT_FIELDS).get(email=email)
 
@@ -255,7 +249,6 @@ class LeaderboardListView(View):
 
 
         leaderboard = (dict(Counter(user_steps).most_common(10)))
-
 
         if contest is None:
             return JsonResponse(
