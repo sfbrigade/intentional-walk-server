@@ -5,15 +5,10 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Count, F, Sum
 
-from home.models import Contest, DailyWalk, Device
-
-from django.db.models import Count, Exists, F, OuterRef, Sum
-from django.views import generic
-
-from home.models import Account, Contest, DailyWalk, IntentionalWalk, Device
+from home.models import Account, Contest, DailyWalk, IntentionalWalk
 from home.utils import localize
-from collections import Counter
 
 
 ACCOUNT_FIELDS = [
@@ -131,15 +126,11 @@ def get_contest_walks(
     )
 
 
-
-
 @method_decorator(csrf_exempt, name="dispatch")
 class LeaderboardListView(View):
     """View to retrieve leaderboard"""
 
     http_method_names = ["get"]
-
-        
 
     def get_context_data(self, request, *args, **kwargs):
         # Call the base implementation first to get a context
@@ -162,8 +153,6 @@ class LeaderboardListView(View):
         # Prepare loading of data into context
         user_stats_container = {}
         context["user_stats_list"] = []
-
-
 
         # If a contest is specified, include all new signups, regardless of
         # whether they walked during the contest or not.
@@ -197,9 +186,6 @@ class LeaderboardListView(View):
             )
             user_stats["account"] = acct
             user_stats["dw_steps"] = dw_row["dw_steps"]
-            #print( user_stats["dw_steps"])
-            #user_stats["dw_distance"] = m_to_mi(dw_row["dw_distance"])
-            #user_stats["num_dws"] = dw_row["dw_count"]
 
             # Also add recorded walk data
             iw_row = intentional_walks.get(email)
@@ -215,18 +201,13 @@ class LeaderboardListView(View):
             # Put user_stats (row) back into container
             user_stats_container[email] = user_stats
 
-         
-
         context["user_stats_list"] = user_stats_container.values()
         context["contests"] = Contest.objects.all()
 
-      
-
         return context
-    
+
     def get(self, request, *args, **kwargs):
         user_stats_container = {}
-        #context["user_stats_list"] = []
 
         contest = Contest.active()
 
@@ -234,10 +215,10 @@ class LeaderboardListView(View):
 
         # get the current/next Contest
         leaderboard_list = []
-        user_steps={}
-        for  email, dw_row in daily_walks.items():
+        user_steps = {}
+        for email, dw_row in daily_walks.items():
             acct = Account.objects.values(*ACCOUNT_FIELDS).get(email=email)
-         
+
             if contest and acct["created"] > localize(contest.end):
                 continue
 
@@ -249,14 +230,13 @@ class LeaderboardListView(View):
             id = acct["id"]
 
             user_steps[id] = dw_row["dw_steps"]
-            leaderboard_list.append({"id":id, "steps":user_steps[id]})
-        
+            leaderboard_list.append({"id": id, "steps": user_steps[id]})
+
         leaderboard_length = 10
-        leaderboard_list = sorted(leaderboard_list, key=lambda user: -user['steps'])
-        leaderboard_list= leaderboard_list[:leaderboard_length]
-
-
- 
+        leaderboard_list = sorted(
+            leaderboard_list, key=lambda user: -user["steps"]
+        )
+        leaderboard_list = leaderboard_list[:leaderboard_length]
 
         if contest is None:
             return JsonResponse(
@@ -268,11 +248,5 @@ class LeaderboardListView(View):
         return JsonResponse(
             {
                 "leaderboard": leaderboard_list,
-           
             }
-         )
-    
-
-
-
-
+        )

@@ -62,7 +62,7 @@ urlpatterns = [
         views.ContestCurrentView.as_view(),
         name="contest_current",
     ),
-      path(
+    path(
         "api/leaderboard/get",
         views.LeaderboardListView.as_view(),
         name="leaderboard_get",
