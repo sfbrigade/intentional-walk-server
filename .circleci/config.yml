@@ -1,30 +1,31 @@
 version: 2.1
 
 orbs:
-  docker: circleci/docker@0.6.0
+  docker: circleci/docker@2.2.0
 
 jobs:
   build-and-test:
     docker:
-      - image: circleci/python:3.8
+      - image: cimg/python:3.8
         environment:
           DATABASE_URL: "postgresql://postgres@localhost/webtool"
           SECRET_KEY: "secretkey"
-      - image: circleci/postgres:11
+      - image: cimg/postgres:11.17
         environment:
           POSTGRES_HOST_AUTH_METHOD=trust
     steps:
       - checkout
       - run:
-          name: Install latest Poetry
+          name: Install Poetry
           command: |
-            curl -sSL https://install.python-poetry.org | python3 -
+            curl -sSL https://install.python-poetry.org | python3 - --version 1.2.2
       - restore_cache:
           keys:
             - deps-{{ checksum "poetry.lock" }}
       - run:
           name: Install Dependencies
           command: |
+            poetry config virtualenvs.create false
             poetry install
       - save_cache:
           key: deps-{{ checksum "poetry.lock" }}
@@ -40,7 +41,6 @@ jobs:
           command: |
             poetry run coverage run --omit="/home/circleci/.cache/pypoetry/virtualenvs/*" -m pytest
             poetry run coveralls
-
 workflows:
   main:
     jobs:
