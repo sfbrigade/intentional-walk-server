@@ -2,10 +2,12 @@ from django.test import Client, TestCase
 
 
 class TestLeaderboard(TestCase):
-    def test_UserListViewEmptyContest_user_counts(self):
+    def test_Leaderboard(self):
         client = Client()
         response = client.get(
             "/api/leaderboard/get"
             # , {"contest_id": self.contest.contest_id}
         )
-        self.assertEqual(response, response)
+        print(response)
+        print("end response)")
+        self.assertEqual(response, "5")
