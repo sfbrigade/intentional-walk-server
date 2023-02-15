@@ -3,3 +3,5 @@ from .contest import Contest
 from .dailywalk import DailyWalk
 from .device import Device
 from .intentionalwalk import IntentionalWalk
+from .leaderboard import Leaderboard
+

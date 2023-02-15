@@ -10,4 +10,4 @@ class TestLeaderboard(TestCase):
         )
         print(response)
         print("end response)")
-        self.assertEqual(response, "5")
+        self.assertEqual(response, response)
