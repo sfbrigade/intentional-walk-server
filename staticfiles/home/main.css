@@ -1,0 +1,71 @@
+html, body {
+    font-family: 'Rajdhani';
+    height: 100%
+}
+.navbar {
+    font-family: 'Exo';
+    font-size: 1.25em;
+}
+.rw-col {
+    display: none;
+}
+.yesno {
+    text-transform: capitalize;
+}
+.map-title {
+    margin-top: 10px;
+    font-size: 1.25em;
+    font-weight: bold;
+    text-align: center;
+}
+
+#contest-title {
+    padding: 50px;
+    color: #CD6155;
+    text-align: center;
+}
+#geo-info {
+    padding-top: 50px;
+    padding-left: 75px;
+    min-width: 400px;
+}
+#geo-info .row {
+    margin-bottom: 0;
+}
+#geo-info-name {
+    font-weight: bold;
+    margin-bottom: 50px;
+}
+#contest-maps-container {
+    margin-bottom: 50px;
+}
+#map-label-1 {
+    color: #702B84;
+}
+#map-label-2 {
+    color: #2B388F;
+}
+
+.graph-title {
+    font-family: 'Rajdhani';
+    font-weight: bold;
+    font-size: 1.25em;
+}
+
+.label {
+    font-family: 'Rajdhani';
+    font-weight: bold;
+}
+
+.tooltip-text {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #222;
+    color: #fff !important;
+    border-radius: 4px;
+}
+.tooltip, .tooltip-text {
+    cursor: default;
+}

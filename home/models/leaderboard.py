@@ -1,16 +1,12 @@
 from django.db import models
 
 
-
 # Event model
 class Leaderboard(models.Model):
-    """
-   
-    """
+    """ """
 
-  
     steps = models.IntegerField(help_text="Number of steps recorded")
-   
+
     account = models.ForeignKey(
         "Account",
         on_delete=models.CASCADE,
@@ -24,9 +20,8 @@ class Leaderboard(models.Model):
     contests = models.ManyToManyField(
         "Contest",
         blank=True,
-        help_text="All the contests the account has enrolled in",
+        help_text="All the contests the account is enrolled in",
     )
-
 
     # Auto populate the account field from the device field
     def save(self, *args, **kwargs):
@@ -35,5 +30,3 @@ class Leaderboard(models.Model):
 
     # def __str__(self):
     #     return f"{self.account.email} | {self.date}"
-
- 
