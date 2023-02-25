@@ -40,8 +40,11 @@ const Api = {
     home() {
       return instance.get("/api/admin/home");
     },
-    users({ page }) {
-      return instance.get("/api/admin/users", { params: { page } });
+    contests() {
+      return instance.get("/api/admin/contests");
+    },
+    users({ contest_id, page }) {
+      return instance.get("/api/admin/users", { params: { contest_id, page } });
     },
   },
 };

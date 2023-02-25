@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { DateTime } from "luxon";
 import numeral from "numeral";
 
@@ -10,16 +10,34 @@ import "./UsersList.scss";
 
 function UsersList() {
   const { search } = useLocation();
+  const navigate = useNavigate();
   const params = new URLSearchParams(search);
 
   const page = parseInt(params.get("page") ?? "1", 10);
   const [lastPage, setLastPage] = useState();
 
+  const contest_id = params.get("contest_id") ?? "";
+  const [contests, setContests] = useState();
+
+  const [contest, setContest] = useState();
   const [users, setUsers] = useState();
 
   useEffect(() => {
     let cancelled = false;
-    Api.admin.users({ page }).then((response) => {
+    Api.admin
+      .contests()
+      .then((response) => !cancelled && setContests(response.data));
+    return () => (cancelled = true);
+  }, []);
+
+  useEffect(() => {
+    setContest(contests?.find((c) => c.contest_id === contest_id));
+  }, [contests, contest_id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setUsers();
+    Api.admin.users({ contest_id, page }).then((response) => {
       if (cancelled) {
         return;
       }
@@ -35,21 +53,47 @@ function UsersList() {
       setLastPage(newLastPage);
     });
     return () => (cancelled = true);
-  }, [page]);
+  }, [contest_id, page]);
+
+  function onChangeContest(event) {
+    const newContestId = event.target.value;
+    navigate(newContestId ? `?contest_id=${newContestId}` : "");
+  }
 
   return (
     <div className="users-list container-fluid">
       <div className="row my-5">
-        <div className="col"></div>
-        <div className="col">
+        <div className="col-md">
           <h2 className="users-list__title">All users</h2>
         </div>
-        <div className="col"></div>
+        <div className="col-md order-md-first">
+          <div className="d-flex">
+            <label className="col-form-label me-2" for="contest_id">
+              Contest:
+            </label>
+            <select
+              value={contest_id}
+              onChange={onChangeContest}
+              className="form-select w-auto"
+              id="contest_id"
+            >
+              <option value="">None</option>
+              {contests?.map((c) => (
+                <option key={c.contest_id} value={c.contest_id}>
+                  {DateTime.fromISO(c.start).toLocaleString(DateTime.DATE_MED)}{" "}
+                  - {DateTime.fromISO(c.end).toLocaleString(DateTime.DATE_MED)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="col-md"></div>
       </div>
       <div className="table-responsive">
         <table className="users-list__table table table-striped">
           <thead>
             <tr>
+              <th></th>
               <th>Name</th>
               <th>Email</th>
               <th>Age</th>
@@ -61,8 +105,9 @@ function UsersList() {
             </tr>
           </thead>
           <tbody>
-            {users?.map((u) => (
+            {users?.map((u, i) => (
               <tr key={u.id}>
+                <td>{(page - 1) * 25 + i + 1}.</td>
                 <td>{u.name}</td>
                 <td>{u.email}</td>
                 <td>{u.age}</td>
@@ -82,7 +127,11 @@ function UsersList() {
             ))}
           </tbody>
         </table>
-        <Pagination page={page} lastPage={lastPage} />
+        <Pagination
+          page={page}
+          lastPage={lastPage}
+          otherParams={{ contest_id }}
+        />
       </div>
     </div>
   );
