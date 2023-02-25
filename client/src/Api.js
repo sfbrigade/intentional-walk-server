@@ -37,6 +37,9 @@ const Api = {
     me() {
       return instance.get("/api/admin/me");
     },
+    users({ page }) {
+      return instance.get("/api/admin/users", { params: { page } });
+    },
   },
 };
 

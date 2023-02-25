@@ -27,10 +27,9 @@ urlpatterns = [
         views.intentional_walks_csv_view,
         name="intentionalwalks_csv_view",
     ),
+    path("api/admin/me", views.AdminMeView.as_view(), name="admin_me"),
     path(
-        "api/admin/me",
-        views.AdminMeView.as_view(),
-        name="admin_me"
+        "api/admin/users", views.AdminUsersView.as_view(), name="admin_users"
     ),
     path(
         "api/appuser/create",

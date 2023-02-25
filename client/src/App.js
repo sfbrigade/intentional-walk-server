@@ -13,8 +13,15 @@ function App() {
       <Router>
         <Navbar />
         <Routes>
-          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <AuthProtected>
+                <Home />
+              </AuthProtected>
+            }
+          />
           <Route
             path="/users/*"
             element={
