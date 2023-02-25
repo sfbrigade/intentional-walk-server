@@ -2,7 +2,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 import "./App.css";
 import { AuthContextProvider, AuthProtected } from "./AuthContext";
-import Navbar from "./Navbar";
+import Navigation from "./Navigation";
 import Home from "./Home";
 import Login from "./Login";
 import UsersRoutes from "./Users/UsersRoutes";
@@ -11,7 +11,7 @@ function App() {
   return (
     <AuthContextProvider>
       <Router>
-        <Navbar />
+        <Navigation />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route

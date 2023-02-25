@@ -2,10 +2,10 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import Api from "./Api";
-import "./Navbar.scss";
+import "./Navigation.scss";
 import { useAuthContext } from "./AuthContext";
 
-function Navbar() {
+function Navigation() {
   const { user, setUser } = useAuthContext();
 
   useEffect(() => {
@@ -23,7 +23,7 @@ function Navbar() {
 
   return (
     <nav
-      className="navbar navbar-expand-md navbar-light bg-light"
+      className="navigation navbar navbar-expand-md navbar-light bg-light"
       aria-label="Navigation"
     >
       <div className="container-fluid">
@@ -39,7 +39,7 @@ function Navbar() {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbar">
+        <div className="navigation__links collapse navbar-collapse" id="navbar">
           <ul className="navbar-nav mb-2 mb-md-0">
             <li className="nav-item">
               <Link className="nav-link" to="/">
@@ -75,4 +75,4 @@ function Navbar() {
     </nav>
   );
 }
-export default Navbar;
+export default Navigation;
