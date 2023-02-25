@@ -28,6 +28,7 @@ urlpatterns = [
         name="intentionalwalks_csv_view",
     ),
     path("api/admin/me", views.AdminMeView.as_view(), name="admin_me"),
+    path("api/admin/home", views.AdminHomeView.as_view(), name="admin_home"),
     path(
         "api/admin/users", views.AdminUsersView.as_view(), name="admin_users"
     ),

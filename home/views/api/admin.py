@@ -22,6 +22,25 @@ class AdminMeView(View):
             return HttpResponse(status=204)
 
 
+class AdminHomeView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            results = Account.objects.aggregate(
+                Sum("dailywalk__steps"),
+                Sum("dailywalk__distance"),
+            )
+            payload = {
+                "accounts_count": Account.objects.count(),
+                "accounts_steps": results["dailywalk__steps__sum"],
+                "accounts_distance": results["dailywalk__distance__sum"],
+            }
+            return JsonResponse(payload)
+        else:
+            return HttpResponse(status=204)
+
+
 class AdminUsersView(View):
     http_method_names = ["get"]
 
