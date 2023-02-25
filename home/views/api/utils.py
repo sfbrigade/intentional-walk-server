@@ -20,7 +20,10 @@ def paginate(request, results, page, per_page):
     if page > 1:
         query["page"] = page - 1
         links.append(f'<{base_url}?{query.urlencode()}>; rel="prev"')
-    return (results[(page - 1) * per_page : page * per_page], ", ".join(links))
+    return (
+        results[(page - 1) * per_page : page * per_page],  # noqa: E203
+        ", ".join(links),
+    )
 
 
 def validate_request_json(

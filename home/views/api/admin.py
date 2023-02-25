@@ -1,12 +1,11 @@
-import json, logging
+import logging
 
-from django.db import connection
 from django.db.models import Count, Sum
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 
-from home.models import Account, DailyWalk
+from home.models import Account
 
 from .utils import paginate
 
