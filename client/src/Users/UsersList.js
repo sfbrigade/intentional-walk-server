@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import numeral from "numeral";
 
 import Api from "../Api";
+import OrderBy from "../Components/OrderBy";
 import Pagination from "../Components/Pagination";
 
 import "./UsersList.scss";
@@ -18,6 +19,8 @@ function UsersList() {
 
   const contest_id = params.get("contest_id") ?? "";
   const [contests, setContests] = useState();
+
+  const order_by = params.get("order_by") ?? "name";
 
   const [contest, setContest] = useState();
   const [users, setUsers] = useState();
@@ -37,7 +40,7 @@ function UsersList() {
   useEffect(() => {
     let cancelled = false;
     setUsers();
-    Api.admin.users({ contest_id, page }).then((response) => {
+    Api.admin.users({ contest_id, order_by, page }).then((response) => {
       if (cancelled) {
         return;
       }
@@ -53,11 +56,24 @@ function UsersList() {
       setLastPage(newLastPage);
     });
     return () => (cancelled = true);
-  }, [contest_id, page]);
+  }, [contest_id, order_by, page]);
 
   function onChangeContest(event) {
     const newContestId = event.target.value;
     navigate(newContestId ? `?contest_id=${newContestId}` : "");
+  }
+
+  function onChangeOrder(newOrder) {
+    const params = [];
+    if (newOrder !== "name") {
+      params.push(["order_by", newOrder]);
+    }
+    if (contest_id) {
+      params.push(["contest_id", contest_id]);
+    }
+    navigate(
+      params.length > 0 ? `?${new URLSearchParams(params).toString()}` : ""
+    );
   }
 
   return (
@@ -76,7 +92,7 @@ function UsersList() {
         </div>
         <div className="col-md order-md-first">
           <div className="d-flex">
-            <label className="col-form-label me-2" for="contest_id">
+            <label className="col-form-label me-2" htmlFor="contest_id">
               Contest:
             </label>
             <select
@@ -101,15 +117,79 @@ function UsersList() {
         <table className="users-list__table table table-striped">
           <thead>
             <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Age</th>
-              <th>Zip</th>
-              <th>Sign up Date</th>
-              <th>Days Walked</th>
-              <th>Total Steps</th>
-              <th>Total Dist (mi)</th>
+              <th>&nbsp;&nbsp;&nbsp;</th>
+              <th>
+                <OrderBy
+                  value="name"
+                  currentValue={order_by}
+                  onChange={onChangeOrder}
+                >
+                  Name
+                </OrderBy>
+              </th>
+              <th>
+                <OrderBy
+                  value="email"
+                  currentValue={order_by}
+                  onChange={onChangeOrder}
+                >
+                  Email
+                </OrderBy>
+              </th>
+              <th>
+                <OrderBy
+                  value="age"
+                  currentValue={order_by}
+                  onChange={onChangeOrder}
+                >
+                  Age
+                </OrderBy>
+              </th>
+              <th>
+                <OrderBy
+                  value="zip"
+                  currentValue={order_by}
+                  onChange={onChangeOrder}
+                >
+                  Zip
+                </OrderBy>
+              </th>
+              <th>
+                <OrderBy
+                  value="created"
+                  currentValue={order_by}
+                  onChange={onChangeOrder}
+                >
+                  Sign-up Date
+                </OrderBy>
+              </th>
+              <th>
+                <OrderBy
+                  value="dw_count"
+                  currentValue={order_by}
+                  onChange={onChangeOrder}
+                >
+                  Days Walked
+                </OrderBy>
+              </th>
+              <th>
+                <OrderBy
+                  value="dw_steps"
+                  currentValue={order_by}
+                  onChange={onChangeOrder}
+                >
+                  Total Steps
+                </OrderBy>
+              </th>
+              <th>
+                <OrderBy
+                  value="dw_distance"
+                  currentValue={order_by}
+                  onChange={onChangeOrder}
+                >
+                  Total Dist (mi)
+                </OrderBy>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -138,7 +218,7 @@ function UsersList() {
         <Pagination
           page={page}
           lastPage={lastPage}
-          otherParams={{ contest_id }}
+          otherParams={{ contest_id, order_by }}
         />
       </div>
     </div>

@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, F, Q, Sum
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.views import View
@@ -60,10 +60,11 @@ class AdminUsersView(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             values = ["id", "name", "email", "age", "zip", "created"]
-            order_by = ["name"]
+            order_by = request.GET.get("order_by", "name")
             page = int(request.GET.get("page", "1"))
             per_page = 25
 
+            # filter and annotate based on contest_id
             filters = None
             annotate = None
             contest_id = request.GET.get("contest_id", None)
@@ -89,6 +90,12 @@ class AdminUsersView(View):
                     "dw_steps": Sum("dailywalk__steps"),
                     "dw_distance": Sum("dailywalk__distance"),
                 }
+
+            # set ordering
+            if order_by.startswith("-"):
+                order_by = [F(order_by[1:]).desc(nulls_last=True)]
+            else:
+                order_by = [F(order_by).asc(nulls_first=False)]
 
             results = (
                 Account.objects.filter(filters)
