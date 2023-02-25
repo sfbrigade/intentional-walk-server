@@ -64,7 +64,15 @@ function UsersList() {
     <div className="users-list container-fluid">
       <div className="row my-5">
         <div className="col-md">
-          <h2 className="users-list__title">All users</h2>
+          <h2 className="users-list__title">
+            {!contest && "All users"}
+            {contest &&
+              `Contest: ${DateTime.fromISO(contest.start).toLocaleString(
+                DateTime.DATE_MED
+              )} - ${DateTime.fromISO(contest.end).toLocaleString(
+                DateTime.DATE_MED
+              )}`}
+          </h2>
         </div>
         <div className="col-md order-md-first">
           <div className="d-flex">
