@@ -1,10 +1,12 @@
 import json, logging
 
+from django.db import connection
+from django.db.models import Count, Sum
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 
-from home.models import Account
+from home.models import Account, DailyWalk
 
 from .utils import paginate
 
@@ -35,9 +37,15 @@ class AdminUsersView(View):
             results = (
                 Account.objects.filter(**filters)
                 .values(*values)
+                .annotate(
+                    dw_count=Count("dailywalk"),
+                    dw_steps=Sum("dailywalk__steps"),
+                    dw_distance=Sum("dailywalk__distance"),
+                )
                 .order_by(*order_by)
             )
             (results, links) = paginate(request, results, page, per_page)
+
             response = JsonResponse(list(results), safe=False)
             if links:
                 response.headers["Link"] = links
