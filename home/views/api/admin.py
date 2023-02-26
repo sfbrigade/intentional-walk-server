@@ -118,3 +118,38 @@ class AdminUsersView(View):
             return response
         else:
             return HttpResponse(status=401)
+
+
+class AdminUsersByZipView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        values = ["zip"]
+        order_by = ["zip"]
+        if request.user.is_authenticated:
+            # filter and annotate based on contest_id
+            filters = None
+            annotate = {
+                "count": Count("zip"),
+            }
+            contest_id = request.GET.get("contest_id", None)
+            if contest_id:
+                filters = Q(contests__contest_id=contest_id)
+            else:
+                filters = Q()
+
+            # filter to show users vs testers
+            filters = filters & Q(
+                is_tester=request.GET.get("is_tester", None) == "true"
+            )
+
+            results = (
+                Account.objects.filter(filters)
+                .values(*values)
+                .annotate(**annotate)
+                .order_by(*order_by)
+            )
+            response = JsonResponse({r["zip"]: r["count"] for r in results})
+            return response
+        else:
+            return HttpResponse(status=401)

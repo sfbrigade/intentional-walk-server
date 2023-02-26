@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import numeral from "numeral";
 
 import Api from "../Api";
+import IntensityMap from "../Components/IntensityMap";
 import OrderBy from "../Components/OrderBy";
 import Pagination from "../Components/Pagination";
 
@@ -27,11 +28,17 @@ function UsersList() {
   const [contest, setContest] = useState();
   const [users, setUsers] = useState();
 
+  const [map, setMap] = useState();
+  const [usersByZip, setUsersByZip] = useState();
+
   useEffect(() => {
     let cancelled = false;
     Api.admin
       .contests()
       .then((response) => !cancelled && setContests(response.data));
+    Api.static
+      .map()
+      .then((response) => !cancelled && setMap(response.data?.features));
     return () => (cancelled = true);
   }, []);
 
@@ -61,6 +68,15 @@ function UsersList() {
       });
     return () => (cancelled = true);
   }, [contest_id, is_tester, order_by, page]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setUsers();
+    Api.admin
+      .usersByZip({ contest_id, is_tester })
+      .then((response) => !cancelled && setUsersByZip(response.data));
+    return () => (cancelled = true);
+  }, [contest_id, is_tester]);
 
   function onChange(contest_id, is_tester, order_by) {
     const params = [];
@@ -139,6 +155,20 @@ function UsersList() {
         </div>
         <div className="col-md"></div>
       </div>
+      {contest && (
+        <div className="row justify-content-center mb-5">
+          <div className="col-lg-3">
+            <IntensityMap
+              data={usersByZip}
+              map={map}
+              minColor="#eeeeee"
+              maxColor="#702b84"
+              width={380}
+              height={300}
+            />
+          </div>
+        </div>
+      )}
       <div className="table-responsive">
         <table className="users-list__table table table-striped">
           <thead>

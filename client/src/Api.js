@@ -48,6 +48,16 @@ const Api = {
         params: { contest_id, is_tester, order_by, page },
       });
     },
+    usersByZip({ contest_id, is_tester }) {
+      return instance.get("/api/admin/users/zip", {
+        params: { contest_id, is_tester },
+      });
+    },
+  },
+  static: {
+    map() {
+      return instance.get("/static/SanFrancisco.Neighborhoods.json");
+    },
   },
 };
 

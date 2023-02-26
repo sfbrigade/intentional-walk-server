@@ -4,6 +4,7 @@ from .api.admin import (
     AdminHomeView,
     AdminContestsView,
     AdminUsersView,
+    AdminUsersByZipView,
 )
 from .api.appuser import AppUserCreateView, AppUserDeleteView
 from .api.dailywalk import DailyWalkCreateView, DailyWalkListView

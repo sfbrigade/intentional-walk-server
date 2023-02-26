@@ -38,6 +38,11 @@ urlpatterns = [
         "api/admin/users", views.AdminUsersView.as_view(), name="admin_users"
     ),
     path(
+        "api/admin/users/zip",
+        views.AdminUsersByZipView.as_view(),
+        name="admin_users_zip",
+    ),
+    path(
         "api/appuser/create",
         views.AppUserCreateView.as_view(),
         name="appuser_create",
