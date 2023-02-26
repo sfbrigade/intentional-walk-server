@@ -30,6 +30,7 @@ function UsersList() {
 
   const [map, setMap] = useState();
   const [usersByZip, setUsersByZip] = useState();
+  const [selectedFeature, setSelectedFeature] = useState();
 
   useEffect(() => {
     let cancelled = false;
@@ -106,6 +107,10 @@ function UsersList() {
     onChange(contest_id, is_tester, newOrderBy);
   }
 
+  function onMouseOverZip(feature) {
+    setSelectedFeature(feature);
+  }
+
   return (
     <div className="users-list container-fluid">
       <div className="row my-5">
@@ -161,11 +166,52 @@ function UsersList() {
             <IntensityMap
               data={usersByZip}
               map={map}
+              onMouseOver={onMouseOverZip}
               minColor="#eeeeee"
               maxColor="#702b84"
               width={380}
               height={300}
             />
+            <h5 className="text-center">Users by Zip</h5>
+          </div>
+          <div className="col-lg-3">
+            <h4>
+              {!selectedFeature && "San Franciso"}
+              {selectedFeature &&
+                `${selectedFeature.properties.neighborhood} (${selectedFeature.id})`}
+            </h4>
+            <dl className="users-list__map-legend">
+              <dt>Total Active Users:</dt>
+              <dd>
+                {usersByZip &&
+                  !selectedFeature &&
+                  Object.values(usersByZip).reduce((a, b) => a + b, 0)}
+                {usersByZip &&
+                  selectedFeature &&
+                  usersByZip[selectedFeature.id]}
+              </dd>
+              <br />
+              <dt>Prev Active Users:</dt>
+              <dd></dd>
+              <br />
+              <dt>New Active Users:</dt>
+              <dd></dd>
+              <br />
+              <dt>Median Steps:</dt>
+              <dd></dd>
+            </dl>
+          </div>
+          <div className="col-lg-3">
+            <IntensityMap
+              data={usersByZip}
+              map={map}
+              onMouseOver={onMouseOverZip}
+              minColor="#eeeeee"
+              maxColor="#2b388f"
+              width={380}
+              height={300}
+            />
+            <h5 className="text-center">Median Steps by Zip</h5>
           </div>
         </div>
       )}

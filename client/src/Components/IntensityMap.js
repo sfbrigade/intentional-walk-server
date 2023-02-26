@@ -1,7 +1,15 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-function IntensityMap({ data, map, minColor, maxColor, width, height }) {
+function IntensityMap({
+  data,
+  map,
+  onMouseOver,
+  minColor,
+  maxColor,
+  width,
+  height,
+}) {
   const ref = useRef();
 
   useEffect(() => {
@@ -29,7 +37,10 @@ function IntensityMap({ data, map, minColor, maxColor, width, height }) {
         .append("path")
         // draw each neighborhood
         .attr("d", d3.geoPath().projection(projection))
-        .attr("fill", (feature) => colorScale(data[feature.id] ?? 0));
+        .attr("stroke", "#f0f0f0")
+        .attr("fill", (feature) => colorScale(data[feature.id] ?? 0))
+        .on("mouseover", (_, feature) => onMouseOver(feature))
+        .on("mouseout", () => onMouseOver());
     }
   }, [data, map, width, height]);
 
