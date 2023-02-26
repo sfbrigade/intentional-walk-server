@@ -26,13 +26,14 @@ class AdminHomeView(View):
     http_method_names = ["get"]
 
     def get(self, request, *args, **kwargs):
+        filters = {"is_tester": False}
         if request.user.is_authenticated:
-            results = Account.objects.aggregate(
+            results = Account.objects.filter(**filters).aggregate(
                 Sum("dailywalk__steps"),
                 Sum("dailywalk__distance"),
             )
             payload = {
-                "accounts_count": Account.objects.count(),
+                "accounts_count": Account.objects.filter(**filters).count(),
                 "accounts_steps": results["dailywalk__steps__sum"],
                 "accounts_distance": results["dailywalk__distance__sum"],
             }
@@ -90,6 +91,11 @@ class AdminUsersView(View):
                     "dw_steps": Sum("dailywalk__steps"),
                     "dw_distance": Sum("dailywalk__distance"),
                 }
+
+            # filter to show users vs testers
+            filters = filters & Q(
+                is_tester=request.GET.get("is_tester", None) == "true"
+            )
 
             # set ordering
             if order_by.startswith("-"):

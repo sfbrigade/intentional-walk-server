@@ -17,6 +17,8 @@ function UsersList() {
   const page = parseInt(params.get("page") ?? "1", 10);
   const [lastPage, setLastPage] = useState();
 
+  const is_tester = params.get("is_tester") === "true";
+
   const contest_id = params.get("contest_id") ?? "";
   const [contests, setContests] = useState();
 
@@ -40,40 +42,52 @@ function UsersList() {
   useEffect(() => {
     let cancelled = false;
     setUsers();
-    Api.admin.users({ contest_id, order_by, page }).then((response) => {
-      if (cancelled) {
-        return;
-      }
-      setUsers(response.data);
-      const linkHeader = Api.parseLinkHeader(response);
-      let newLastPage = page;
-      if (linkHeader?.last) {
-        const match = linkHeader.last.match(/page=(\d+)/);
-        newLastPage = parseInt(match[1], 10);
-      } else if (linkHeader?.next) {
-        newLastPage = page + 1;
-      }
-      setLastPage(newLastPage);
-    });
+    Api.admin
+      .users({ contest_id, is_tester, order_by, page })
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+        setUsers(response.data);
+        const linkHeader = Api.parseLinkHeader(response);
+        let newLastPage = page;
+        if (linkHeader?.last) {
+          const match = linkHeader.last.match(/page=(\d+)/);
+          newLastPage = parseInt(match[1], 10);
+        } else if (linkHeader?.next) {
+          newLastPage = page + 1;
+        }
+        setLastPage(newLastPage);
+      });
     return () => (cancelled = true);
-  }, [contest_id, order_by, page]);
+  }, [contest_id, is_tester, order_by, page]);
 
-  function onChangeContest(event) {
-    const newContestId = event.target.value;
-    navigate(newContestId ? `?contest_id=${newContestId}` : "");
-  }
-
-  function onChangeOrder(newOrder) {
+  function onChange(contest_id, is_tester, order_by) {
     const params = [];
-    if (newOrder !== "name") {
-      params.push(["order_by", newOrder]);
-    }
     if (contest_id) {
       params.push(["contest_id", contest_id]);
+    }
+    if (is_tester) {
+      params.push(["is_tester", "true"]);
+    }
+    if (order_by !== "name") {
+      params.push(["order_by", order_by]);
     }
     navigate(
       params.length > 0 ? `?${new URLSearchParams(params).toString()}` : ""
     );
+  }
+
+  function onChangeContest(event) {
+    onChange(event.target.value, is_tester, order_by);
+  }
+
+  function onChangeShow(event) {
+    onChange(contest_id, event.target.value === "true", order_by);
+  }
+
+  function onChangeOrder(newOrderBy) {
+    onChange(contest_id, is_tester, newOrderBy);
   }
 
   return (
@@ -98,7 +112,7 @@ function UsersList() {
             <select
               value={contest_id}
               onChange={onChangeContest}
-              className="form-select w-auto"
+              className="form-select w-auto me-3"
               id="contest_id"
             >
               <option value="">None</option>
@@ -108,6 +122,18 @@ function UsersList() {
                   - {DateTime.fromISO(c.end).toLocaleString(DateTime.DATE_MED)}
                 </option>
               ))}
+            </select>
+            <label className="col-form-label me-2" htmlFor="is_tester">
+              Show:
+            </label>
+            <select
+              value={is_tester}
+              onChange={onChangeShow}
+              className="form-select w-auto"
+              id="is_tester"
+            >
+              <option value={false}>Users</option>
+              <option value={true}>Testers</option>
             </select>
           </div>
         </div>
@@ -218,7 +244,7 @@ function UsersList() {
         <Pagination
           page={page}
           lastPage={lastPage}
-          otherParams={{ contest_id, order_by }}
+          otherParams={{ contest_id, order_by, is_tester }}
         />
       </div>
     </div>
