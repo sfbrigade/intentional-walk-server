@@ -187,7 +187,7 @@ function UsersList() {
                 `${selectedFeature.properties.neighborhood} (${selectedFeature.id})`}
             </h4>
             <dl className="users-list__map-legend">
-              <dt>Total Active Users:</dt>
+              <dt>Total Users:</dt>
               <dd>
                 {usersByZip &&
                   !selectedFeature &&
@@ -197,10 +197,7 @@ function UsersList() {
                   usersByZip[selectedFeature.id]}
               </dd>
               <br />
-              <dt>Prev Active Users:</dt>
-              <dd></dd>
-              <br />
-              <dt>New Active Users:</dt>
+              <dt>Active Users:</dt>
               <dd></dd>
               <br />
               <dt>Median Steps:</dt>
