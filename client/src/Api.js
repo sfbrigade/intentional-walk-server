@@ -53,6 +53,11 @@ const Api = {
         params: { contest_id, is_tester },
       });
     },
+    usersByZipMedianSteps({ contest_id, is_tester }) {
+      return instance.get("/api/admin/users/zip/steps", {
+        params: { contest_id, is_tester },
+      });
+    },
   },
   static: {
     map() {

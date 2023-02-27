@@ -30,6 +30,7 @@ function UsersList() {
 
   const [map, setMap] = useState();
   const [usersByZip, setUsersByZip] = useState();
+  const [usersByZipMedianSteps, setUsersByZipMedianSteps] = useState();
   const [selectedFeature, setSelectedFeature] = useState();
 
   useEffect(() => {
@@ -76,6 +77,11 @@ function UsersList() {
     Api.admin
       .usersByZip({ contest_id, is_tester })
       .then((response) => !cancelled && setUsersByZip(response.data));
+    Api.admin
+      .usersByZipMedianSteps({ contest_id, is_tester })
+      .then(
+        (response) => !cancelled && setUsersByZipMedianSteps(response.data)
+      );
     return () => (cancelled = true);
   }, [contest_id, is_tester]);
 
@@ -198,7 +204,16 @@ function UsersList() {
               <dd></dd>
               <br />
               <dt>Median Steps:</dt>
-              <dd></dd>
+              <dd>
+                {usersByZipMedianSteps &&
+                  !selectedFeature &&
+                  numeral(usersByZipMedianSteps.all).format("0,0")}
+                {usersByZipMedianSteps &&
+                  selectedFeature &&
+                  numeral(usersByZipMedianSteps[selectedFeature.id]).format(
+                    "0,0"
+                  )}
+              </dd>
             </dl>
           </div>
           <div className="col-lg-3">

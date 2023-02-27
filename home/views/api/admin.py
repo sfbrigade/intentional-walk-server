@@ -1,5 +1,6 @@
 import logging
 
+from django.db import connection
 from django.db.models import Count, F, Q, Sum
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
@@ -150,6 +151,64 @@ class AdminUsersByZipView(View):
                 .order_by(*order_by)
             )
             response = JsonResponse({r["zip"]: r["count"] for r in results})
+            return response
+        else:
+            return HttpResponse(status=401)
+
+
+class AdminUsersByZipMedianStepsView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            is_tester = request.GET.get("is_tester", None) == "true"
+            contest_id = request.GET.get("contest_id", None)
+            if contest_id is None:
+                return HttpResponse(status=422)
+            contest = Contest.objects.get(pk=contest_id)
+            payload = {}
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY sum)
+                    FROM (
+                        SELECT home_account.id AS id, SUM(home_dailywalk.steps) AS sum
+                        FROM home_account
+                        JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
+                        JOIN home_account_contests ON home_account.id=home_account_contests.account_id
+                        WHERE home_account.is_tester=%s AND
+                              home_account_contests.contest_id=%s AND
+                              home_dailywalk.date BETWEEN %s AND %s
+                        GROUP BY (home_account.id)
+                    ) subquery
+                """,
+                    [is_tester, contest_id, contest.start, contest.end],
+                )
+                row = cursor.fetchone()
+
+                payload["all"] = row[0]
+                cursor.execute(
+                    """
+                    SELECT zip, PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY sum)
+                    FROM (
+                        SELECT home_account.id AS id, home_account.zip AS zip, SUM(home_dailywalk.steps) AS sum
+                        FROM home_account
+                        JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
+                        JOIN home_account_contests ON home_account.id=home_account_contests.account_id
+                        WHERE home_account.is_tester=%s AND
+                              home_account_contests.contest_id=%s AND
+                              home_dailywalk.date BETWEEN %s AND %s
+                        GROUP BY (home_account.id, home_account.zip)
+                    ) subquery
+                    GROUP BY zip
+                """,
+                    [is_tester, contest_id, contest.start, contest.end],
+                )
+                rows = cursor.fetchall()
+                for row in rows:
+                    payload[row[0]] = row[1]
+
+            response = JsonResponse(payload)
             return response
         else:
             return HttpResponse(status=401)

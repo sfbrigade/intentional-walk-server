@@ -5,6 +5,7 @@ from .api.admin import (
     AdminContestsView,
     AdminUsersView,
     AdminUsersByZipView,
+    AdminUsersByZipMedianStepsView,
 )
 from .api.appuser import AppUserCreateView, AppUserDeleteView
 from .api.dailywalk import DailyWalkCreateView, DailyWalkListView
