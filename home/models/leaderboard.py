@@ -17,9 +17,9 @@ class Leaderboard(models.Model):
         on_delete=models.CASCADE,
         help_text="Device the data is coming from",
     )
-    contests = models.ManyToManyField(
+    contests = models.ForeignKey(
         "Contest",
-        blank=True,
+        on_delete=models.CASCADE,
         help_text="All the contests the account is enrolled in",
     )
 
@@ -28,5 +28,5 @@ class Leaderboard(models.Model):
         self.account = self.device.account
         super().save(*args, **kwargs)
 
-    # def __str__(self):
-    #     return f"{self.account.email} | {self.date}"
+    def __str__(self):
+        return f"{self.device.device_id} | {self.steps}"
