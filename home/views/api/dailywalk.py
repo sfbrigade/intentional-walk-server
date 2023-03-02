@@ -124,11 +124,13 @@ class DailyWalkCreateView(View):
                 try:
                     # Updation
                     total_steps = (
-                    DailyWalk.objects.filter(account__email=device.account.email)
-                    .filter(date__range=(contest.start, contest.end))
-                    .aggregate(Sum("steps"))
+                        DailyWalk.objects.filter(
+                            account__email=device.account.email
+                        )
+                        .filter(date__range=(contest.start, contest.end))
+                        .aggregate(Sum("steps"))
                     )
-                
+
                     leaderboard = Leaderboard.objects.get(
                         account__email=device.account.email
                     )
