@@ -1,21 +1,28 @@
-from datetime import date, timedelta
+# from datetime import date, timedelta
+# from typing import Optional
 import json
-from typing import Optional
+
 
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Count, F, Sum
+
+# from django.db.models import Count, F, Sum
 from django.core.exceptions import ObjectDoesNotExist
 
 
-from home.models import Account, Contest, DailyWalk, IntentionalWalk, Device, Leaderboard
-from home.utils import localize
+from home.models import (
+    # Account,
+    Contest,
+    # DailyWalk,
+    # IntentionalWalk,
+    Device,
+    Leaderboard,
+)
+
+# from home.utils import localize
 from .utils import validate_request_json
-
-
-
 
 
 DEVICE_FIELDS = [
@@ -104,7 +111,7 @@ ACCOUNT_FIELDS = [
 #         )
 
 #     dw_contest_summaries = get_daily_walk_summaries(**dw_contest_filters)
-#     iw_contest_summaries = get_intentional_walk_summaries(**iw_contest_filters)
+#     iw_contest_summaries= get_intentional_walk_summaries(**iw_contest_filters)
 
 #     if (
 #         include_baseline and contest is not None
@@ -122,7 +129,7 @@ ACCOUNT_FIELDS = [
 #             "start__gte": localize(start_baseline),  # inclusive
 #             "end__lt": contest.start,  # exclusive
 #         }
-#         dw_baseline_summaries = get_daily_walk_summaries(**dw_baseline_filters)
+#         dw_baseline_summaries= get_daily_walk_summaries(**dw_baseline_filters)
 #         iw_baseline_summaries = get_intentional_walk_summaries(
 #             **iw_baseline_filters
 #         )
@@ -139,82 +146,79 @@ ACCOUNT_FIELDS = [
 #     )
 
 
+# def get_context_data(self, request, *args, **kwargs):
+#     # Call the base implementation first to get a context
+#     context = super().get_context_data(**kwargs)
 
+#     # Check if url has any contest parameters
+#     contest_id = self.request.GET.get("contest_id")
 
-    # def get_context_data(self, request, *args, **kwargs):
-    #     # Call the base implementation first to get a context
-    #     context = super().get_context_data(**kwargs)
+#     # Check if url has any contest parameters
+#     include_testers = self.request.GET.get("include_testers") is not None
 
-    #     # Check if url has any contest parameters
-    #     contest_id = self.request.GET.get("contest_id")
+#     # Default href for download button
+#     context["download_url"] = "/data/users_agg.csv"
 
-    #     # Check if url has any contest parameters
-    #     include_testers = self.request.GET.get("include_testers") is not None
+#     contest = (
+#         Contest.objects.get(contest_id=contest_id) if contest_id else None
+#     )
+#     daily_walks, intentional_walks, _, _ = get_contest_walks(contest)
 
-    #     # Default href for download button
-    #     context["download_url"] = "/data/users_agg.csv"
+#     # Prepare loading of data into context
+#     user_stats_container = {}
+#     context["user_stats_list"] = []
 
-    #     contest = (
-    #         Contest.objects.get(contest_id=contest_id) if contest_id else None
-    #     )
-    #     daily_walks, intentional_walks, _, _ = get_contest_walks(contest)
+#     # If a contest is specified, include all new signups, regardless of
+#     # whether they walked during the contest or not.
+#     if contest is not None:
+#         # Context variables
+#         context["current_contest"] = contest
+#         context["download_url"] += f"?contest_id={contest_id}"
 
-    #     # Prepare loading of data into context
-    #     user_stats_container = {}
-    #     context["user_stats_list"] = []
+#         # # Find everyone who signed up during the constest
+#         # for acct in get_new_signups(contest, include_testers):
+#         #     if acct["email"] not in daily_walks:
+#         #         user_stats_container[acct["email"]] = dict(
+#         #             new_signup=True, account=acct
+#         #         )
+#         #         new_signups_by_zip[acct["zip"]] += 1
 
-    #     # If a contest is specified, include all new signups, regardless of
-    #     # whether they walked during the contest or not.
-    #     if contest is not None:
-    #         # Context variables
-    #         context["current_contest"] = contest
-    #         context["download_url"] += f"?contest_id={contest_id}"
+#     # Add all accounts found in filtered daily walk data
+#     for email, dw_row in daily_walks.items():
+#         acct = Account.objects.values(*ACCOUNT_FIELDS).get(email=email)
 
-    #         # # Find everyone who signed up during the constest
-    #         # for acct in get_new_signups(contest, include_testers):
-    #         #     if acct["email"] not in daily_walks:
-    #         #         user_stats_container[acct["email"]] = dict(
-    #         #             new_signup=True, account=acct
-    #         #         )
-    #         #         new_signups_by_zip[acct["zip"]] += 1
+#         # Skip testers unless include_testers
+#         if not include_testers and acct.get("is_tester"):
+#             continue
 
-    #     # Add all accounts found in filtered daily walk data
-    #     for email, dw_row in daily_walks.items():
-    #         acct = Account.objects.values(*ACCOUNT_FIELDS).get(email=email)
+#         # Don't include those who signed up after the contest ended
+#         if contest and acct["created"] > localize(contest.end):
+#             continue
 
-    #         # Skip testers unless include_testers
-    #         if not include_testers and acct.get("is_tester"):
-    #             continue
+#         user_stats = user_stats_container.get(
+#             email, dict(new_signup=False)
+#         )
+#         user_stats["account"] = acct
+#         user_stats["dw_steps"] = dw_row["dw_steps"]
 
-    #         # Don't include those who signed up after the contest ended
-    #         if contest and acct["created"] > localize(contest.end):
-    #             continue
+#         # Also add recorded walk data
+#         iw_row = intentional_walks.get(email)
+#         if iw_row:
+#             user_stats["rw_steps"] = iw_row["rw_steps"]
+#             user_stats["rw_distance"] = iw_row["rw_distance"]
+#             user_stats["rw_time"] = (
+#                 iw_row["rw_total_walk_time"].total_seconds()
+#                 - iw_row["rw_pause_time"]
+#             ) / 60  # minutes
+#         user_stats["num_rws"] = iw_row["rw_count"] if iw_row else 0
 
-    #         user_stats = user_stats_container.get(
-    #             email, dict(new_signup=False)
-    #         )
-    #         user_stats["account"] = acct
-    #         user_stats["dw_steps"] = dw_row["dw_steps"]
+#         # Put user_stats (row) back into container
+#         user_stats_container[email] = user_stats
 
-    #         # Also add recorded walk data
-    #         iw_row = intentional_walks.get(email)
-    #         if iw_row:
-    #             user_stats["rw_steps"] = iw_row["rw_steps"]
-    #             user_stats["rw_distance"] = iw_row["rw_distance"]
-    #             user_stats["rw_time"] = (
-    #                 iw_row["rw_total_walk_time"].total_seconds()
-    #                 - iw_row["rw_pause_time"]
-    #             ) / 60  # minutes
-    #         user_stats["num_rws"] = iw_row["rw_count"] if iw_row else 0
+#     context["user_stats_list"] = user_stats_container.values()
+#     context["contests"] = Contest.objects.all()
 
-    #         # Put user_stats (row) back into container
-    #         user_stats_container[email] = user_stats
-
-    #     context["user_stats_list"] = user_stats_container.values()
-    #     context["contests"] = Contest.objects.all()
-
-    #     return context
-
+#     return context
 
 
 #
@@ -222,7 +226,7 @@ ACCOUNT_FIELDS = [
 class LeaderboardListView(View):
     """View to retrieve leaderboard"""
 
-   # model = DailyWalk
+    # model = DailyWalk
     http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):
@@ -250,8 +254,17 @@ class LeaderboardListView(View):
                     ),
                 }
             )
+        # Json response template
+        json_response = {
+            "status": "success",
+            "message": "Leaderboard accessed successfully",
+            "payload": {
+                "account_id": device.device_id,
+                "leaderboard": [],
+            },
+        }
 
-    #def get(self, request, *args, **kwargs):
+        # def get(self, request, *args, **kwargs):
         # user_stats_container = {}
 
         contest = Contest.active()
@@ -299,45 +312,48 @@ class LeaderboardListView(View):
         contest = Contest.active()
         leaderboard_list = []
         leaderboard_length = 10
-        
-        #c = [(idx, item) for idx,item in enumerate(leaderboard_list, start=1)]
+
+        # c = [(idx, item) for idx,item in enumerate(leaderboard_list, start=1)]
 
         def build_dict(seq, key):
-            return list((dict(d, rank=rank+1)) for (rank, d) in enumerate(seq))
+            return list(
+                (dict(d, rank=rank + 1)) for (rank, d) in enumerate(seq)
+            )
 
         leaderboard = Leaderboard.objects.all()
         model_leaderboard_list = []
         for participant in leaderboard:
             leader_dict = {}
-            leader_dict["id"]= participant.device.device_id
-            leader_dict["steps"]= participant.steps
+            leader_dict["id"] = participant.device.device_id
+            leader_dict["steps"] = participant.steps
 
-            
             model_leaderboard_list.append(leader_dict)
-        #print("dict", model_leaderboard_list)
+        # print("dict", model_leaderboard_list)
 
         leaderboard_list = sorted(
             model_leaderboard_list, key=lambda user: -user["steps"]
         )
 
-
         leaderboard_list = build_dict(leaderboard_list, key="steps")
-      #  current_user = {}
-      #  current_user_range = []
+        #  current_user = {}
+        #  current_user_range = []
 
         for count, user in enumerate(leaderboard_list):
-            #print("if", user["id"], json_data["account_id"])
-            if (user["id"] in json_data["account_id"] and user["rank"] > leaderboard_length):
-               # current_user_range.append(leaderboard_list[count-1])
-               # current_user_range.append(leaderboard_list[count])
-               # current_user_range.append(leaderboard_list[count+1])
+            # print("if", user["id"], json_data["account_id"])
+            if (
+                user["id"] in json_data["account_id"]
+                and user["rank"] > leaderboard_length
+            ):
+                # current_user_range.append(leaderboard_list[count-1])
+                # current_user_range.append(leaderboard_list[count])
+                # current_user_range.append(leaderboard_list[count+1])
                 current_user = user
-            
-        ##cut list to 10 items, add current user
+
+        # cut list to 10 items, add current user
         leaderboard_list = leaderboard_list[:leaderboard_length]
         leaderboard_list.append(current_user)
-        #leaderboard_list.extend(current_user_range)
-
+        # leaderboard_list.extend(current_user_range)
+        json_response["payload"]["leaderboard"] = leaderboard_list
 
         if contest is None:
             return JsonResponse(
@@ -346,8 +362,4 @@ class LeaderboardListView(View):
                     "message": "There are no contests",
                 }
             )
-        return JsonResponse(
-            {
-                "leaderboard": leaderboard_list,
-            }
-        )
+        return JsonResponse(json_response)

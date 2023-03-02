@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Count, Sum
+from django.db.models import Sum
 
 from home.models import Contest, DailyWalk, Device, Leaderboard
 
@@ -116,28 +116,33 @@ class DailyWalkCreateView(View):
                     "distance": daily_walk.distance,
                 }
             )
-            
-            #total_steps = DailyWalk.objects.get(account__email=device.account.email) #.annotate(Count('dailywalk'))
 
-            total_steps = DailyWalk.objects.filter(account__email=device.account.email).filter(
-                date__range=(contest.start, contest.end)).aggregate(Sum('steps'))
+            # total_steps = DailyWalk.objects.get
+            # (account__email=device.account.email)
+            # .annotate(Count('dailywalk'))
+
+            total_steps = (
+                DailyWalk.objects.filter(account__email=device.account.email)
+                .filter(date__range=(contest.start, contest.end))
+                .aggregate(Sum("steps"))
+            )
             try:
                 # Updation
                 leaderboard = Leaderboard.objects.get(
                     account__email=device.account.email
                 )
                 leaderboard.steps = total_steps["steps__sum"]
-                leaderboard.contests=contest
+                leaderboard.contests = contest
 
                 leaderboard.device_id = json_data["account_id"]
                 leaderboard.save()
             except ObjectDoesNotExist:
                 leaderboard = Leaderboard.objects.create(
-                   steps = total_steps["steps__sum"],                   
-                   device=device,
-                   contests=contest,
-               )
-          
+                    steps=total_steps["steps__sum"],
+                    device=device,
+                    contests=contest,
+                )
+
         for contest in active_contests:
             try:
                 acct = device.account
