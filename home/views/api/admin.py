@@ -137,6 +137,7 @@ class AdminUsersByZipView(View):
         values = ["zip"]
         order_by = ["zip"]
         if request.user.is_authenticated:
+            payload = {}
             # filter and annotate based on contest_id
             filters = None
             annotate = {
@@ -153,14 +154,30 @@ class AdminUsersByZipView(View):
                 is_tester=request.GET.get("is_tester", None) == "true"
             )
 
+            # query for totals
             results = (
                 Account.objects.filter(filters)
                 .values(*values)
                 .annotate(**annotate)
                 .order_by(*order_by)
             )
-            response = JsonResponse({r["zip"]: r["count"] for r in results})
-            return response
+            payload["total"] = {r["zip"]: r["count"] for r in results}
+
+            # now query for new if for contest
+            if contest_id:
+                contest = Contest.objects.get(pk=contest_id)
+                filters = filters & Q(
+                    created__range=(contest.start_promo, contest.end)
+                )
+                results = (
+                    Account.objects.filter(filters)
+                    .values(*values)
+                    .annotate(**annotate)
+                    .order_by(*order_by)
+                )
+                payload["new"] = {r["zip"]: r["count"] for r in results}
+
+            return JsonResponse(payload)
         else:
             return HttpResponse(status=401)
 

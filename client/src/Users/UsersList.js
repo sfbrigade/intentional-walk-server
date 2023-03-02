@@ -170,7 +170,7 @@ function UsersList() {
         <div className="row justify-content-center mb-5">
           <div className="col-lg-3">
             <IntensityMap
-              data={usersByZip}
+              data={usersByZip.total}
               map={map}
               onMouseOver={onMouseOverZip}
               minColor="#eeeeee"
@@ -189,12 +189,30 @@ function UsersList() {
             <dl className="users-list__map-legend">
               <dt>Total Users:</dt>
               <dd>
-                {usersByZip &&
-                  !selectedFeature &&
-                  Object.values(usersByZip).reduce((a, b) => a + b, 0)}
-                {usersByZip &&
-                  selectedFeature &&
-                  usersByZip[selectedFeature.id]}
+                {usersByZip && (
+                  <>
+                    {!selectedFeature && (
+                      <>
+                        {Object.values(usersByZip.total).reduce(
+                          (a, b) => a + b,
+                          0
+                        )}
+                        &nbsp;<span>(</span>
+                        {Object.values(usersByZip.new).reduce(
+                          (a, b) => a + b,
+                          0
+                        )}
+                        <span> new)</span>
+                      </>
+                    )}
+                    {selectedFeature && (
+                      <>
+                        {usersByZip.total[selectedFeature.id] ?? "0"}&nbsp;(
+                        {usersByZip.new[selectedFeature.id] ?? "0"} new)
+                      </>
+                    )}
+                  </>
+                )}
               </dd>
               <br />
               <dt>Active Users:</dt>
@@ -215,7 +233,7 @@ function UsersList() {
           </div>
           <div className="col-lg-3">
             <IntensityMap
-              data={usersByZip}
+              data={usersByZipMedianSteps}
               map={map}
               onMouseOver={onMouseOverZip}
               minColor="#eeeeee"
