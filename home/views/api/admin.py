@@ -1,7 +1,7 @@
 import logging
 
 from django.db import connection
-from django.db.models import Count, F, Q, Sum
+from django.db.models import BooleanField, Count, ExpressionWrapper, F, Q, Sum
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.views import View
@@ -77,6 +77,10 @@ class AdminUsersView(View):
                     dailywalk__date__range=(contest.start, contest.end)
                 )
                 annotate = {
+                    "is_new": ExpressionWrapper(
+                        Q(created__range=(contest.start_promo, contest.end)),
+                        output_field=BooleanField(),
+                    ),
                     "dw_count": Count("dailywalk", filter=dailywalk_filter),
                     "dw_steps": Sum(
                         "dailywalk__steps", filter=dailywalk_filter
@@ -99,10 +103,15 @@ class AdminUsersView(View):
             )
 
             # set ordering
+            add_name = False
             if order_by.startswith("-"):
+                add_name = order_by[1:] != "name"
                 order_by = [F(order_by[1:]).desc(nulls_last=True)]
             else:
+                add_name = order_by != "name"
                 order_by = [F(order_by).asc(nulls_first=False)]
+            if add_name:
+                order_by.append("name")
 
             results = (
                 Account.objects.filter(filters)

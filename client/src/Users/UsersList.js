@@ -277,6 +277,17 @@ function UsersList() {
                   Sign-up Date
                 </OrderBy>
               </th>
+              {contest && (
+                <th>
+                  <OrderBy
+                    value="is_new"
+                    currentValue={order_by}
+                    onChange={onChangeOrder}
+                  >
+                    Is new?
+                  </OrderBy>
+                </th>
+              )}
               <th>
                 <OrderBy
                   value="dw_count"
@@ -319,6 +330,7 @@ function UsersList() {
                     DateTime.DATE_MED
                   )}
                 </td>
+                {contest && <td>{u.is_new ? "Yes" : "No"}</td>}
                 <td>{u.dw_count?.toLocaleString()}</td>
                 <td>{u.dw_steps?.toLocaleString()}</td>
                 <td>
