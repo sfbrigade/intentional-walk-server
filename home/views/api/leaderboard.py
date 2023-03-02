@@ -7,10 +7,14 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count, F, Sum
 
-from home.models import Account, Contest, DailyWalk, IntentionalWalk
+from home.models import Account, Contest, DailyWalk, IntentionalWalk, Device
 from home.utils import localize
 
-
+DEVICE_FIELDS = [
+    "account",
+    "account_id",
+    "device_id",
+]
 ACCOUNT_FIELDS = [
     "email",
     "name",
@@ -26,6 +30,7 @@ ACCOUNT_FIELDS = [
     "sexual_orien",
     "sexual_orien_other",
     "id",
+    # "device",
 ]
 
 
@@ -218,7 +223,20 @@ class LeaderboardListView(View):
         user_steps = {}
         for email, dw_row in daily_walks.items():
             acct = Account.objects.values(*ACCOUNT_FIELDS).get(email=email)
-
+            print("acct", acct)
+            accountid = acct.get("id")
+            dev_id = (
+                Account.objects.values("device")
+                .filter(id=accountid)
+                .reverse()[0]
+            )
+            print("dev_id", dev_id)
+            dev = Device.objects.values(*DEVICE_FIELDS).filter(
+                account_id=accountid
+            )[0]
+            print("device id", dev)
+            print("iso d", dev["device_id"])
+            # print("id, ",Device.objects.get("device_id"))
             if contest and acct["created"] > localize(contest.end):
                 continue
 
@@ -228,9 +246,16 @@ class LeaderboardListView(View):
             user_stats["account"] = acct
             user_stats["dw_steps"] = dw_row["dw_steps"]
             id = acct["id"]
+            # device = Device.objects.get(device_id = acct)
+            # print(device)
+
+            # id = device.device_id
+            # device = Device.objects.get(device_id=json_data["account_id"])
 
             user_steps[id] = dw_row["dw_steps"]
-            leaderboard_list.append({"id": id, "steps": user_steps[id]})
+            leaderboard_list.append(
+                {"id": dev["device_id"], "steps": user_steps[id]}
+            )
 
         leaderboard_length = 10
         leaderboard_list = sorted(
