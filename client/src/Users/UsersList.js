@@ -73,15 +73,18 @@ function UsersList() {
 
   useEffect(() => {
     let cancelled = false;
-    setUsers();
-    Api.admin
-      .usersByZip({ contest_id, is_tester })
-      .then((response) => !cancelled && setUsersByZip(response.data));
-    Api.admin
-      .usersByZipMedianSteps({ contest_id, is_tester })
-      .then(
-        (response) => !cancelled && setUsersByZipMedianSteps(response.data)
-      );
+    if (contest_id) {
+      setUsersByZip();
+      setUsersByZipMedianSteps();
+      Api.admin
+        .usersByZip({ contest_id, is_tester })
+        .then((response) => !cancelled && setUsersByZip(response.data));
+      Api.admin
+        .usersByZipMedianSteps({ contest_id, is_tester })
+        .then(
+          (response) => !cancelled && setUsersByZipMedianSteps(response.data)
+        );
+    }
     return () => (cancelled = true);
   }, [contest_id, is_tester]);
 
@@ -170,7 +173,7 @@ function UsersList() {
         <div className="row justify-content-center mb-5">
           <div className="col-lg-3">
             <IntensityMap
-              data={usersByZip.total}
+              data={usersByZip?.total}
               map={map}
               onMouseOver={onMouseOverZip}
               minColor="#eeeeee"
