@@ -43,6 +43,11 @@ urlpatterns = [
         name="admin_users_zip",
     ),
     path(
+        "api/admin/users/zip/active",
+        views.AdminUsersActiveByZipView.as_view(),
+        name="admin_users_zip_active",
+    ),
+    path(
         "api/admin/users/zip/steps",
         views.AdminUsersByZipMedianStepsView.as_view(),
         name="admin_users_zip_steps",

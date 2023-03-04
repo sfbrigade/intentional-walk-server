@@ -30,6 +30,7 @@ function UsersList() {
 
   const [map, setMap] = useState();
   const [usersByZip, setUsersByZip] = useState();
+  const [usersByZipActive, setUsersByZipActive] = useState();
   const [usersByZipMedianSteps, setUsersByZipMedianSteps] = useState();
   const [selectedFeature, setSelectedFeature] = useState();
 
@@ -75,10 +76,14 @@ function UsersList() {
     let cancelled = false;
     if (contest_id) {
       setUsersByZip();
+      setUsersByZipActive();
       setUsersByZipMedianSteps();
       Api.admin
         .usersByZip({ contest_id, is_tester })
         .then((response) => !cancelled && setUsersByZip(response.data));
+      Api.admin
+        .usersByZipActive({ contest_id, is_tester })
+        .then((response) => !cancelled && setUsersByZipActive(response.data));
       Api.admin
         .usersByZipMedianSteps({ contest_id, is_tester })
         .then(
@@ -219,7 +224,33 @@ function UsersList() {
               </dd>
               <br />
               <dt>Active Users:</dt>
-              <dd></dd>
+              <dd>
+                {usersByZipActive && (
+                  <>
+                    {!selectedFeature && (
+                      <>
+                        {Object.values(usersByZipActive.total).reduce(
+                          (a, b) => a + b,
+                          0
+                        )}
+                        &nbsp;<span>(</span>
+                        {Object.values(usersByZipActive.new).reduce(
+                          (a, b) => a + b,
+                          0
+                        )}
+                        <span> new)</span>
+                      </>
+                    )}
+                    {selectedFeature && (
+                      <>
+                        {usersByZipActive.total[selectedFeature.id] ?? "0"}
+                        &nbsp;(
+                        {usersByZipActive.new[selectedFeature.id] ?? "0"} new)
+                      </>
+                    )}
+                  </>
+                )}
+              </dd>
               <br />
               <dt>Median Steps:</dt>
               <dd>

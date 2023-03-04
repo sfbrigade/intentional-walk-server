@@ -182,6 +182,82 @@ class AdminUsersByZipView(View):
             return HttpResponse(status=401)
 
 
+class AdminUsersActiveByZipView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        contest_id = request.GET.get("contest_id", None)
+        is_tester = request.GET.get("is_tester", None) == "true"
+        if not contest_id:
+            return HttpResponse(status=422)
+        elif request.user.is_authenticated:
+            payload = {}
+            contest = Contest.objects.get(pk=contest_id)
+
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT zip, COUNT(*)
+                    FROM (
+                        SELECT DISTINCT(home_account.id), home_account.zip
+                        FROM home_account
+                        JOIN home_account_contests ON home_account.id=home_account_contests.account_id
+                        LEFT JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
+                        LEFT JOIN home_intentionalwalk ON home_account.id=home_intentionalwalk.account_id
+                        WHERE home_account.is_tester=%s AND
+                              home_account_contests.contest_id=%s AND
+                              ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
+                               (home_intentionalwalk.id IS NOT NULL AND home_intentionalwalk.start BETWEEN %s AND %s))
+                    ) subquery
+                    GROUP BY zip
+                """,
+                    [
+                        is_tester,
+                        contest_id,
+                        contest.start,
+                        contest.end,
+                        contest.start,
+                        contest.end,
+                    ],
+                )
+                rows = cursor.fetchall()
+                payload["total"] = {row[0]: row[1] for row in rows}
+                cursor.execute(
+                    """
+                    SELECT zip, COUNT(*)
+                    FROM (
+                        SELECT DISTINCT(home_account.id), home_account.zip
+                        FROM home_account
+                        JOIN home_account_contests ON home_account.id=home_account_contests.account_id
+                        LEFT JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
+                        LEFT JOIN home_intentionalwalk ON home_account.id=home_intentionalwalk.account_id
+                        WHERE home_account.is_tester=%s AND
+                              home_account_contests.contest_id=%s AND
+                              home_account.created BETWEEN %s AND %s AND
+                              ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
+                               (home_intentionalwalk.id IS NOT NULL AND home_intentionalwalk.start BETWEEN %s AND %s))
+                    ) subquery
+                    GROUP BY zip
+                """,
+                    [
+                        is_tester,
+                        contest_id,
+                        contest.start_promo,
+                        contest.end,
+                        contest.start,
+                        contest.end,
+                        contest.start,
+                        contest.end,
+                    ],
+                )
+                rows = cursor.fetchall()
+                payload["new"] = {row[0]: row[1] for row in rows}
+
+            return JsonResponse(payload)
+        else:
+            return HttpResponse(status=401)
+
+
 class AdminUsersByZipMedianStepsView(View):
     http_method_names = ["get"]
 
