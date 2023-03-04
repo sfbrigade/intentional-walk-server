@@ -175,109 +175,136 @@ function UsersList() {
         <div className="col-md"></div>
       </div>
       {contest && (
-        <div className="row justify-content-center mb-5">
-          <div className="col-lg-3">
-            <IntensityMap
-              data={usersByZip?.total}
-              map={map}
-              onMouseOver={onMouseOverZip}
-              minColor="#eeeeee"
-              maxColor="#702b84"
-              width={380}
-              height={300}
-            />
-            <h5 className="text-center">Users by Zip</h5>
-          </div>
-          <div className="col-lg-3">
-            <h4>
-              {!selectedFeature && "San Franciso"}
-              {selectedFeature &&
-                `${selectedFeature.properties.neighborhood} (${selectedFeature.id})`}
-            </h4>
-            <dl className="users-list__map-legend">
-              <dt>Total Users:</dt>
-              <dd>
-                {usersByZip && (
-                  <>
-                    {!selectedFeature && (
-                      <>
-                        {Object.values(usersByZip.total).reduce(
-                          (a, b) => a + b,
-                          0
-                        )}
-                        &nbsp;<span>(</span>
-                        {Object.values(usersByZip.new).reduce(
-                          (a, b) => a + b,
-                          0
-                        )}
-                        <span> new)</span>
-                      </>
-                    )}
-                    {selectedFeature && (
-                      <>
-                        {usersByZip.total[selectedFeature.id] ?? "0"}&nbsp;(
-                        {usersByZip.new[selectedFeature.id] ?? "0"} new)
-                      </>
-                    )}
-                  </>
-                )}
-              </dd>
-              <br />
-              <dt>Active Users:</dt>
-              <dd>
-                {usersByZipActive && (
-                  <>
-                    {!selectedFeature && (
-                      <>
-                        {Object.values(usersByZipActive.total).reduce(
-                          (a, b) => a + b,
-                          0
-                        )}
-                        &nbsp;<span>(</span>
-                        {Object.values(usersByZipActive.new).reduce(
-                          (a, b) => a + b,
-                          0
-                        )}
-                        <span> new)</span>
-                      </>
-                    )}
-                    {selectedFeature && (
-                      <>
-                        {usersByZipActive.total[selectedFeature.id] ?? "0"}
-                        &nbsp;(
-                        {usersByZipActive.new[selectedFeature.id] ?? "0"} new)
-                      </>
-                    )}
-                  </>
-                )}
-              </dd>
-              <br />
-              <dt>Median Steps:</dt>
-              <dd>
-                {usersByZipMedianSteps &&
-                  !selectedFeature &&
-                  numeral(usersByZipMedianSteps.all).format("0,0")}
-                {usersByZipMedianSteps &&
-                  selectedFeature &&
-                  numeral(usersByZipMedianSteps[selectedFeature.id]).format(
-                    "0,0"
+        <>
+          <div className="row mb-5">
+            <div className="col-lg-3 offset-lg-2">
+              <IntensityMap
+                data={usersByZip?.total}
+                map={map}
+                onMouseOver={onMouseOverZip}
+                minColor="#eeeeee"
+                maxColor="#702b84"
+                width={380}
+                height={300}
+              />
+              <h5 className="text-center">Users by Zip</h5>
+            </div>
+            <div className="col-lg-2">
+              <h4>
+                {!selectedFeature && "San Franciso"}
+                {selectedFeature &&
+                  `${selectedFeature.properties.neighborhood} (${selectedFeature.id})`}
+              </h4>
+              <dl className="users-list__map-legend">
+                <dt>Total Users:</dt>
+                <dd>
+                  {usersByZip && (
+                    <>
+                      {!selectedFeature && (
+                        <>
+                          {Object.values(usersByZip.total).reduce(
+                            (a, b) => a + b,
+                            0
+                          )}
+                          &nbsp;<span>(</span>
+                          {Object.values(usersByZip.new).reduce(
+                            (a, b) => a + b,
+                            0
+                          )}
+                          <span> new)</span>
+                        </>
+                      )}
+                      {selectedFeature && (
+                        <>
+                          {usersByZip.total[selectedFeature.id] ?? "0"}&nbsp;(
+                          {usersByZip.new[selectedFeature.id] ?? "0"} new)
+                        </>
+                      )}
+                    </>
                   )}
-              </dd>
-            </dl>
+                </dd>
+                <br />
+                <dt>Active Users:</dt>
+                <dd>
+                  {usersByZipActive && (
+                    <>
+                      {!selectedFeature && (
+                        <>
+                          {Object.values(usersByZipActive.total).reduce(
+                            (a, b) => a + b,
+                            0
+                          )}
+                          &nbsp;<span>(</span>
+                          {Object.values(usersByZipActive.new).reduce(
+                            (a, b) => a + b,
+                            0
+                          )}
+                          <span> new)</span>
+                        </>
+                      )}
+                      {selectedFeature && (
+                        <>
+                          {usersByZipActive.total[selectedFeature.id] ?? "0"}
+                          &nbsp;(
+                          {usersByZipActive.new[selectedFeature.id] ?? "0"} new)
+                        </>
+                      )}
+                    </>
+                  )}
+                </dd>
+                <br />
+                <dt>Median Steps:</dt>
+                <dd>
+                  {usersByZipMedianSteps &&
+                    !selectedFeature &&
+                    numeral(usersByZipMedianSteps.all).format("0,0")}
+                  {usersByZipMedianSteps &&
+                    selectedFeature &&
+                    numeral(usersByZipMedianSteps[selectedFeature.id]).format(
+                      "0,0"
+                    )}
+                </dd>
+              </dl>
+            </div>
+            <div className="col-lg-3">
+              <IntensityMap
+                data={usersByZipMedianSteps}
+                map={map}
+                onMouseOver={onMouseOverZip}
+                minColor="#eeeeee"
+                maxColor="#2b388f"
+                width={380}
+                height={300}
+              />
+              <h5 className="text-center">Median Steps by Zip</h5>
+            </div>
           </div>
-          <div className="col-lg-3">
-            <IntensityMap
-              data={usersByZipMedianSteps}
-              map={map}
-              onMouseOver={onMouseOverZip}
-              minColor="#eeeeee"
-              maxColor="#2b388f"
-              width={380}
-              height={300}
-            />
-            <h5 className="text-center">Median Steps by Zip</h5>
+          <div className="row mb-5">
+            <div className="col-lg-3 offset-lg-2 d-flex flex-column justify-content-center">
+              <h4 className="text-center">
+                Total Users (
+                <b>
+                  {usersByZip &&
+                    Object.values(usersByZip.total).reduce((a, b) => a + b, 0)}
+                </b>
+                )
+              </h4>
+            </div>
+            <div className="col-lg-3 offset-lg-2 d-flex flex-column justify-content-center">
+              <h4 className="text-center">
+                Total Active Users (
+                <b>
+                  {usersByZipActive &&
+                    Object.values(usersByZipActive.total).reduce(
+                      (a, b) => a + b,
+                      0
+                    )}
+                </b>
+                )
+              </h4>
+            </div>
           </div>
-        </div>
+        </>
       )}
       <div className="table-responsive">
         <table className="users-list__table table table-striped">
