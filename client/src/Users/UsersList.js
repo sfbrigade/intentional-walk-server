@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import numeral from "numeral";
 
 import Api from "../Api";
+import BarChart from "../Components/BarChart";
 import IntensityMap from "../Components/IntensityMap";
 import OrderBy from "../Components/OrderBy";
 import Pagination from "../Components/Pagination";
@@ -125,6 +126,36 @@ function UsersList() {
     setSelectedFeature(feature);
   }
 
+  let totalUsers;
+  let totalUsersData;
+  let totalNewUsers;
+  if (usersByZip) {
+    totalUsers = Object.values(usersByZip.total).reduce((a, b) => a + b, 0);
+    totalNewUsers = Object.values(usersByZip.new).reduce((a, b) => a + b, 0);
+    totalUsersData = [
+      { label: "Prev", value: totalUsers - totalNewUsers },
+      { label: "New", value: totalNewUsers },
+    ];
+  }
+
+  let totalActiveUsers;
+  let totalActiveUsersData;
+  let totalNewActiveUsers;
+  if (usersByZipActive) {
+    totalActiveUsers = Object.values(usersByZipActive.total).reduce(
+      (a, b) => a + b,
+      0
+    );
+    totalNewActiveUsers = Object.values(usersByZipActive.new).reduce(
+      (a, b) => a + b,
+      0
+    );
+    totalActiveUsersData = [
+      { label: "Prev", value: totalActiveUsers - totalNewActiveUsers },
+      { label: "New", value: totalNewActiveUsers },
+    ];
+  }
+
   return (
     <div className="users-list container-fluid">
       <div className="row my-5">
@@ -202,22 +233,17 @@ function UsersList() {
                     <>
                       {!selectedFeature && (
                         <>
-                          {Object.values(usersByZip.total).reduce(
-                            (a, b) => a + b,
-                            0
-                          )}
-                          &nbsp;<span>(</span>
-                          {Object.values(usersByZip.new).reduce(
-                            (a, b) => a + b,
-                            0
-                          )}
-                          <span> new)</span>
+                          {totalUsers}&nbsp;<span>(</span>
+                          {totalNewUsers}
+                          <span>&nbsp;new)</span>
                         </>
                       )}
                       {selectedFeature && (
                         <>
-                          {usersByZip.total[selectedFeature.id] ?? "0"}&nbsp;(
-                          {usersByZip.new[selectedFeature.id] ?? "0"} new)
+                          {usersByZip.total[selectedFeature.id] ?? "0"}&nbsp;
+                          <span>(</span>
+                          {usersByZip.new[selectedFeature.id] ?? "0"}
+                          <span>&nbsp;new)</span>
                         </>
                       )}
                     </>
@@ -230,23 +256,17 @@ function UsersList() {
                     <>
                       {!selectedFeature && (
                         <>
-                          {Object.values(usersByZipActive.total).reduce(
-                            (a, b) => a + b,
-                            0
-                          )}
-                          &nbsp;<span>(</span>
-                          {Object.values(usersByZipActive.new).reduce(
-                            (a, b) => a + b,
-                            0
-                          )}
-                          <span> new)</span>
+                          {totalActiveUsers}&nbsp;<span>(</span>
+                          {totalNewActiveUsers}
+                          <span>&nbsp;new)</span>
                         </>
                       )}
                       {selectedFeature && (
                         <>
                           {usersByZipActive.total[selectedFeature.id] ?? "0"}
-                          &nbsp;(
-                          {usersByZipActive.new[selectedFeature.id] ?? "0"} new)
+                          &nbsp;<span>(</span>
+                          {usersByZipActive.new[selectedFeature.id] ?? "0"}
+                          <span>&nbsp;new)</span>
                         </>
                       )}
                     </>
@@ -280,27 +300,32 @@ function UsersList() {
             </div>
           </div>
           <div className="row mb-5">
-            <div className="col-lg-3 offset-lg-2 d-flex flex-column justify-content-center">
+            <div className="col-lg-3 offset-lg-2 d-flex flex-column align-items-center">
               <h4 className="text-center">
-                Total Users (
-                <b>
-                  {usersByZip &&
-                    Object.values(usersByZip.total).reduce((a, b) => a + b, 0)}
-                </b>
-                )
+                Total Users (<b>{totalUsers}</b>)
               </h4>
+              {totalUsersData && (
+                <BarChart
+                  data={totalUsersData}
+                  width={300}
+                  height={300}
+                  minColor="#eeeeee"
+                  maxColor="#702b84"
+                />
+              )}
             </div>
             <div className="col-lg-3 offset-lg-2 d-flex flex-column justify-content-center">
               <h4 className="text-center">
-                Total Active Users (
-                <b>
-                  {usersByZipActive &&
-                    Object.values(usersByZipActive.total).reduce(
-                      (a, b) => a + b,
-                      0
-                    )}
-                </b>
-                )
+                Total Active Users (<b>{totalActiveUsers}</b>)
+                {totalActiveUsersData && (
+                  <BarChart
+                    data={totalActiveUsersData}
+                    width={300}
+                    height={300}
+                    minColor="#eeeeee"
+                    maxColor="#2b388f"
+                  />
+                )}
               </h4>
             </div>
           </div>

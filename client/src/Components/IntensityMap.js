@@ -13,7 +13,7 @@ function IntensityMap({
   const ref = useRef();
 
   useEffect(() => {
-    if (data && map && width && height) {
+    if (data && map && width && height && minColor && maxColor && onMouseOver) {
       // set up map projection
       const projection = d3
         .geoMercator()
@@ -42,7 +42,7 @@ function IntensityMap({
         .on("mouseover", (_, feature) => onMouseOver(feature))
         .on("mouseout", () => onMouseOver());
     }
-  }, [data, map, width, height]);
+  }, [data, map, width, height, minColor, maxColor, onMouseOver]);
 
   return <svg ref={ref} width={width} height={height} />;
 }
