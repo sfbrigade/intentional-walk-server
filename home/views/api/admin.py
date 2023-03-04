@@ -1,5 +1,7 @@
 import logging
 
+from datetime import timedelta
+
 from django.db import connection
 from django.db.models import BooleanField, Count, ExpressionWrapper, F, Q, Sum
 from django.forms.models import model_to_dict
@@ -78,7 +80,10 @@ class AdminUsersView(View):
                 )
                 annotate = {
                     "is_new": ExpressionWrapper(
-                        Q(created__range=(contest.start_promo, contest.end)),
+                        Q(
+                            created__gte=contest.start_promo,
+                            created__lt=contest.end + timedelta(days=1),
+                        ),
                         output_field=BooleanField(),
                     ),
                     "dw_count": Count("dailywalk", filter=dailywalk_filter),
@@ -167,7 +172,8 @@ class AdminUsersByZipView(View):
             if contest_id:
                 contest = Contest.objects.get(pk=contest_id)
                 filters = filters & Q(
-                    created__range=(contest.start_promo, contest.end)
+                    created__gte=contest.start_promo,
+                    created__lt=contest.end + timedelta(days=1),
                 )
                 results = (
                     Account.objects.filter(filters)
@@ -207,7 +213,8 @@ class AdminUsersActiveByZipView(View):
                         WHERE home_account.is_tester=%s AND
                               home_account_contests.contest_id=%s AND
                               ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
-                               (home_intentionalwalk.id IS NOT NULL AND home_intentionalwalk.start BETWEEN %s AND %s))
+                               (home_intentionalwalk.id IS NOT NULL AND
+                                home_intentionalwalk.start >= %s AND home_intentionalwalk.start < %s))
                     ) subquery
                     GROUP BY zip
                 """,
@@ -217,7 +224,7 @@ class AdminUsersActiveByZipView(View):
                         contest.start,
                         contest.end,
                         contest.start,
-                        contest.end,
+                        contest.end + timedelta(days=1),
                     ],
                 )
                 rows = cursor.fetchall()
@@ -233,9 +240,10 @@ class AdminUsersActiveByZipView(View):
                         LEFT JOIN home_intentionalwalk ON home_account.id=home_intentionalwalk.account_id
                         WHERE home_account.is_tester=%s AND
                               home_account_contests.contest_id=%s AND
-                              home_account.created BETWEEN %s AND %s AND
+                              home_account.created >= %s AND home_account.created < %s AND
                               ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
-                               (home_intentionalwalk.id IS NOT NULL AND home_intentionalwalk.start BETWEEN %s AND %s))
+                               (home_intentionalwalk.id IS NOT NULL AND
+                                home_intentionalwalk.start >= %s AND home_intentionalwalk.start < %s))
                     ) subquery
                     GROUP BY zip
                 """,
@@ -243,11 +251,11 @@ class AdminUsersActiveByZipView(View):
                         is_tester,
                         contest_id,
                         contest.start_promo,
-                        contest.end,
+                        contest.end + timedelta(days=1),
                         contest.start,
                         contest.end,
                         contest.start,
-                        contest.end,
+                        contest.end + timedelta(days=1),
                     ],
                 )
                 rows = cursor.fetchall()
