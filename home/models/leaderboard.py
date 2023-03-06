@@ -17,10 +17,10 @@ class Leaderboard(models.Model):
         on_delete=models.CASCADE,
         help_text="Device the data is coming from",
     )
-    contests = models.ForeignKey(
+    contest = models.ForeignKey(
         "Contest",
         on_delete=models.CASCADE,
-        help_text="All the contests the account is enrolled in",
+        help_text="The contest the account is enrolled in",
     )
 
     # Auto populate the account field from the device field

@@ -120,30 +120,32 @@ class DailyWalkCreateView(View):
             # total_steps = DailyWalk.objects.get
             # (account__email=device.account.email)
             # .annotate(Count('dailywalk'))
-            if contest:
-                try:
-                    # Updation
-                    total_steps = (
-                        DailyWalk.objects.filter(
-                            account__email=device.account.email
-                        )
-                        .filter(date__range=(contest.start, contest.end))
-                        .aggregate(Sum("steps"))
-                    )
-
-                    leaderboard = Leaderboard.objects.get(
+        if contest:
+            
+            total_steps = (
+                    DailyWalk.objects.filter(
                         account__email=device.account.email
                     )
-                    leaderboard.steps = total_steps["steps__sum"]
-                    leaderboard.contests = contest
+                    .filter(date__range=(contest.start, contest.end))
+                    .aggregate(Sum("steps"))
+            )
+            try:
+                # Updation
+            
 
-                    leaderboard.device_id = json_data["account_id"]
-                    leaderboard.save()
-                except ObjectDoesNotExist:
-                    leaderboard = Leaderboard.objects.create(
-                        steps=0,
-                        device=device,
-                        contests=contest,
+                leaderboard = Leaderboard.objects.get(
+                    account__email=device.account.email, contest=contest
+                )
+                leaderboard.steps = total_steps["steps__sum"]
+                leaderboard.contest = contest
+
+                leaderboard.device_id = json_data["account_id"]
+                leaderboard.save()
+            except ObjectDoesNotExist:
+                leaderboard = Leaderboard.objects.create(
+                    steps=total_steps["steps__sum"],
+                    device=device,
+                    contest=contest,
                     )
         else:
             # No active contest

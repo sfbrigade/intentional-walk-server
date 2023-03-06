@@ -6,7 +6,7 @@ from uuid import uuid4
 from django.utils import timezone
 from faker import Faker
 
-from home.models import Account, Contest, DailyWalk, Device, IntentionalWalk
+from home.models import Account, Contest, DailyWalk, Device, IntentionalWalk, Leaderboard
 from home.models.account import (
     SAN_FRANCISCO_ZIP_CODES,
     GenderLabels,
