@@ -38,7 +38,7 @@ STATIC_ROOT = PROJECT_ROOT / "staticfiles"
 
 if PRODUCTION:
     WHITENOISE_INDEX_FILE = True
-    WHITENOISE_ROOT = PROJECT_ROOT / "client" / "build"
+    WHITENOISE_ROOT = BASE_DIR / "client" / "build"
     STATICFILES_STORAGE = (
         "whitenoise.storage.CompressedManifestStaticFilesStorage"
     )
@@ -85,7 +85,7 @@ ROOT_URLCONF = "server.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "client" / "build"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

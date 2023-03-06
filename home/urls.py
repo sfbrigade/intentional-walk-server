@@ -1,6 +1,7 @@
 import os
 
 from django.urls import path
+from django.views.generic import TemplateView
 
 from . import views
 
@@ -12,7 +13,8 @@ urlpatterns = []
 if PRODUCTION:
     # serve the React SPA index.html as a catch-all
     urlpatterns = [
-        path("", views.TemplateView.as_view(template_name="index.html"))
+        path("users/", TemplateView.as_view(template_name="index.html")),
+        path("login/", TemplateView.as_view(template_name="index.html")),
     ]
 else:
     # mount old views for comparison testing until fully deprecated and removed
