@@ -22,6 +22,9 @@ class IntentionalWalk(models.Model):
     )
     steps = models.IntegerField(help_text="Number of steps recorded")
     pause_time = models.FloatField(help_text="Total time paused (in seconds)")
+    walk_time = models.FloatField(
+        help_text="Total time walked not including pause time"
+    )
     distance = models.FloatField(help_text="Total distance covered")
     device = models.ForeignKey(
         "Device",
@@ -38,16 +41,10 @@ class IntentionalWalk(models.Model):
     )
 
     @property
-    def walk_time(self):
-        return (self.end - self.start).total_seconds() - self.pause_time
-
-    @property
     def walk_time_repr(self):
         return time.strftime(
             "%Hh %Mm %Ss",
-            time.gmtime(
-                int((self.end - self.start).total_seconds() - self.pause_time)
-            ),
+            time.gmtime(int(self.walk_time)),
         )
 
     @property
@@ -60,14 +57,15 @@ class IntentionalWalk(models.Model):
 
     @property
     def speed_mph(self):
-        return (
-            self.distance_in_miles
-            / ((self.end - self.start).total_seconds() - self.pause_time)
-        ) * 3600
+        return (self.distance_in_miles / self.walk_time) * 3600
 
-    # Auto populate the account field from the device field
     def save(self, *args, **kwargs):
+        # Auto populate the account field from the device field
         self.account = self.device.account
+        # Calculate the walk time
+        self.walk_time = (
+            self.end - self.start
+        ).total_seconds() - self.pause_time
         super().save(*args, **kwargs)
 
     def __str__(self):

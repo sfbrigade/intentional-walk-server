@@ -10,6 +10,7 @@ from .api.admin import (
 )
 from .api.appuser import AppUserCreateView, AppUserDeleteView
 from .api.dailywalk import DailyWalkCreateView, DailyWalkListView
+from .api.export import ExportUsersView
 from .api.intentionalwalk import IntentionalWalkView, IntentionalWalkListView
 from .api.contest import ContestCurrentView
 

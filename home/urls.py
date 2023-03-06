@@ -73,6 +73,11 @@ urlpatterns = [
         name="dailywalk_get",
     ),
     path(
+        "api/export/users",
+        views.ExportUsersView.as_view(),
+        name="export_users",
+    ),
+    path(
         "api/intentionalwalk/create",
         views.IntentionalWalkView.as_view(),
         name="intentionalwalk_create",
