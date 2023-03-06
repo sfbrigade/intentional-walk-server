@@ -19,6 +19,55 @@ from home.models import Account, Contest, DailyWalk
 
 logger = logging.getLogger(__name__)
 
+# configure the base CSV headers
+CSV_COLUMNS = [
+    {"name": "Participant Name", "id": "name"},
+    {"name": "Date Enrolled", "id": "created"},
+    {"name": "Email", "id": "email"},
+    {"name": "Zip Code", "id": "zip"},
+    {"name": "Sexual Orientation", "id": "sexual_orien"},
+    {"name": "Sexual Orientation Other", "id": "sexual_orien_other"},
+    {"name": "Gender Identity", "id": "gender"},
+    {"name": "Gender Identity Other", "id": "gender_other"},
+    {"name": "Race", "id": "race"},
+    {"name": "Race Other", "id": "race_other"},
+    {"name": "Is Latino", "id": "is_latino"},
+    {"name": "Age", "id": "age"},
+    {"name": "Is New Signup", "id": "is_new"},
+    {"name": "Active During Contest", "id": "is_active"},
+    {"name": "Total Daily Walks During Contest", "id": "dw_contest_count"},
+    {
+        "name": "Total Daily Walks During Baseline",
+        "id": "dw_baseline_count",
+    },
+    {"name": "Total Steps During Contest", "id": "dw_contest_steps"},
+    {"name": "Total Steps During Baseline", "id": "dw_baseline_steps"},
+    {
+        "name": "Total Recorded Walks During Contest",
+        "id": "iw_contest_count",
+    },
+    {
+        "name": "Total Recorded Walks During Baseline",
+        "id": "iw_baseline_count",
+    },
+    {
+        "name": "Total Recorded Steps During Contest",
+        "id": "iw_contest_steps",
+    },
+    {
+        "name": "Total Recorded Steps During Baseline",
+        "id": "iw_baseline_steps",
+    },
+    {
+        "name": "Total Recorded Walk Time During Contest",
+        "id": "iw_contest_time",
+    },
+    {
+        "name": "Total Recorded Walk Time During Baseline",
+        "id": "iw_baseline_time",
+    },
+]
+
 
 def get_dailywalk_stats(name, ids, dailywalk_filter):
     filters = Q(id__in=ids)
@@ -80,62 +129,14 @@ def export_contest_users_data(file, contest_id, is_tester):
     # get the Contest object
     contest = Contest.objects.get(pk=contest_id)
 
-    # configure the base CSV headers
-    csv_columns = [
-        {"name": "Participant Name", "id": "name"},
-        {"name": "Date Enrolled", "id": "created"},
-        {"name": "Email", "id": "email"},
-        {"name": "Zip Code", "id": "zip"},
-        {"name": "Sexual Orientation", "id": "sexual_orien"},
-        {"name": "Sexual Orientation Other", "id": "sexual_orien_other"},
-        {"name": "Gender Identity", "id": "gender"},
-        {"name": "Gender Identity Other", "id": "gender_other"},
-        {"name": "Race", "id": "race"},
-        {"name": "Race Other", "id": "race_other"},
-        {"name": "Is Latino", "id": "is_latino"},
-        {"name": "Age", "id": "age"},
-        {"name": "Is New Signup", "id": "is_new"},
-        {"name": "Active During Contest", "id": "is_active"},
-        {"name": "Total Daily Walks During Contest", "id": "dw_contest_count"},
-        {
-            "name": "Total Daily Walks During Baseline",
-            "id": "dw_baseline_count",
-        },
-        {"name": "Total Steps During Contest", "id": "dw_contest_steps"},
-        {"name": "Total Steps During Baseline", "id": "dw_baseline_steps"},
-        {
-            "name": "Total Recorded Walks During Contest",
-            "id": "iw_contest_count",
-        },
-        {
-            "name": "Total Recorded Walks During Baseline",
-            "id": "iw_baseline_count",
-        },
-        {
-            "name": "Total Recorded Steps During Contest",
-            "id": "iw_contest_steps",
-        },
-        {
-            "name": "Total Recorded Steps During Baseline",
-            "id": "iw_baseline_steps",
-        },
-        {
-            "name": "Total Recorded Walk Time During Contest",
-            "id": "iw_contest_time",
-        },
-        {
-            "name": "Total Recorded Walk Time During Baseline",
-            "id": "iw_baseline_time",
-        },
-    ]
+    # configure the CSV writer
+    fieldnames = [col["id"] for col in CSV_COLUMNS]
+    header = {col["id"]: col["name"] for col in CSV_COLUMNS}
     # add headers for every day in the output range (start of baseline to end of contest)
     for dt in range((contest.end - contest.start_baseline).days + 1):
         date = contest.start_baseline + timedelta(days=dt)
-        csv_columns.append({"name": str(date), "id": str(date)})
-
-    # configure the CSV writer
-    fieldnames = [col["id"] for col in csv_columns]
-    header = {col["id"]: col["name"] for col in csv_columns}
+        fieldnames.append(str(date))
+        header[str(date)] = str(date)
     writer = csv.DictWriter(file, fieldnames=fieldnames, extrasaction="ignore")
     writer.writerow(header)
 
