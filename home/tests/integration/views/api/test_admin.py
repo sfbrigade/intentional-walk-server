@@ -1,3 +1,5 @@
+import math
+
 from datetime import date, datetime, timedelta
 
 from django.contrib.auth.models import User
@@ -37,12 +39,12 @@ class TestAdminViews(TestCase):
         Login()
 
         # Accounts generated for testing
-        # account0: signup before current contest, not part of current contest
-        # account1: signup before current contest, tester, dailywalks, intentionalwalks
-        # account2: signup before current contest, dailywalks, intentionalwalks
-        # account3: signup during current contest, dailywalks
-        # account4: signup during current contest, intentionalwalks
-        # account5: signup during current contest, inactive
+        # account0: 94102 signup before current contest, not part of current contest
+        # account1: 94102 signup before current contest, tester, dailywalks 5k steps/day, intentionalwalks
+        # account2: 94103 signup before current contest, dailywalks 10k steps/day, intentionalwalks
+        # account3: 94103 signup during current contest, dailywalks 15k steps/day
+        # account4: 94104 signup during current contest, intentionalwalks
+        # account5: 94104 signup during current contest, inactive
 
         # Generate 3 accounts before the current contest
         accounts = list(AccountGenerator().generate(3))
@@ -50,8 +52,13 @@ class TestAdminViews(TestCase):
         accounts[1].is_tester = True
         accounts[1].save()
         # Generate 3 accounts during the contest
-        with freeze_time("3000-03-01"):
+        with freeze_time("3000-03-02"):
             accounts = accounts + list(AccountGenerator().generate(3))
+        # Set names for testing ordering, zip codes for grouping
+        for i, account in enumerate(accounts):
+            account.name = f"User {i}"
+            account.zip = f"{94102 + math.floor(i / 2)}"
+            account.save()
 
         # generate devices for the active accounts
         device1 = list(DeviceGenerator(accounts[1:2]).generate(1))
@@ -68,7 +75,7 @@ class TestAdminViews(TestCase):
         }
         contest0 = next(ContestGenerator().generate(1, **params))
         # save its id in a class variable for use in tests
-        cls.contest0_id = contest0.pk
+        cls.contest0_id = str(contest0.pk)
 
         # Add the last five accounts to this contest
         for account in accounts[1:6]:
@@ -134,4 +141,93 @@ class TestAdminViews(TestCase):
                 "accounts_steps": 350000,  # 14 days * (10,000 + 15,000 steps/day)
                 "accounts_distance": 280000,  # 14 days * (8,000 + 12,000 meters/day)
             },
+        )
+
+    def test_get_contests(self):
+        c = Client()
+        self.assertTrue(self.login(c))
+        response = c.get("/api/admin/contests")
+        data = response.json()
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]["contest_id"], self.contest0_id)
+
+    def test_get_users(self):
+        c = Client()
+        self.assertTrue(self.login(c))
+        response = c.get("/api/admin/users")
+        data = response.json()
+        self.assertEqual(len(data), 5)  # 6 accounts - 1 tester
+
+        response = c.get(f"/api/admin/users?contest_id={self.contest0_id}")
+        data = response.json()
+        self.assertEqual(len(data), 4)  # 5 accounts in the contest - 1 tester
+        # default ordering is by name
+        self.assertEqual(data[0]["name"], "User 2")
+        self.assertEqual(data[0]["is_new"], False)
+        self.assertEqual(data[0]["dw_count"], 7)
+        self.assertEqual(data[0]["dw_steps"], 70000)
+        self.assertEqual(data[0]["dw_distance"], 56000)
+        self.assertEqual(data[1]["name"], "User 3")
+        self.assertEqual(data[1]["is_new"], True)
+        self.assertEqual(data[1]["dw_count"], 7)
+        self.assertEqual(data[1]["dw_steps"], 105000)
+        self.assertEqual(data[1]["dw_distance"], 84000)
+        self.assertEqual(data[2]["name"], "User 4")
+        self.assertEqual(data[2]["is_new"], True)
+        self.assertEqual(data[2]["dw_count"], 0)
+        self.assertEqual(data[2]["dw_steps"], None)
+        self.assertEqual(data[2]["dw_distance"], None)
+        self.assertEqual(data[3]["name"], "User 5")
+        self.assertEqual(data[3]["is_new"], True)
+        self.assertEqual(data[3]["dw_count"], 0)
+        self.assertEqual(data[3]["dw_steps"], None)
+        self.assertEqual(data[3]["dw_distance"], None)
+
+        response = c.get(
+            f"/api/admin/users?contest_id={self.contest0_id}&is_tester=true"
+        )
+        data = response.json()
+        self.assertEqual(len(data), 1)  # 1 tester
+
+    def test_get_users_by_zip(self):
+        c = Client()
+        self.assertTrue(self.login(c))
+        response = c.get(f"/api/admin/users/zip?contest_id={self.contest0_id}")
+        data = response.json()
+        self.assertEqual(
+            data,
+            {
+                "total": {"94103": 2, "94104": 2},
+                "new": {"94103": 1, "94104": 2},
+            },
+        )
+
+    def test_get_users_active_by_zip(self):
+        c = Client()
+        self.assertTrue(self.login(c))
+        response = c.get(
+            f"/api/admin/users/zip/active?contest_id={self.contest0_id}"
+        )
+        data = response.json()
+        self.assertEqual(
+            data,
+            {
+                "total": {"94103": 2, "94104": 1},
+                "new": {"94103": 1, "94104": 1},
+            },
+        )
+
+    def test_get_users_median_steps_by_zip(self):
+        c = Client()
+        self.assertTrue(self.login(c))
+        response = c.get(
+            f"/api/admin/users/zip/steps?contest_id={self.contest0_id}"
+        )
+        data = response.json()
+        self.assertEqual(
+            data,
+            {
+                "all": 87500.0,
+                "94103": 87500.0,
+            },  # median of [70k, 105k] = avg of the two = 87.5k
         )
