@@ -203,7 +203,18 @@ function UsersList() {
             </select>
           </div>
         </div>
-        <div className="col-md"></div>
+        <div className="col-md">
+          <div className="d-flex justify-content-end">
+            {contest && (
+              <a
+                href={`/api/export/users?contest_id=${contest.contest_id}&is_tester=${is_tester}`}
+                className="btn btn-outline-primary"
+              >
+                Download as CSV
+              </a>
+            )}
+          </div>
+        </div>
       </div>
       {contest && (
         <>

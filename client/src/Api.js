@@ -66,7 +66,7 @@ const Api = {
   },
   static: {
     map() {
-      return instance.get("/static/SanFrancisco.Neighborhoods.json");
+      return instance.get("/static/home/SanFrancisco.Neighborhoods.json");
     },
   },
 };
