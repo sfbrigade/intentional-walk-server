@@ -37,6 +37,7 @@ STATICFILES_DIRS = [PROJECT_ROOT / "static"]
 STATIC_ROOT = PROJECT_ROOT / "staticfiles"
 
 if PRODUCTION:
+    WHITENOISE_ROOT = PROJECT_ROOT / "client" / "build"
     STATICFILES_STORAGE = (
         "whitenoise.storage.CompressedManifestStaticFilesStorage"
     )
