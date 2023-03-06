@@ -1,5 +1,7 @@
 import time
 
+from dateutil import parser
+
 from django.db import models
 
 from home.templatetags.format_helpers import m_to_mi
@@ -59,13 +61,20 @@ class IntentionalWalk(models.Model):
     def speed_mph(self):
         return (self.distance_in_miles / self.walk_time) * 3600
 
+    def update_walk_time(self):
+        end = self.end
+        if type(end) is str:
+            end = parser.parse(end)
+        start = self.start
+        if type(start) is str:
+            start = parser.parse(start)
+        self.walk_time = (end - start).total_seconds() - self.pause_time
+
     def save(self, *args, **kwargs):
         # Auto populate the account field from the device field
         self.account = self.device.account
         # Calculate the walk time
-        self.walk_time = (
-            self.end - self.start
-        ).total_seconds() - self.pause_time
+        self.update_walk_time()
         super().save(*args, **kwargs)
 
     def __str__(self):
