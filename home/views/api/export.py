@@ -180,7 +180,7 @@ def export_contest_users_data(file, contest_id, is_tester):
     while offset < total:
         ids = []
         rows = []
-        for row in results[offset : offset + limit - 1]:  # noqa E203
+        for row in results[offset : offset + limit]:  # noqa E203
             # convert race Set into a comma delimited string
             row["race"] = ",".join(row["race"])
             # gather all rows and ids
