@@ -12,6 +12,7 @@ from home.models import (
     DailyWalk,
     Device,
     IntentionalWalk,
+    #Leaderboard
 )
 from home.models.account import (
     SAN_FRANCISCO_ZIP_CODES,
