@@ -31,7 +31,7 @@ class LeaderboardListView(View):
         if contest_id is None:
             return HttpResponse(
                 "No current contest, check back during the next contest period!"
-                )
+            )
 
         current_contest = Contest.objects.filter(contest_id=contest_id)
         # http://localhost:8000/api/leaderboard/
@@ -49,7 +49,8 @@ class LeaderboardListView(View):
                     "message": (
                         "Unregistered device - "
                         "Please register first!"
-                        "account:" f"{account_id}"
+                        "account:"
+                        f"{account_id}"
                     ),
                 }
             )
@@ -67,10 +68,10 @@ class LeaderboardListView(View):
         leaderboard_length = 10
         leaderboard = (
             Leaderboard.objects.filter(contest=contest_id)
-            .values("device_id",  "steps")
-            .annotate(rank=Window(
-                expression=Rank(),
-                order_by=F('steps').desc()))
+            .values("device_id", "steps")
+            .annotate(
+                rank=Window(expression=Rank(), order_by=F("steps").desc())
+            )
         )
 
         leaderboard_list = [user for user in leaderboard]
