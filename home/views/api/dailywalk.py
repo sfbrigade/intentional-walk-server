@@ -121,17 +121,14 @@ class DailyWalkCreateView(View):
             # (account__email=device.account.email)
             # .annotate(Count('dailywalk'))
         if contest:
-            
+
             total_steps = (
-                    DailyWalk.objects.filter(
-                        account__email=device.account.email
-                    )
-                    .filter(date__range=(contest.start, contest.end))
-                    .aggregate(Sum("steps"))
+                DailyWalk.objects.filter(account__email=device.account.email)
+                .filter(date__range=(contest.start, contest.end))
+                .aggregate(Sum("steps"))
             )
             try:
                 # Updation
-            
 
                 leaderboard = Leaderboard.objects.get(
                     account__email=device.account.email, contest=contest
@@ -146,7 +143,7 @@ class DailyWalkCreateView(View):
                     steps=total_steps["steps__sum"],
                     device=device,
                     contest=contest,
-                    )
+                )
         else:
             # No active contest
             pass

@@ -1,58 +1,44 @@
-# from datetime import date, timedelta
-# from typing import Optional
-import json
-
-
 from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models.functions import RowNumber, Rank
+from django.db.models.functions import Rank
 from django.db.models.expressions import Window
-
-
-from django.db.models import Count, F, Sum
+from django.db.models import F
 from django.core.exceptions import ObjectDoesNotExist
 
-
 from home.models import (
-    # Account,
     Contest,
-    # DailyWalk,
-    # IntentionalWalk,
     Device,
     Leaderboard,
 )
 
-# from home.utils import localize
-from .utils import validate_request_json
 
-    #Dispatch?
 @method_decorator(csrf_exempt, name="dispatch")
+# Dispatch?
 class LeaderboardListView(View):
     """View to retrieve leaderboard"""
 
-    # model = DailyWalk
+    # model = Leaderboard
     http_method_names = ["get"]
 
-   # def get(self, request, account_id, contest_id, *args, **kwargs):
     def get(self, request, *args, **kwargs):
 
         contest_id = request.GET.get("contest_id")
         account_id = request.GET.get("account_id")
-        print("a", account_id)
-        print("c", contest_id)
-        print("r", request)
 
         # Parse params
         if contest_id is None:
-            return HttpResponse("No current contest, check back during the next contest period!")
-
+            return HttpResponse(
+                "No current contest, check back during the next contest period!"
+                )
 
         current_contest = Contest.objects.filter(contest_id=contest_id)
-        print("curr", current_contest)
-        ## http://localhost:8000/api/leaderboard/get?contest_id=24dcb327-7ce4-4c6d-b33d-33a2606d30ec?account_id=691d690b-da13-4864-b5ff-4d1535a6528d
-        # Validate request. If any field is missing, send back the response message
+        # http://localhost:8000/api/leaderboard/
+        # get?contest_id=<contest>?account_id=<account_id>
+
+        # Validate request. If any field is missing,
+        #  send back the response message
         # Get the device if already registered
         try:
             device = Device.objects.get(device_id=account_id)
@@ -62,7 +48,7 @@ class LeaderboardListView(View):
                     "status": "error",
                     "message": (
                         "Unregistered device - "
-                        "Please register first!"  
+                        "Please register first!"
                         "account:" f"{account_id}"
                     ),
                 }
@@ -79,17 +65,19 @@ class LeaderboardListView(View):
 
         leaderboard_list = []
         leaderboard_length = 10
-        leaderboard = ( Leaderboard.objects.filter(contest=contest_id)
+        leaderboard = (
+            Leaderboard.objects.filter(contest=contest_id)
             .values("device_id",  "steps")
             .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('steps').desc()))
+                expression=Rank(),
+                order_by=F('steps').desc()))
         )
 
-        leaderboard_list = [user for user in leaderboard]  
+        leaderboard_list = [user for user in leaderboard]
 
-        for count, user in enumerate(leaderboard_list):
-            print("if", user["id"], json_data["account_id"])
+        # Check if user should be added after top 10 displayed
+        current_user = {}
+        for user in leaderboard_list:
             if (
                 user["device_id"] == account_id
                 and user["rank"] > leaderboard_length
@@ -101,8 +89,7 @@ class LeaderboardListView(View):
 
         # cut list to 10 items, add current user
         leaderboard_list = leaderboard_list[:leaderboard_length]
-        #leaderboard_list.append(current_user)
-        # leaderboard_list.extend(current_user_range)
+        leaderboard_list.append(current_user)
         json_response["payload"]["leaderboard"] = leaderboard_list
 
         if current_contest is None:
