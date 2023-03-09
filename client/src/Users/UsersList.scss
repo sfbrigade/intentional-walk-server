@@ -1,0 +1,25 @@
+.users-list__title {
+  color: #cd6155;
+  text-align: center;
+}
+
+.users-list__map-legend {
+  dt,
+  dd {
+    display: inline;
+  }
+  dt {
+    margin-right: 0.5rem;
+    font-weight: normal;
+  }
+  dd {
+    font-weight: bold;
+    span {
+      font-weight: normal;
+    }
+  }
+}
+
+.users-list__table {
+  font-size: 1.2rem;
+}

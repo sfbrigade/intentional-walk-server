@@ -110,5 +110,7 @@ venv.bak/
 
 *.dump
 
+.DS_Store
+
 # Local paths
 home/static

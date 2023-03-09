@@ -1,4 +1,29 @@
+from math import ceil
 from typing import Any, Dict, List
+
+
+def paginate(request, results, page, per_page):
+    count = results.count()
+    pages_count = ceil(count / per_page)
+    base_url = f"{request.scheme}://{request.get_host()}{request.path}"
+    query = request.GET.copy()
+    links = []
+    if page < pages_count:
+        query["page"] = page + 1
+        links.append(f'<{base_url}?{query.urlencode()}>; rel="next"')
+    if page < pages_count - 1:
+        query["page"] = pages_count
+        links.append(f'<{base_url}?{query.urlencode()}>; rel="last"')
+    if page > 2:
+        query["page"] = 1
+        links.append(f'<{base_url}?{query.urlencode()}>; rel="first"')
+    if page > 1:
+        query["page"] = page - 1
+        links.append(f'<{base_url}?{query.urlencode()}>; rel="prev"')
+    return (
+        results[(page - 1) * per_page : page * per_page],  # noqa: E203
+        ", ".join(links),
+    )
 
 
 def validate_request_json(

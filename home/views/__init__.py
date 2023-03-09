@@ -1,6 +1,16 @@
 # Import API views
+from .api.admin import (
+    AdminMeView,
+    AdminHomeView,
+    AdminContestsView,
+    AdminUsersView,
+    AdminUsersByZipView,
+    AdminUsersActiveByZipView,
+    AdminUsersByZipMedianStepsView,
+)
 from .api.appuser import AppUserCreateView, AppUserDeleteView
 from .api.dailywalk import DailyWalkCreateView, DailyWalkListView
+from .api.export import ExportUsersView
 from .api.intentionalwalk import IntentionalWalkView, IntentionalWalkListView
 from .api.contest import ContestCurrentView
 
