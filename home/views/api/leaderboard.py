@@ -72,25 +72,30 @@ class LeaderboardListView(View):
             .annotate(
                 rank=Window(expression=Rank(), order_by=F("steps").desc())
             )
-        )
-        # Convert to List
+        ) 
+        
+        # Convert to List    #### Move this after for loop 
         leaderboard_list = [user for user in leaderboard]
-
-        # Cut list length to specified length (10)
-        leaderboard_list = leaderboard_list[:leaderboard_length]
 
         # Check if user should be added after top 10 displayed
         current_user = {}
-        for user in leaderboard_list:
+        for user in leaderboard_list: # ###in leaderboard
             if (
                 user["device_id"] == account_id
                 and user["rank"] > leaderboard_length
             ):
-                # current_user_range.append(leaderboard_list[count-1])
-                # current_user_range.append(leaderboard_list[count])
-                # current_user_range.append(leaderboard_list[count+1])
+                
                 current_user = user
-                leaderboard_list.append(current_user)
+
+        # Cut list length to specified length (10)
+        leaderboard_list = leaderboard_list[:leaderboard_length]
+
+
+        # if ____
+        leaderboard_list.append(current_user)
+
+
+
 
         # cut list to 10 items, add current user
         json_response["payload"]["leaderboard"] = leaderboard_list
