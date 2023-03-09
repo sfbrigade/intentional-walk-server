@@ -1,0 +1,15 @@
+{
+  "name": "intentional-walk-server",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": "18.14.2",
+    "npm": "9.5.0"
+  },
+  "workspaces": [
+    "client"
+  ],
+  "scripts": {
+    "build": "npm run build -w client"
+  }
+}

@@ -1,6 +1,11 @@
 version: '3'
 services:
   server:
-    command: bash -l -c "bin/init; python manage.py runserver 0:8000"
+    command: bash -l -c "bin/init; nf start -j Procfile.dev"
+    environment:
+      - PORT=3000
+    ports:
+      - 3000:3000
     volumes:
       - .:/app
+      - /app/client/node_modules
