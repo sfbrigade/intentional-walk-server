@@ -26,6 +26,10 @@ function UsersList() {
 
   const order_by = params.get("order_by") ?? "name";
 
+  const query = params.get("query") ?? "";
+  const [newQuery, setNewQuery] = useState(query);
+  const [queryDebounceTimerId, setQueryDebounceTimerId] = useState();
+
   const [contest, setContest] = useState();
   const [users, setUsers] = useState();
 
@@ -54,7 +58,7 @@ function UsersList() {
     let cancelled = false;
     setUsers();
     Api.admin
-      .users({ contest_id, is_tester, order_by, page })
+      .users({ contest_id, is_tester, order_by, query, page })
       .then((response) => {
         if (cancelled) {
           return;
@@ -71,7 +75,7 @@ function UsersList() {
         setLastPage(newLastPage);
       });
     return () => (cancelled = true);
-  }, [contest_id, is_tester, order_by, page]);
+  }, [contest_id, is_tester, order_by, query, page]);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +98,7 @@ function UsersList() {
     return () => (cancelled = true);
   }, [contest_id, is_tester]);
 
-  function onChange(contest_id, is_tester, order_by) {
+  function onChange(contest_id, is_tester, order_by, query) {
     const params = [];
     if (contest_id) {
       params.push(["contest_id", contest_id]);
@@ -105,21 +109,37 @@ function UsersList() {
     if (order_by !== "name") {
       params.push(["order_by", order_by]);
     }
+    if (query) {
+      params.push(["query", query]);
+    }
     navigate(
       params.length > 0 ? `?${new URLSearchParams(params).toString()}` : ""
     );
   }
 
   function onChangeContest(event) {
-    onChange(event.target.value, is_tester, order_by);
+    onChange(event.target.value, is_tester, order_by, query);
   }
 
   function onChangeShow(event) {
-    onChange(contest_id, event.target.value === "true", order_by);
+    onChange(contest_id, event.target.value === "true", order_by, query);
   }
 
   function onChangeOrder(newOrderBy) {
-    onChange(contest_id, is_tester, newOrderBy);
+    onChange(contest_id, is_tester, newOrderBy, query);
+  }
+
+  function onChangeQuery(event) {
+    if (queryDebounceTimerId) {
+      clearTimeout(queryDebounceTimerId);
+    }
+    setNewQuery(event.target.value);
+    setQueryDebounceTimerId(
+      setTimeout(
+        () => onChange(contest_id, is_tester, order_by, event.target.value),
+        300
+      )
+    );
   }
 
   function onMouseOverZip(feature) {
@@ -346,6 +366,24 @@ function UsersList() {
         <table className="users-list__table table table-striped">
           <thead>
             <tr>
+              <td colSpan={9}>
+                <div className="d-flex">
+                  <div className="d-flex">
+                    <label className="col-form-label me-2" htmlFor="search">
+                      Search:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Name or Email..."
+                      value={newQuery}
+                      onChange={onChangeQuery}
+                      className="form-control w-auto"
+                    />
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
               <th>&nbsp;&nbsp;&nbsp;</th>
               <th>
                 <OrderBy
@@ -459,7 +497,7 @@ function UsersList() {
         <Pagination
           page={page}
           lastPage={lastPage}
-          otherParams={{ contest_id, order_by, is_tester }}
+          otherParams={{ contest_id, order_by, is_tester, query }}
         />
       </div>
     </div>
