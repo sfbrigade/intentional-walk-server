@@ -107,6 +107,13 @@ class AdminUsersView(View):
                 is_tester=request.GET.get("is_tester", None) == "true"
             )
 
+            # filter by search query
+            query = request.GET.get("query", None)
+            if query:
+                filters = filters & Q(
+                    Q(name__icontains=query) | Q(email__icontains=query)
+                )
+
             # set ordering
             add_name = False
             if order_by.startswith("-"):

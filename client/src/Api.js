@@ -43,9 +43,9 @@ const Api = {
     contests() {
       return instance.get("/api/admin/contests");
     },
-    users({ contest_id, is_tester, order_by, page }) {
+    users({ contest_id, is_tester, order_by, query, page }) {
       return instance.get("/api/admin/users", {
-        params: { contest_id, is_tester, order_by, page },
+        params: { contest_id, is_tester, order_by, query, page },
       });
     },
     usersByZip({ contest_id, is_tester }) {
