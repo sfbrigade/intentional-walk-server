@@ -525,7 +525,7 @@ function UsersList() {
                     <td>{u.iw_steps?.toLocaleString()}</td>
                     <td>
                       {u.iw_distance &&
-                        numeral(u.dw_distance / 1609).format("0,0.0")}
+                        numeral(u.iw_distance / 1609).format("0,0.0")}
                     </td>
                     <td>
                       {u.iw_time && numeral(u.iw_time / 60).format("0,0.0")}
