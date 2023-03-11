@@ -30,6 +30,8 @@ function UsersList() {
   const [newQuery, setNewQuery] = useState(query);
   const [queryDebounceTimerId, setQueryDebounceTimerId] = useState();
 
+  const show_rw = params.get("show_rw") === "true";
+
   const [contest, setContest] = useState();
   const [users, setUsers] = useState();
 
@@ -98,7 +100,7 @@ function UsersList() {
     return () => (cancelled = true);
   }, [contest_id, is_tester]);
 
-  function onChange(contest_id, is_tester, order_by, query) {
+  function onChange(contest_id, is_tester, order_by, query, show_rw) {
     const params = [];
     if (contest_id) {
       params.push(["contest_id", contest_id]);
@@ -111,6 +113,9 @@ function UsersList() {
     }
     if (query) {
       params.push(["query", query]);
+    }
+    if (show_rw) {
+      params.push(["show_rw", "true"]);
     }
     navigate(
       params.length > 0 ? `?${new URLSearchParams(params).toString()}` : ""
@@ -140,6 +145,10 @@ function UsersList() {
         300
       )
     );
+  }
+
+  function onChangeShowRW(event) {
+    onChange(contest_id, is_tester, order_by, query, event.target.checked);
   }
 
   function onMouseOverZip(feature) {
@@ -366,8 +375,8 @@ function UsersList() {
         <table className="users-list__table table table-striped">
           <thead>
             <tr>
-              <td colSpan={9}>
-                <div className="d-flex">
+              <td colSpan={10 + (show_rw ? 4 : 0)}>
+                <div className="d-flex justify-content-between align-items-center">
                   <div className="d-flex">
                     <label className="col-form-label me-2" htmlFor="search">
                       Search:
@@ -379,6 +388,18 @@ function UsersList() {
                       onChange={onChangeQuery}
                       className="form-control w-auto"
                     />
+                  </div>
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      checked={show_rw}
+                      onChange={onChangeShowRW}
+                      id="showRW"
+                    />
+                    <label className="form-check-label" htmlFor="showRW">
+                      Show Recorded Walks
+                    </label>
                   </div>
                 </div>
               </td>
@@ -468,6 +489,14 @@ function UsersList() {
                   Total Dist (mi)
                 </OrderBy>
               </th>
+              {show_rw && (
+                <>
+                  <th>RWs</th>
+                  <th>RW Steps</th>
+                  <th>RW Dist. (mi)</th>
+                  <th>RW Time (min)</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -490,6 +519,19 @@ function UsersList() {
                   {u.dw_distance &&
                     numeral(u.dw_distance / 1609).format("0,0.0")}
                 </td>
+                {show_rw && (
+                  <>
+                    <td>{u.iw_count?.toLocaleString()}</td>
+                    <td>{u.iw_steps?.toLocaleString()}</td>
+                    <td>
+                      {u.iw_distance &&
+                        numeral(u.dw_distance / 1609).format("0,0.0")}
+                    </td>
+                    <td>
+                      {u.iw_time && numeral(u.iw_time / 60).format("0,0.0")}
+                    </td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>
