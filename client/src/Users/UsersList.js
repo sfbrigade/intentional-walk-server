@@ -26,6 +26,12 @@ function UsersList() {
 
   const order_by = params.get("order_by") ?? "name";
 
+  const query = params.get("query") ?? "";
+  const [newQuery, setNewQuery] = useState(query);
+  const [queryDebounceTimerId, setQueryDebounceTimerId] = useState();
+
+  const show_rw = params.get("show_rw") === "true";
+
   const [contest, setContest] = useState();
   const [users, setUsers] = useState();
 
@@ -54,7 +60,7 @@ function UsersList() {
     let cancelled = false;
     setUsers();
     Api.admin
-      .users({ contest_id, is_tester, order_by, page })
+      .users({ contest_id, is_tester, order_by, query, page })
       .then((response) => {
         if (cancelled) {
           return;
@@ -71,7 +77,7 @@ function UsersList() {
         setLastPage(newLastPage);
       });
     return () => (cancelled = true);
-  }, [contest_id, is_tester, order_by, page]);
+  }, [contest_id, is_tester, order_by, query, page]);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +100,7 @@ function UsersList() {
     return () => (cancelled = true);
   }, [contest_id, is_tester]);
 
-  function onChange(contest_id, is_tester, order_by) {
+  function onChange(contest_id, is_tester, order_by, query, show_rw) {
     const params = [];
     if (contest_id) {
       params.push(["contest_id", contest_id]);
@@ -105,21 +111,44 @@ function UsersList() {
     if (order_by !== "name") {
       params.push(["order_by", order_by]);
     }
+    if (query) {
+      params.push(["query", query]);
+    }
+    if (show_rw) {
+      params.push(["show_rw", "true"]);
+    }
     navigate(
       params.length > 0 ? `?${new URLSearchParams(params).toString()}` : ""
     );
   }
 
   function onChangeContest(event) {
-    onChange(event.target.value, is_tester, order_by);
+    onChange(event.target.value, is_tester, order_by, query);
   }
 
   function onChangeShow(event) {
-    onChange(contest_id, event.target.value === "true", order_by);
+    onChange(contest_id, event.target.value === "true", order_by, query);
   }
 
   function onChangeOrder(newOrderBy) {
-    onChange(contest_id, is_tester, newOrderBy);
+    onChange(contest_id, is_tester, newOrderBy, query);
+  }
+
+  function onChangeQuery(event) {
+    if (queryDebounceTimerId) {
+      clearTimeout(queryDebounceTimerId);
+    }
+    setNewQuery(event.target.value);
+    setQueryDebounceTimerId(
+      setTimeout(
+        () => onChange(contest_id, is_tester, order_by, event.target.value),
+        300
+      )
+    );
+  }
+
+  function onChangeShowRW(event) {
+    onChange(contest_id, is_tester, order_by, query, event.target.checked);
   }
 
   function onMouseOverZip(feature) {
@@ -346,6 +375,36 @@ function UsersList() {
         <table className="users-list__table table table-striped">
           <thead>
             <tr>
+              <td colSpan={10 + (show_rw ? 4 : 0)}>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="d-flex">
+                    <label className="col-form-label me-2" htmlFor="search">
+                      Search:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Name or Email..."
+                      value={newQuery}
+                      onChange={onChangeQuery}
+                      className="form-control w-auto"
+                    />
+                  </div>
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      checked={show_rw}
+                      onChange={onChangeShowRW}
+                      id="showRW"
+                    />
+                    <label className="form-check-label" htmlFor="showRW">
+                      Show Recorded Walks
+                    </label>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
               <th>&nbsp;&nbsp;&nbsp;</th>
               <th>
                 <OrderBy
@@ -430,6 +489,14 @@ function UsersList() {
                   Total Dist (mi)
                 </OrderBy>
               </th>
+              {show_rw && (
+                <>
+                  <th>RWs</th>
+                  <th>RW Steps</th>
+                  <th>RW Dist. (mi)</th>
+                  <th>RW Time (min)</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -452,6 +519,19 @@ function UsersList() {
                   {u.dw_distance &&
                     numeral(u.dw_distance / 1609).format("0,0.0")}
                 </td>
+                {show_rw && (
+                  <>
+                    <td>{u.iw_count?.toLocaleString()}</td>
+                    <td>{u.iw_steps?.toLocaleString()}</td>
+                    <td>
+                      {u.iw_distance &&
+                        numeral(u.iw_distance / 1609).format("0,0.0")}
+                    </td>
+                    <td>
+                      {u.iw_time && numeral(u.iw_time / 60).format("0,0.0")}
+                    </td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>
@@ -459,7 +539,7 @@ function UsersList() {
         <Pagination
           page={page}
           lastPage={lastPage}
-          otherParams={{ contest_id, order_by, is_tester }}
+          otherParams={{ contest_id, order_by, is_tester, query }}
         />
       </div>
     </div>

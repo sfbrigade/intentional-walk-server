@@ -1,9 +1,11 @@
 import logging
 
 from datetime import timedelta
+from dateutil import parser
 
 from django.db import connection
 from django.db.models import BooleanField, Count, ExpressionWrapper, F, Q, Sum
+from django.db.models.functions import TruncDate
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.views import View
@@ -72,11 +74,16 @@ class AdminUsersView(View):
             filters = None
             annotate = None
             contest_id = request.GET.get("contest_id", None)
+            intentionalwalk_filter = None
             if contest_id:
                 filters = Q(contests__contest_id=contest_id)
                 contest = Contest.objects.get(pk=contest_id)
                 dailywalk_filter = Q(
                     dailywalk__date__range=(contest.start, contest.end)
+                )
+                intentionalwalk_filter = Q(
+                    intentionalwalk__start__gte=contest.start,
+                    intentionalwalk__start__lt=contest.end + timedelta(days=1),
                 )
                 annotate = {
                     "is_new": ExpressionWrapper(
@@ -101,11 +108,19 @@ class AdminUsersView(View):
                     "dw_steps": Sum("dailywalk__steps"),
                     "dw_distance": Sum("dailywalk__distance"),
                 }
+                intentionalwalk_filter = Q()
 
             # filter to show users vs testers
             filters = filters & Q(
                 is_tester=request.GET.get("is_tester", None) == "true"
             )
+
+            # filter by search query
+            query = request.GET.get("query", None)
+            if query:
+                filters = filters & Q(
+                    Q(name__icontains=query) | Q(email__icontains=query)
+                )
 
             # set ordering
             add_name = False
@@ -118,6 +133,7 @@ class AdminUsersView(View):
             if add_name:
                 order_by.append("name")
 
+            # perform query!
             results = (
                 Account.objects.filter(filters)
                 .values(*values)
@@ -125,6 +141,39 @@ class AdminUsersView(View):
                 .order_by(*order_by)
             )
             (results, links) = paginate(request, results, page, per_page)
+            results = list(results)
+
+            # now query for and add in recorded IntentionalWalk stats
+            ids = [row["id"] for row in results]
+            iw_results = (
+                Account.objects.filter(id__in=ids)
+                .values("id")
+                .annotate(
+                    iw_count=Count(
+                        "intentionalwalk", filter=intentionalwalk_filter
+                    ),
+                    iw_steps=Sum(
+                        "intentionalwalk__steps", filter=intentionalwalk_filter
+                    ),
+                    iw_distance=Sum(
+                        "intentionalwalk__distance",
+                        filter=intentionalwalk_filter,
+                    ),
+                    iw_time=Sum(
+                        "intentionalwalk__walk_time",
+                        filter=intentionalwalk_filter,
+                    ),
+                )
+                .order_by(*order_by)
+            )
+            for i, row in enumerate(iw_results):
+                results[i].update(row)
+                # at this point, we have enough info to determine if user is "active"
+                if contest_id:
+                    results[i]["is_active"] = (
+                        results[i]["dw_count"] > 0
+                        or results[i]["iw_count"] > 0
+                    )
 
             response = JsonResponse(list(results), safe=False)
             if links:
@@ -133,6 +182,36 @@ class AdminUsersView(View):
             return response
         else:
             return HttpResponse(status=401)
+
+
+class AdminUsersDailyView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        filters = Q()
+        # filter to show users vs testers
+        filters = filters & Q(
+            is_tester=request.GET.get("is_tester", None) == "true"
+        )
+        # filter by date
+        start_date = request.GET.get("start_date", None)
+        end_date = request.GET.get("end_date", None)
+        if start_date:
+            filters = filters & Q(created__gte=start_date)
+        if end_date:
+            filters = filters & Q(
+                created__lt=parser.parse(end_date) + timedelta(days=1)
+            )
+        results = (
+            Account.objects.filter(filters)
+            .annotate(date=TruncDate("created"))
+            .values("date")
+            .annotate(count=Count("id"))
+            .order_by("date")
+        )
+        results = [[row["date"], row["count"]] for row in results]
+        results.insert(0, ["Date", "Count"])
+        return JsonResponse(results, safe=False)
 
 
 class AdminUsersByZipView(View):
