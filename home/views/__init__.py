@@ -5,6 +5,7 @@ from .api.admin import (
     AdminContestsView,
     AdminUsersView,
     AdminUsersDailyView,
+    AdminUsersCumulativeView,
     AdminUsersByZipView,
     AdminUsersActiveByZipView,
     AdminUsersByZipMedianStepsView,

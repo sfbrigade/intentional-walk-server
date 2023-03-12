@@ -48,9 +48,14 @@ const Api = {
         params: { contest_id, is_tester, order_by, query, page },
       });
     },
-    usersDaily({ start_date, end_date, contest_id, is_tester }) {
+    usersDaily({ start_date, end_date }) {
       return instance.get("/api/admin/users/daily", {
-        params: { start_date, end_date, contest_id, is_tester },
+        params: { start_date, end_date },
+      });
+    },
+    usersCumulative({ start_date, end_date }) {
+      return instance.get("/api/admin/users/cumulative", {
+        params: { start_date, end_date },
       });
     },
     usersByZip({ contest_id, is_tester }) {

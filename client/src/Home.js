@@ -20,6 +20,7 @@ function Home() {
   const [data, setData] = useState();
 
   const [usersDaily, setUsersDaily] = useState();
+  const [usersCumulative, setUsersCumulative] = useState();
 
   useEffect(() => {
     let cancelled = false;
@@ -34,6 +35,13 @@ function Home() {
         (response) =>
           !cancelled &&
           setUsersDaily(response.data.map((r) => [new Date([r[0]]), r[1]]))
+      );
+    Api.admin
+      .usersCumulative({ start_date, end_date })
+      .then(
+        (response) =>
+          !cancelled &&
+          setUsersCumulative(response.data.map((r) => [new Date([r[0]]), r[1]]))
       );
     return () => (cancelled = true);
   }, [start_date, end_date]);
@@ -139,7 +147,25 @@ function Home() {
               />
             )}
           </div>
-          <div className="col-lg-6"></div>
+          <div className="col-lg-6">
+            {usersCumulative && (
+              <Chart
+                chartType="LineChart"
+                data={usersCumulative}
+                options={{
+                  legend: { position: "none" },
+                  bar: { groupWidth: "95%" },
+                  vAxis: {
+                    title: "Total signups",
+                    viewWindow: { min: 0 },
+                  },
+                  colors: ["#E59866"],
+                }}
+                width="100%"
+                height="400px"
+              />
+            )}
+          </div>
         </div>
       </div>
     </>

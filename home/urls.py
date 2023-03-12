@@ -58,7 +58,12 @@ urlpatterns = urlpatterns + [
     path(
         "api/admin/users/daily",
         views.AdminUsersDailyView.as_view(),
-        name="admin_users",
+        name="admin_users_daily",
+    ),
+    path(
+        "api/admin/users/cumulative",
+        views.AdminUsersCumulativeView.as_view(),
+        name="admin_users_cumulative",
     ),
     path(
         "api/admin/users/zip",
