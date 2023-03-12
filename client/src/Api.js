@@ -48,6 +48,11 @@ const Api = {
         params: { contest_id, is_tester, order_by, query, page },
       });
     },
+    usersDaily({ start_date, end_date, contest_id, is_tester }) {
+      return instance.get("/api/admin/users/daily", {
+        params: { start_date, end_date, contest_id, is_tester },
+      });
+    },
     usersByZip({ contest_id, is_tester }) {
       return instance.get("/api/admin/users/zip", {
         params: { contest_id, is_tester },

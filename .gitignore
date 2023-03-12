@@ -114,3 +114,7 @@ venv.bak/
 
 # Local paths
 home/static
+
+# React SPA
+/client/build
+/node_modules
