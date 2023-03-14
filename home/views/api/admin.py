@@ -10,7 +10,7 @@ from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 
-from home.models import Account, Contest
+from home.models import Account, Contest, DailyWalk
 
 from .utils import paginate
 
@@ -45,6 +45,36 @@ class AdminHomeView(View):
             return JsonResponse(payload)
         else:
             return HttpResponse(status=204)
+
+
+class AdminHomeStepsDailyView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponse(status=401)
+
+        filters = Q()
+        # filter to show users vs testers
+        filters = filters & Q(
+            account__is_tester=request.GET.get("is_tester", None) == "true"
+        )
+        # filter by date
+        start_date = request.GET.get("start_date", None)
+        end_date = request.GET.get("end_date", None)
+        if start_date:
+            filters = filters & Q(date__gte=start_date)
+        if end_date:
+            filters = filters & Q(date__lte=end_date)
+        results = (
+            DailyWalk.objects.filter(filters)
+            .values("date")
+            .annotate(count=Sum("steps"))
+            .order_by("date")
+        )
+        results = [[row["date"], row["count"]] for row in results]
+        results.insert(0, ["Date", "Count"])
+        return JsonResponse(results, safe=False)
 
 
 class AdminContestsView(View):

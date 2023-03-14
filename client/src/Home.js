@@ -21,6 +21,7 @@ function Home() {
 
   const [usersDaily, setUsersDaily] = useState();
   const [usersCumulative, setUsersCumulative] = useState();
+  const [stepsDaily, setStepsDaily] = useState();
 
   useEffect(() => {
     let cancelled = false;
@@ -42,6 +43,13 @@ function Home() {
         (response) =>
           !cancelled &&
           setUsersCumulative(response.data.map((r) => [new Date([r[0]]), r[1]]))
+      );
+    Api.admin
+      .homeStepsDaily({ start_date, end_date })
+      .then(
+        (response) =>
+          !cancelled &&
+          setStepsDaily(response.data.map((r) => [new Date([r[0]]), r[1]]))
       );
     return () => (cancelled = true);
   }, [start_date, end_date]);
@@ -127,8 +135,9 @@ function Home() {
             </button>
           </div>
         </div>
-        <div className="row">
-          <div className="col-lg-6">
+        <div className="row my-5">
+          <div className="col-lg-6 text-center">
+            <h3>Signups (per day)</h3>
             {usersDaily && (
               <Chart
                 chartType="ColumnChart"
@@ -147,7 +156,8 @@ function Home() {
               />
             )}
           </div>
-          <div className="col-lg-6">
+          <div className="col-lg-6 text-center">
+            <h3>Signups (total)</h3>
             {usersCumulative && (
               <Chart
                 chartType="LineChart"
@@ -165,6 +175,39 @@ function Home() {
                 height="400px"
               />
             )}
+          </div>
+        </div>
+        <div className="row my-5">
+          <div className="col-lg-6 text-center">
+            <h3>Steps (per day)</h3>
+            {stepsDaily && (
+              <Chart
+                chartType="ColumnChart"
+                data={stepsDaily}
+                options={{
+                  legend: { position: "none" },
+                  bar: { groupWidth: "95%" },
+                  vAxis: {
+                    title: "Steps",
+                    viewWindow: { min: 0 },
+                  },
+                  colors: ["#2ECC71"],
+                }}
+                width="100%"
+                height="400px"
+              />
+            )}
+          </div>
+          <div className="col-lg-6 text-center">
+            <h3>Steps (total)</h3>
+          </div>
+        </div>
+        <div className="row my-5">
+          <div className="col-lg-6 text-center">
+            <h3>Miles (per day)</h3>
+          </div>
+          <div className="col-lg-6 text-center">
+            <h3>Miles (total)</h3>
           </div>
         </div>
       </div>

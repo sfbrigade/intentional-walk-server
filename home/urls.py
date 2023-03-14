@@ -48,6 +48,11 @@ urlpatterns = urlpatterns + [
     path("api/admin/me", views.AdminMeView.as_view(), name="admin_me"),
     path("api/admin/home", views.AdminHomeView.as_view(), name="admin_home"),
     path(
+        "api/admin/home/steps/daily",
+        views.AdminHomeStepsDailyView.as_view(),
+        name="admin_home_steps_daily",
+    ),
+    path(
         "api/admin/contests",
         views.AdminContestsView.as_view(),
         name="admin_contests",

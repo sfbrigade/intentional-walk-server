@@ -40,6 +40,11 @@ const Api = {
     home() {
       return instance.get("/api/admin/home");
     },
+    homeStepsDaily({ start_date, end_date }) {
+      return instance.get("/api/admin/home/steps/daily", {
+        params: { start_date, end_date },
+      });
+    },
     contests() {
       return instance.get("/api/admin/contests");
     },
