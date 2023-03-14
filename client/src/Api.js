@@ -45,6 +45,11 @@ const Api = {
         params: { start_date, end_date },
       });
     },
+    homeStepsCumulative({ start_date, end_date }) {
+      return instance.get("/api/admin/home/steps/cumulative", {
+        params: { start_date, end_date },
+      });
+    },
     contests() {
       return instance.get("/api/admin/contests");
     },

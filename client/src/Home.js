@@ -22,6 +22,7 @@ function Home() {
   const [usersDaily, setUsersDaily] = useState();
   const [usersCumulative, setUsersCumulative] = useState();
   const [stepsDaily, setStepsDaily] = useState();
+  const [stepsCumulative, setStepsCumulative] = useState();
 
   useEffect(() => {
     let cancelled = false;
@@ -50,6 +51,13 @@ function Home() {
         (response) =>
           !cancelled &&
           setStepsDaily(response.data.map((r) => [new Date([r[0]]), r[1]]))
+      );
+    Api.admin
+      .homeStepsCumulative({ start_date, end_date })
+      .then(
+        (response) =>
+          !cancelled &&
+          setStepsCumulative(response.data.map((r) => [new Date([r[0]]), r[1]]))
       );
     return () => (cancelled = true);
   }, [start_date, end_date]);
@@ -200,6 +208,23 @@ function Home() {
           </div>
           <div className="col-lg-6 text-center">
             <h3>Steps (total)</h3>
+            {stepsCumulative && (
+              <Chart
+                chartType="LineChart"
+                data={stepsCumulative}
+                options={{
+                  legend: { position: "none" },
+                  bar: { groupWidth: "95%" },
+                  vAxis: {
+                    title: "Steps",
+                    viewWindow: { min: 0 },
+                  },
+                  colors: ["#2ECC71"],
+                }}
+                width="100%"
+                height="400px"
+              />
+            )}
           </div>
         </div>
         <div className="row my-5">

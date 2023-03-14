@@ -3,6 +3,7 @@ from .api.admin import (
     AdminMeView,
     AdminHomeView,
     AdminHomeStepsDailyView,
+    AdminHomeStepsCumulativeView,
     AdminContestsView,
     AdminUsersView,
     AdminUsersDailyView,

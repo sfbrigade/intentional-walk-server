@@ -53,6 +53,11 @@ urlpatterns = urlpatterns + [
         name="admin_home_steps_daily",
     ),
     path(
+        "api/admin/home/steps/cumulative",
+        views.AdminHomeStepsCumulativeView.as_view(),
+        name="admin_home_steps_cumulative",
+    ),
+    path(
         "api/admin/contests",
         views.AdminContestsView.as_view(),
         name="admin_contests",

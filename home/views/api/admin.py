@@ -77,6 +77,53 @@ class AdminHomeStepsDailyView(View):
         return JsonResponse(results, safe=False)
 
 
+class AdminHomeStepsCumulativeView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponse(status=401)
+
+        is_tester = request.GET.get("is_tester", None) == "true"
+        conditions = """
+            "home_account"."is_tester"=%s
+        """
+        params = [is_tester]
+        start_date = request.GET.get("start_date", None)
+        if start_date:
+            conditions = f"""{conditions} AND
+                "home_dailywalk"."date" >= %s
+            """
+            params.append(start_date)
+        end_date = request.GET.get("end_date", None)
+        if end_date:
+            conditions = f"""{conditions} AND
+                "home_dailywalk"."date" <= %s
+            """
+            params.append(end_date)
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT "date", (SUM("count") OVER (ORDER BY "date"))::int AS "count"
+                FROM
+                    (SELECT
+                        "date",
+                        SUM("steps") AS "count"
+                     FROM "home_dailywalk"
+                     JOIN "home_account" ON "home_account"."id"="home_dailywalk"."account_id"
+                     WHERE {conditions}
+                     GROUP BY "date") subquery
+                ORDER BY "date"
+                """,
+                params,
+            )
+            results = cursor.fetchall()
+        results = list(results)
+        results.insert(0, ["Date", "Count"])
+        return JsonResponse(results, safe=False)
+
+
 class AdminContestsView(View):
     http_method_names = ["get"]
 
