@@ -50,6 +50,16 @@ const Api = {
         params: { start_date, end_date },
       });
     },
+    homeDistanceDaily({ start_date, end_date }) {
+      return instance.get("/api/admin/home/distance/daily", {
+        params: { start_date, end_date },
+      });
+    },
+    homeDistanceCumulative({ start_date, end_date }) {
+      return instance.get("/api/admin/home/distance/cumulative", {
+        params: { start_date, end_date },
+      });
+    },
     contests() {
       return instance.get("/api/admin/contests");
     },

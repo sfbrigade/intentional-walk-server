@@ -23,6 +23,8 @@ function Home() {
   const [usersCumulative, setUsersCumulative] = useState();
   const [stepsDaily, setStepsDaily] = useState();
   const [stepsCumulative, setStepsCumulative] = useState();
+  const [distanceDaily, setDistanceDaily] = useState();
+  const [distanceCumulative, setDistanceCumulative] = useState();
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +60,30 @@ function Home() {
         (response) =>
           !cancelled &&
           setStepsCumulative(response.data.map((r) => [new Date([r[0]]), r[1]]))
+      );
+    Api.admin
+      .homeDistanceDaily({ start_date, end_date })
+      .then(
+        (response) =>
+          !cancelled &&
+          setDistanceDaily(
+            response.data.map((r, i) => [
+              new Date([r[0]]),
+              i === 0 ? r[1] : r[1] / 1609,
+            ])
+          )
+      );
+    Api.admin
+      .homeDistanceCumulative({ start_date, end_date })
+      .then(
+        (response) =>
+          !cancelled &&
+          setDistanceCumulative(
+            response.data.map((r, i) => [
+              new Date([r[0]]),
+              i === 0 ? r[1] : r[1] / 1609,
+            ])
+          )
       );
     return () => (cancelled = true);
   }, [start_date, end_date]);
@@ -230,9 +256,43 @@ function Home() {
         <div className="row my-5">
           <div className="col-lg-6 text-center">
             <h3>Miles (per day)</h3>
+            {distanceDaily && (
+              <Chart
+                chartType="ColumnChart"
+                data={distanceDaily}
+                options={{
+                  legend: { position: "none" },
+                  bar: { groupWidth: "95%" },
+                  vAxis: {
+                    title: "Miles",
+                    viewWindow: { min: 0 },
+                  },
+                  colors: ["#1ABC9C"],
+                }}
+                width="100%"
+                height="400px"
+              />
+            )}
           </div>
           <div className="col-lg-6 text-center">
             <h3>Miles (total)</h3>
+            {distanceCumulative && (
+              <Chart
+                chartType="LineChart"
+                data={distanceCumulative}
+                options={{
+                  legend: { position: "none" },
+                  bar: { groupWidth: "95%" },
+                  vAxis: {
+                    title: "Miles",
+                    viewWindow: { min: 0 },
+                  },
+                  colors: ["#1ABC9C"],
+                }}
+                width="100%"
+                height="400px"
+              />
+            )}
           </div>
         </div>
       </div>
