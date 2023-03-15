@@ -48,7 +48,7 @@ def generate_test_data():
     accounts[1].is_tester = True
     accounts[1].save()
     # Generate 3 accounts during the contest
-    with freeze_time("3000-03-02"):
+    with freeze_time("3000-03-02 12:00:00", tz_offset=-8):
         accounts = accounts + list(AccountGenerator().generate(3))
     # Set names for testing ordering, zip codes for grouping
     for i, account in enumerate(accounts):
