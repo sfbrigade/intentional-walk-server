@@ -76,6 +76,11 @@ class AdminHomeUsersDailyView(View):
             .order_by("date")
         )
         results = [[row["date"], row["count"]] for row in results]
+        if len(results) > 0:
+            if start_date and results[0][0] != start_date:
+                results.insert(0, [start_date, 0])
+            if end_date and results[-1][0] != end_date:
+                results.append([end_date, 0])
         results.insert(0, ["Date", "Count"])
         return JsonResponse(results, safe=False)
 
@@ -122,6 +127,11 @@ class AdminHomeUsersCumulativeView(View):
             )
             results = cursor.fetchall()
         results = list(results)
+        if len(results) > 0:
+            if start_date and results[0][0] != start_date:
+                results.insert(0, [start_date, 0])
+            if end_date and results[-1][0] != end_date:
+                results.append([end_date, results[-1][1]])
         results.insert(0, ["Date", "Count"])
         return JsonResponse(results, safe=False)
 
@@ -152,6 +162,11 @@ class AdminHomeStepsDailyView(View):
             .order_by("date")
         )
         results = [[row["date"], row["count"]] for row in results]
+        if len(results) > 0:
+            if start_date and results[0][0] != start_date:
+                results.insert(0, [start_date, 0])
+            if end_date and results[-1][0] != end_date:
+                results.append([end_date, 0])
         results.insert(0, ["Date", "Count"])
         return JsonResponse(results, safe=False)
 
@@ -199,6 +214,11 @@ class AdminHomeStepsCumulativeView(View):
             )
             results = cursor.fetchall()
         results = list(results)
+        if len(results) > 0:
+            if start_date and results[0][0] != start_date:
+                results.insert(0, [start_date, 0])
+            if end_date and results[-1][0] != end_date:
+                results.append([end_date, results[-1][1]])
         results.insert(0, ["Date", "Count"])
         return JsonResponse(results, safe=False)
 
@@ -229,6 +249,11 @@ class AdminHomeDistanceDailyView(View):
             .order_by("date")
         )
         results = [[row["date"], row["count"]] for row in results]
+        if len(results) > 0:
+            if start_date and results[0][0] != start_date:
+                results.insert(0, [start_date, 0])
+            if end_date and results[-1][0] != end_date:
+                results.append([end_date, 0])
         results.insert(0, ["Date", "Count"])
         return JsonResponse(results, safe=False)
 
@@ -276,6 +301,11 @@ class AdminHomeDistanceCumulativeView(View):
             )
             results = cursor.fetchall()
         results = list(results)
+        if len(results) > 0:
+            if start_date and results[0][0] != start_date:
+                results.insert(0, [start_date, 0])
+            if end_date and results[-1][0] != end_date:
+                results.append([end_date, results[-1][1]])
         results.insert(0, ["Date", "Count"])
         return JsonResponse(results, safe=False)
 
