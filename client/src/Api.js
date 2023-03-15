@@ -40,34 +40,34 @@ const Api = {
     home() {
       return instance.get("/api/admin/home");
     },
-    homeUsersDaily({ start_date, end_date }) {
+    homeUsersDaily({ contest_id, start_date, end_date }) {
       return instance.get("/api/admin/home/users/daily", {
-        params: { start_date, end_date },
+        params: { contest_id, start_date, end_date },
       });
     },
-    homeUsersCumulative({ start_date, end_date }) {
+    homeUsersCumulative({ contest_id, start_date, end_date }) {
       return instance.get("/api/admin/home/users/cumulative", {
-        params: { start_date, end_date },
+        params: { contest_id, start_date, end_date },
       });
     },
-    homeStepsDaily({ start_date, end_date }) {
+    homeStepsDaily({ contest_id, start_date, end_date }) {
       return instance.get("/api/admin/home/steps/daily", {
-        params: { start_date, end_date },
+        params: { contest_id, start_date, end_date },
       });
     },
-    homeStepsCumulative({ start_date, end_date }) {
+    homeStepsCumulative({ contest_id, start_date, end_date }) {
       return instance.get("/api/admin/home/steps/cumulative", {
-        params: { start_date, end_date },
+        params: { contest_id, start_date, end_date },
       });
     },
-    homeDistanceDaily({ start_date, end_date }) {
+    homeDistanceDaily({ contest_id, start_date, end_date }) {
       return instance.get("/api/admin/home/distance/daily", {
-        params: { start_date, end_date },
+        params: { contest_id, start_date, end_date },
       });
     },
-    homeDistanceCumulative({ start_date, end_date }) {
+    homeDistanceCumulative({ contest_id, start_date, end_date }) {
       return instance.get("/api/admin/home/distance/cumulative", {
-        params: { start_date, end_date },
+        params: { contest_id, start_date, end_date },
       });
     },
     contests() {

@@ -47,26 +47,60 @@ class AdminHomeView(View):
             return HttpResponse(status=204)
 
 
-class AdminHomeUsersDailyView(View):
+class AdminHomeGraphView(View):
     http_method_names = ["get"]
+
+    def is_cumulative(self):
+        return False
+
+    def get_results(self):
+        return []
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return HttpResponse(status=401)
 
+        contest_id = request.GET.get("contest_id", None)
+        if contest_id:
+            contest = Contest.objects.get(pk=contest_id)
+            self.start_date = contest.start_promo.isoformat()
+            self.end_date = contest.end.isoformat()
+        else:
+            self.start_date = request.GET.get("start_date", None)
+            self.end_date = request.GET.get("end_date", None)
+        self.is_tester = request.GET.get("is_tester", None) == "true"
+
+        results = self.get_results()
+        if len(results) > 0:
+            if (
+                self.start_date
+                and results[0][0].isoformat() != self.start_date
+            ):
+                results.insert(0, [self.start_date, 0])
+            if self.end_date and results[-1][0].isoformat() != self.end_date:
+                if self.is_cumulative():
+                    results.append([self.end_date, results[-1][1]])
+                else:
+                    results.append([self.end_date, 0])
+        else:
+            results.append([self.start_date, 0])
+            results.append([self.end_date, 0])
+        results.insert(0, ["Date", "Count"])
+
+        return JsonResponse(results, safe=False)
+
+
+class AdminHomeUsersDailyView(AdminHomeGraphView):
+    def get_results(self):
         filters = Q()
         # filter to show users vs testers
-        filters = filters & Q(
-            is_tester=request.GET.get("is_tester", None) == "true"
-        )
+        filters = filters & Q(is_tester=self.is_tester)
         # filter by date
-        start_date = request.GET.get("start_date", None)
-        end_date = request.GET.get("end_date", None)
-        if start_date:
-            filters = filters & Q(created__gte=start_date)
-        if end_date:
+        if self.start_date:
+            filters = filters & Q(created__gte=self.start_date)
+        if self.end_date:
             filters = filters & Q(
-                created__lt=parser.parse(end_date) + timedelta(days=1)
+                created__lt=parser.parse(self.end_date) + timedelta(days=1)
             )
         results = (
             Account.objects.filter(filters)
@@ -76,39 +110,28 @@ class AdminHomeUsersDailyView(View):
             .order_by("date")
         )
         results = [[row["date"], row["count"]] for row in results]
-        if len(results) > 0:
-            if start_date and results[0][0] != start_date:
-                results.insert(0, [start_date, 0])
-            if end_date and results[-1][0] != end_date:
-                results.append([end_date, 0])
-        results.insert(0, ["Date", "Count"])
-        return JsonResponse(results, safe=False)
+        return results
 
 
-class AdminHomeUsersCumulativeView(View):
-    http_method_names = ["get"]
+class AdminHomeUsersCumulativeView(AdminHomeGraphView):
+    def is_cumulative(self):
+        return True
 
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponse(status=401)
-
-        is_tester = request.GET.get("is_tester", None) == "true"
+    def get_results(self):
         conditions = """
             "is_tester"=%s
         """
-        params = [is_tester]
-        start_date = request.GET.get("start_date", None)
-        if start_date:
+        params = [self.is_tester]
+        if self.start_date:
             conditions = f"""{conditions} AND
                 "created" >= %s
             """
-            params.append(start_date)
-        end_date = request.GET.get("end_date", None)
-        if end_date:
+            params.append(self.start_date)
+        if self.end_date:
             conditions = f"""{conditions} AND
                 "created" < %s
             """
-            params.append(parser.parse(end_date) + timedelta(days=1))
+            params.append(parser.parse(self.end_date) + timedelta(days=1))
 
         with connection.cursor() as cursor:
             cursor.execute(
@@ -126,35 +149,21 @@ class AdminHomeUsersCumulativeView(View):
                 params,
             )
             results = cursor.fetchall()
-        results = list(results)
-        if len(results) > 0:
-            if start_date and results[0][0] != start_date:
-                results.insert(0, [start_date, 0])
-            if end_date and results[-1][0] != end_date:
-                results.append([end_date, results[-1][1]])
-        results.insert(0, ["Date", "Count"])
-        return JsonResponse(results, safe=False)
+        return list(results)
 
 
-class AdminHomeStepsDailyView(View):
+class AdminHomeStepsDailyView(AdminHomeGraphView):
     http_method_names = ["get"]
 
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponse(status=401)
-
+    def get_results(self):
         filters = Q()
         # filter to show users vs testers
-        filters = filters & Q(
-            account__is_tester=request.GET.get("is_tester", None) == "true"
-        )
+        filters = filters & Q(account__is_tester=self.is_tester)
         # filter by date
-        start_date = request.GET.get("start_date", None)
-        end_date = request.GET.get("end_date", None)
-        if start_date:
-            filters = filters & Q(date__gte=start_date)
-        if end_date:
-            filters = filters & Q(date__lte=end_date)
+        if self.start_date:
+            filters = filters & Q(date__gte=self.start_date)
+        if self.end_date:
+            filters = filters & Q(date__lte=self.end_date)
         results = (
             DailyWalk.objects.filter(filters)
             .values("date")
@@ -162,39 +171,28 @@ class AdminHomeStepsDailyView(View):
             .order_by("date")
         )
         results = [[row["date"], row["count"]] for row in results]
-        if len(results) > 0:
-            if start_date and results[0][0] != start_date:
-                results.insert(0, [start_date, 0])
-            if end_date and results[-1][0] != end_date:
-                results.append([end_date, 0])
-        results.insert(0, ["Date", "Count"])
-        return JsonResponse(results, safe=False)
+        return results
 
 
-class AdminHomeStepsCumulativeView(View):
-    http_method_names = ["get"]
+class AdminHomeStepsCumulativeView(AdminHomeGraphView):
+    def is_cumulative(self):
+        return True
 
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponse(status=401)
-
-        is_tester = request.GET.get("is_tester", None) == "true"
+    def get_results(self):
         conditions = """
             "home_account"."is_tester"=%s
         """
-        params = [is_tester]
-        start_date = request.GET.get("start_date", None)
-        if start_date:
+        params = [self.is_tester]
+        if self.start_date:
             conditions = f"""{conditions} AND
                 "home_dailywalk"."date" >= %s
             """
-            params.append(start_date)
-        end_date = request.GET.get("end_date", None)
-        if end_date:
+            params.append(self.start_date)
+        if self.end_date:
             conditions = f"""{conditions} AND
                 "home_dailywalk"."date" <= %s
             """
-            params.append(end_date)
+            params.append(self.end_date)
 
         with connection.cursor() as cursor:
             cursor.execute(
@@ -214,34 +212,19 @@ class AdminHomeStepsCumulativeView(View):
             )
             results = cursor.fetchall()
         results = list(results)
-        if len(results) > 0:
-            if start_date and results[0][0] != start_date:
-                results.insert(0, [start_date, 0])
-            if end_date and results[-1][0] != end_date:
-                results.append([end_date, results[-1][1]])
-        results.insert(0, ["Date", "Count"])
-        return JsonResponse(results, safe=False)
+        return results
 
 
-class AdminHomeDistanceDailyView(View):
-    http_method_names = ["get"]
-
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponse(status=401)
-
+class AdminHomeDistanceDailyView(AdminHomeGraphView):
+    def get_results(self):
         filters = Q()
         # filter to show users vs testers
-        filters = filters & Q(
-            account__is_tester=request.GET.get("is_tester", None) == "true"
-        )
+        filters = filters & Q(account__is_tester=self.is_tester)
         # filter by date
-        start_date = request.GET.get("start_date", None)
-        end_date = request.GET.get("end_date", None)
-        if start_date:
-            filters = filters & Q(date__gte=start_date)
-        if end_date:
-            filters = filters & Q(date__lte=end_date)
+        if self.start_date:
+            filters = filters & Q(date__gte=self.start_date)
+        if self.end_date:
+            filters = filters & Q(date__lte=self.end_date)
         results = (
             DailyWalk.objects.filter(filters)
             .values("date")
@@ -249,39 +232,28 @@ class AdminHomeDistanceDailyView(View):
             .order_by("date")
         )
         results = [[row["date"], row["count"]] for row in results]
-        if len(results) > 0:
-            if start_date and results[0][0] != start_date:
-                results.insert(0, [start_date, 0])
-            if end_date and results[-1][0] != end_date:
-                results.append([end_date, 0])
-        results.insert(0, ["Date", "Count"])
-        return JsonResponse(results, safe=False)
+        return results
 
 
-class AdminHomeDistanceCumulativeView(View):
-    http_method_names = ["get"]
+class AdminHomeDistanceCumulativeView(AdminHomeGraphView):
+    def is_cumulative(self):
+        return True
 
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponse(status=401)
-
-        is_tester = request.GET.get("is_tester", None) == "true"
+    def get_results(self):
         conditions = """
             "home_account"."is_tester"=%s
         """
-        params = [is_tester]
-        start_date = request.GET.get("start_date", None)
-        if start_date:
+        params = [self.is_tester]
+        if self.start_date:
             conditions = f"""{conditions} AND
                 "home_dailywalk"."date" >= %s
             """
-            params.append(start_date)
-        end_date = request.GET.get("end_date", None)
-        if end_date:
+            params.append(self.start_date)
+        if self.end_date:
             conditions = f"""{conditions} AND
                 "home_dailywalk"."date" <= %s
             """
-            params.append(end_date)
+            params.append(self.end_date)
 
         with connection.cursor() as cursor:
             cursor.execute(
@@ -301,13 +273,7 @@ class AdminHomeDistanceCumulativeView(View):
             )
             results = cursor.fetchall()
         results = list(results)
-        if len(results) > 0:
-            if start_date and results[0][0] != start_date:
-                results.insert(0, [start_date, 0])
-            if end_date and results[-1][0] != end_date:
-                results.append([end_date, results[-1][1]])
-        results.insert(0, ["Date", "Count"])
-        return JsonResponse(results, safe=False)
+        return results
 
 
 class AdminContestsView(View):
