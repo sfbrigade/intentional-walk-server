@@ -64,7 +64,9 @@ class AdminHomeGraphView(View):
         contest_id = request.GET.get("contest_id", None)
         if contest_id:
             contest = Contest.objects.get(pk=contest_id)
-            self.start_date = contest.start_promo.isoformat()
+            self.start_date = min(
+                contest.start_baseline, contest.start_promo
+            ).isoformat()
             self.end_date = contest.end.isoformat()
         else:
             self.start_date = request.GET.get("start_date", None)
