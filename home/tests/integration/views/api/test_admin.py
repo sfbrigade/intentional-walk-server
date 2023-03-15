@@ -1,6 +1,10 @@
+import logging
+
 from django.test import Client, TestCase
 
 from .utils import Login, generate_test_data
+
+logger = logging.getLogger(__name__)
 
 
 class TestAdminViews(TestCase):
@@ -36,6 +40,156 @@ class TestAdminViews(TestCase):
                 "accounts_steps": 350000,  # 14 days * (10,000 + 15,000 steps/day)
                 "accounts_distance": 280000,  # 14 days * (8,000 + 12,000 meters/day)
             },
+        )
+
+    def test_get_home_users_daily(self):
+        c = Client()
+        self.assertTrue(Login.login(c))
+        response = c.get(
+            f"/api/admin/home/users/daily?contest_id={self.contest0_id}"
+        )
+        data = response.json()
+        self.assertEqual(
+            data,
+            [
+                ["Date", "Count"],
+                ["3000-02-28", 0],
+                ["3000-03-02", 3],
+                ["3000-03-14", 0],
+            ],
+        )
+
+    def test_get_home_users_cumulative(self):
+        c = Client()
+        self.assertTrue(Login.login(c))
+        response = c.get(
+            f"/api/admin/home/users/cumulative?contest_id={self.contest0_id}"
+        )
+        data = response.json()
+        self.assertEqual(
+            data,
+            [
+                ["Date", "Count"],
+                ["3000-02-28", 0],
+                ["3000-03-02", 3],
+                ["3000-03-14", 3],
+            ],
+        )
+
+    def test_get_home_steps_daily(self):
+        c = Client()
+        self.assertTrue(Login.login(c))
+        response = c.get(
+            f"/api/admin/home/steps/daily?contest_id={self.contest0_id}"
+        )
+        data = response.json()
+        self.assertEqual(
+            data,
+            [
+                ["Date", "Count"],
+                ["3000-02-28", 25000],
+                ["3000-03-01", 25000],
+                ["3000-03-02", 25000],
+                ["3000-03-03", 25000],
+                ["3000-03-04", 25000],
+                ["3000-03-05", 25000],
+                ["3000-03-06", 25000],
+                ["3000-03-07", 25000],
+                ["3000-03-08", 25000],
+                ["3000-03-09", 25000],
+                ["3000-03-10", 25000],
+                ["3000-03-11", 25000],
+                ["3000-03-12", 25000],
+                ["3000-03-13", 25000],
+                ["3000-03-14", 0],
+            ],
+        )
+
+    def test_get_home_steps_cumulative(self):
+        c = Client()
+        self.assertTrue(Login.login(c))
+        response = c.get(
+            f"/api/admin/home/steps/cumulative?contest_id={self.contest0_id}"
+        )
+        data = response.json()
+        self.assertEqual(
+            data,
+            [
+                ["Date", "Count"],
+                ["3000-02-28", 25000],
+                ["3000-03-01", 50000],
+                ["3000-03-02", 75000],
+                ["3000-03-03", 100000],
+                ["3000-03-04", 125000],
+                ["3000-03-05", 150000],
+                ["3000-03-06", 175000],
+                ["3000-03-07", 200000],
+                ["3000-03-08", 225000],
+                ["3000-03-09", 250000],
+                ["3000-03-10", 275000],
+                ["3000-03-11", 300000],
+                ["3000-03-12", 325000],
+                ["3000-03-13", 350000],
+                ["3000-03-14", 350000],
+            ],
+        )
+
+    def test_get_home_distance_daily(self):
+        c = Client()
+        self.assertTrue(Login.login(c))
+        response = c.get(
+            f"/api/admin/home/distance/daily?contest_id={self.contest0_id}"
+        )
+        data = response.json()
+        self.assertEqual(
+            data,
+            [
+                ["Date", "Count"],
+                ["3000-02-28", 20000],
+                ["3000-03-01", 20000],
+                ["3000-03-02", 20000],
+                ["3000-03-03", 20000],
+                ["3000-03-04", 20000],
+                ["3000-03-05", 20000],
+                ["3000-03-06", 20000],
+                ["3000-03-07", 20000],
+                ["3000-03-08", 20000],
+                ["3000-03-09", 20000],
+                ["3000-03-10", 20000],
+                ["3000-03-11", 20000],
+                ["3000-03-12", 20000],
+                ["3000-03-13", 20000],
+                ["3000-03-14", 0],
+            ],
+        )
+
+    def test_get_home_distance_cumulative(self):
+        c = Client()
+        self.assertTrue(Login.login(c))
+        response = c.get(
+            f"/api/admin/home/distance/cumulative?contest_id={self.contest0_id}"
+        )
+        data = response.json()
+        self.assertEqual(
+            data,
+            [
+                ["Date", "Count"],
+                ["3000-02-28", 20000],
+                ["3000-03-01", 40000],
+                ["3000-03-02", 60000],
+                ["3000-03-03", 80000],
+                ["3000-03-04", 100000],
+                ["3000-03-05", 120000],
+                ["3000-03-06", 140000],
+                ["3000-03-07", 160000],
+                ["3000-03-08", 180000],
+                ["3000-03-09", 200000],
+                ["3000-03-10", 220000],
+                ["3000-03-11", 240000],
+                ["3000-03-12", 260000],
+                ["3000-03-13", 280000],
+                ["3000-03-14", 280000],
+            ],
         )
 
     def test_get_contests(self):
