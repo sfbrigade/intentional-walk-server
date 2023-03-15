@@ -60,6 +60,7 @@ class AdminHomeGraphView(View):
         if not request.user.is_authenticated:
             return HttpResponse(status=401)
 
+        # handle common parameters for all the chart data API endpoints
         contest_id = request.GET.get("contest_id", None)
         if contest_id:
             contest = Contest.objects.get(pk=contest_id)
@@ -70,7 +71,10 @@ class AdminHomeGraphView(View):
             self.end_date = request.GET.get("end_date", None)
         self.is_tester = request.GET.get("is_tester", None) == "true"
 
+        # let the concrete subclass implement the actual query
         results = self.get_results()
+
+        # handle common result processing for the chart data
         if len(results) > 0:
             if (
                 self.start_date
@@ -152,8 +156,9 @@ class AdminHomeUsersCumulativeView(AdminHomeGraphView):
         return list(results)
 
 
-class AdminHomeStepsDailyView(AdminHomeGraphView):
-    http_method_names = ["get"]
+class AdminHomeWalksDailyView(AdminHomeGraphView):
+    def get_value_type(self):
+        return None
 
     def get_results(self):
         filters = Q()
@@ -167,16 +172,29 @@ class AdminHomeStepsDailyView(AdminHomeGraphView):
         results = (
             DailyWalk.objects.filter(filters)
             .values("date")
-            .annotate(count=Sum("steps"))
+            .annotate(count=Sum(self.get_value_type()))
             .order_by("date")
         )
         results = [[row["date"], row["count"]] for row in results]
         return results
 
 
-class AdminHomeStepsCumulativeView(AdminHomeGraphView):
+class AdminHomeStepsDailyView(AdminHomeWalksDailyView):
+    def get_value_type(self):
+        return "steps"
+
+
+class AdminHomeDistanceDailyView(AdminHomeWalksDailyView):
+    def get_value_type(self):
+        return "distance"
+
+
+class AdminHomeWalksCumulativeView(AdminHomeGraphView):
     def is_cumulative(self):
         return True
+
+    def get_value_type(self):
+        return None
 
     def get_results(self):
         conditions = """
@@ -201,7 +219,7 @@ class AdminHomeStepsCumulativeView(AdminHomeGraphView):
                 FROM
                     (SELECT
                         "date",
-                        SUM("steps") AS "count"
+                        SUM("{self.get_value_type()}") AS "count"
                      FROM "home_dailywalk"
                      JOIN "home_account" ON "home_account"."id"="home_dailywalk"."account_id"
                      WHERE {conditions}
@@ -215,65 +233,14 @@ class AdminHomeStepsCumulativeView(AdminHomeGraphView):
         return results
 
 
-class AdminHomeDistanceDailyView(AdminHomeGraphView):
-    def get_results(self):
-        filters = Q()
-        # filter to show users vs testers
-        filters = filters & Q(account__is_tester=self.is_tester)
-        # filter by date
-        if self.start_date:
-            filters = filters & Q(date__gte=self.start_date)
-        if self.end_date:
-            filters = filters & Q(date__lte=self.end_date)
-        results = (
-            DailyWalk.objects.filter(filters)
-            .values("date")
-            .annotate(count=Sum("distance"))
-            .order_by("date")
-        )
-        results = [[row["date"], row["count"]] for row in results]
-        return results
+class AdminHomeStepsCumulativeView(AdminHomeWalksCumulativeView):
+    def get_value_type(self):
+        return "steps"
 
 
-class AdminHomeDistanceCumulativeView(AdminHomeGraphView):
-    def is_cumulative(self):
-        return True
-
-    def get_results(self):
-        conditions = """
-            "home_account"."is_tester"=%s
-        """
-        params = [self.is_tester]
-        if self.start_date:
-            conditions = f"""{conditions} AND
-                "home_dailywalk"."date" >= %s
-            """
-            params.append(self.start_date)
-        if self.end_date:
-            conditions = f"""{conditions} AND
-                "home_dailywalk"."date" <= %s
-            """
-            params.append(self.end_date)
-
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f"""
-                SELECT "date", (SUM("count") OVER (ORDER BY "date"))::int AS "count"
-                FROM
-                    (SELECT
-                        "date",
-                        SUM("distance") AS "count"
-                     FROM "home_dailywalk"
-                     JOIN "home_account" ON "home_account"."id"="home_dailywalk"."account_id"
-                     WHERE {conditions}
-                     GROUP BY "date") subquery
-                ORDER BY "date"
-                """,
-                params,
-            )
-            results = cursor.fetchall()
-        results = list(results)
-        return results
+class AdminHomeDistanceCumulativeView(AdminHomeWalksCumulativeView):
+    def get_value_type(self):
+        return "distance"
 
 
 class AdminContestsView(View):
