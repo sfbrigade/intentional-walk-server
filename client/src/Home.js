@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { Chart } from "react-google-charts";
+import { DateTime } from "luxon";
 import numeral from "numeral";
 
 import "./Home.scss";
@@ -11,8 +12,8 @@ function Home() {
   const navigate = useNavigate();
   const params = new URLSearchParams(search);
 
-  const start_date = params.get("start_date") ?? "";
-  const end_date = params.get("end_date") ?? "";
+  const start_date = params.get("start_date") ?? "2020-04-01";
+  const end_date = params.get("end_date") ?? DateTime.now().toISODate();
 
   const [newStartDate, setNewStartDate] = useState(start_date);
   const [newEndDate, setNewEndDate] = useState(end_date);
@@ -34,14 +35,14 @@ function Home() {
   useEffect(() => {
     let cancelled = false;
     Api.admin
-      .usersDaily({ start_date, end_date })
+      .homeUsersDaily({ start_date, end_date })
       .then(
         (response) =>
           !cancelled &&
           setUsersDaily(response.data.map((r) => [new Date([r[0]]), r[1]]))
       );
     Api.admin
-      .usersCumulative({ start_date, end_date })
+      .homeUsersCumulative({ start_date, end_date })
       .then(
         (response) =>
           !cancelled &&

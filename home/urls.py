@@ -48,6 +48,16 @@ urlpatterns = urlpatterns + [
     path("api/admin/me", views.AdminMeView.as_view(), name="admin_me"),
     path("api/admin/home", views.AdminHomeView.as_view(), name="admin_home"),
     path(
+        "api/admin/home/users/daily",
+        views.AdminHomeUsersDailyView.as_view(),
+        name="admin_home_users_daily",
+    ),
+    path(
+        "api/admin/home/users/cumulative",
+        views.AdminHomeUsersCumulativeView.as_view(),
+        name="admin_home_users_cumulative",
+    ),
+    path(
         "api/admin/home/steps/daily",
         views.AdminHomeStepsDailyView.as_view(),
         name="admin_home_steps_daily",
@@ -74,16 +84,6 @@ urlpatterns = urlpatterns + [
     ),
     path(
         "api/admin/users", views.AdminUsersView.as_view(), name="admin_users"
-    ),
-    path(
-        "api/admin/users/daily",
-        views.AdminUsersDailyView.as_view(),
-        name="admin_users_daily",
-    ),
-    path(
-        "api/admin/users/cumulative",
-        views.AdminUsersCumulativeView.as_view(),
-        name="admin_users_cumulative",
     ),
     path(
         "api/admin/users/zip",

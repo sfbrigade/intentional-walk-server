@@ -40,6 +40,16 @@ const Api = {
     home() {
       return instance.get("/api/admin/home");
     },
+    homeUsersDaily({ start_date, end_date }) {
+      return instance.get("/api/admin/home/users/daily", {
+        params: { start_date, end_date },
+      });
+    },
+    homeUsersCumulative({ start_date, end_date }) {
+      return instance.get("/api/admin/home/users/cumulative", {
+        params: { start_date, end_date },
+      });
+    },
     homeStepsDaily({ start_date, end_date }) {
       return instance.get("/api/admin/home/steps/daily", {
         params: { start_date, end_date },
@@ -66,16 +76,6 @@ const Api = {
     users({ contest_id, is_tester, order_by, query, page }) {
       return instance.get("/api/admin/users", {
         params: { contest_id, is_tester, order_by, query, page },
-      });
-    },
-    usersDaily({ start_date, end_date }) {
-      return instance.get("/api/admin/users/daily", {
-        params: { start_date, end_date },
-      });
-    },
-    usersCumulative({ start_date, end_date }) {
-      return instance.get("/api/admin/users/cumulative", {
-        params: { start_date, end_date },
       });
     },
     usersByZip({ contest_id, is_tester }) {

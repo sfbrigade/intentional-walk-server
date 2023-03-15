@@ -47,6 +47,85 @@ class AdminHomeView(View):
             return HttpResponse(status=204)
 
 
+class AdminHomeUsersDailyView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponse(status=401)
+
+        filters = Q()
+        # filter to show users vs testers
+        filters = filters & Q(
+            is_tester=request.GET.get("is_tester", None) == "true"
+        )
+        # filter by date
+        start_date = request.GET.get("start_date", None)
+        end_date = request.GET.get("end_date", None)
+        if start_date:
+            filters = filters & Q(created__gte=start_date)
+        if end_date:
+            filters = filters & Q(
+                created__lt=parser.parse(end_date) + timedelta(days=1)
+            )
+        results = (
+            Account.objects.filter(filters)
+            .annotate(date=TruncDate("created"))
+            .values("date")
+            .annotate(count=Count("id"))
+            .order_by("date")
+        )
+        results = [[row["date"], row["count"]] for row in results]
+        results.insert(0, ["Date", "Count"])
+        return JsonResponse(results, safe=False)
+
+
+class AdminHomeUsersCumulativeView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponse(status=401)
+
+        is_tester = request.GET.get("is_tester", None) == "true"
+        conditions = """
+            "is_tester"=%s
+        """
+        params = [is_tester]
+        start_date = request.GET.get("start_date", None)
+        if start_date:
+            conditions = f"""{conditions} AND
+                "created" >= %s
+            """
+            params.append(start_date)
+        end_date = request.GET.get("end_date", None)
+        if end_date:
+            conditions = f"""{conditions} AND
+                "created" < %s
+            """
+            params.append(parser.parse(end_date) + timedelta(days=1))
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                SELECT "date", (SUM("count") OVER (ORDER BY "date"))::int AS "count"
+                FROM
+                    (SELECT
+                        ("created" AT TIME ZONE 'America/Los_Angeles')::date AS "date",
+                        COUNT("id") AS "count"
+                     FROM "home_account"
+                     WHERE {conditions}
+                     GROUP BY "date") subquery
+                ORDER BY "date"
+                """,
+                params,
+            )
+            results = cursor.fetchall()
+        results = list(results)
+        results.insert(0, ["Date", "Count"])
+        return JsonResponse(results, safe=False)
+
+
 class AdminHomeStepsDailyView(View):
     http_method_names = ["get"]
 
@@ -336,85 +415,6 @@ class AdminUsersView(View):
             return response
         else:
             return HttpResponse(status=401)
-
-
-class AdminUsersDailyView(View):
-    http_method_names = ["get"]
-
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponse(status=401)
-
-        filters = Q()
-        # filter to show users vs testers
-        filters = filters & Q(
-            is_tester=request.GET.get("is_tester", None) == "true"
-        )
-        # filter by date
-        start_date = request.GET.get("start_date", None)
-        end_date = request.GET.get("end_date", None)
-        if start_date:
-            filters = filters & Q(created__gte=start_date)
-        if end_date:
-            filters = filters & Q(
-                created__lt=parser.parse(end_date) + timedelta(days=1)
-            )
-        results = (
-            Account.objects.filter(filters)
-            .annotate(date=TruncDate("created"))
-            .values("date")
-            .annotate(count=Count("id"))
-            .order_by("date")
-        )
-        results = [[row["date"], row["count"]] for row in results]
-        results.insert(0, ["Date", "Count"])
-        return JsonResponse(results, safe=False)
-
-
-class AdminUsersCumulativeView(View):
-    http_method_names = ["get"]
-
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponse(status=401)
-
-        is_tester = request.GET.get("is_tester", None) == "true"
-        conditions = """
-            "is_tester"=%s
-        """
-        params = [is_tester]
-        start_date = request.GET.get("start_date", None)
-        if start_date:
-            conditions = f"""{conditions} AND
-                "created" >= %s
-            """
-            params.append(start_date)
-        end_date = request.GET.get("end_date", None)
-        if end_date:
-            conditions = f"""{conditions} AND
-                "created" < %s
-            """
-            params.append(parser.parse(end_date) + timedelta(days=1))
-
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f"""
-                SELECT "date", (SUM("count") OVER (ORDER BY "date"))::int AS "count"
-                FROM
-                    (SELECT
-                        ("created" AT TIME ZONE 'America/Los_Angeles')::date AS "date",
-                        COUNT("id") AS "count"
-                     FROM "home_account"
-                     WHERE {conditions}
-                     GROUP BY "date") subquery
-                ORDER BY "date"
-                """,
-                params,
-            )
-            results = cursor.fetchall()
-        results = list(results)
-        results.insert(0, ["Date", "Count"])
-        return JsonResponse(results, safe=False)
 
 
 class AdminUsersByZipView(View):
