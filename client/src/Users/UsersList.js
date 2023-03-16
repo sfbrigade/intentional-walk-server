@@ -248,7 +248,7 @@ function UsersList() {
       {contest && (
         <>
           <div className="row mb-5">
-            <div className="col-lg-3 offset-lg-2">
+            <div className="col-lg-3 offset-lg-2 text-center">
               <IntensityMap
                 data={usersByZip?.total}
                 map={map}
@@ -258,7 +258,7 @@ function UsersList() {
                 width={380}
                 height={300}
               />
-              <h5 className="text-center">Users by Zip</h5>
+              <h5>Users by Zip</h5>
             </div>
             <div className="col-lg-2">
               <h4>
@@ -326,7 +326,7 @@ function UsersList() {
                 </dd>
               </dl>
             </div>
-            <div className="col-lg-3">
+            <div className="col-lg-3 text-center">
               <IntensityMap
                 data={usersByZipMedianSteps}
                 map={map}
@@ -336,7 +336,7 @@ function UsersList() {
                 width={380}
                 height={300}
               />
-              <h5 className="text-center">Median Steps by Zip</h5>
+              <h5>Median Steps by Zip</h5>
             </div>
           </div>
           <div className="row mb-5">
@@ -349,24 +349,24 @@ function UsersList() {
                   data={totalUsersData}
                   width={300}
                   height={300}
-                  minColor="#eeeeee"
+                  minColor="#aaa"
                   maxColor="#702b84"
                 />
               )}
             </div>
-            <div className="col-lg-3 offset-lg-2 d-flex flex-column justify-content-center">
+            <div className="col-lg-3 offset-lg-2 d-flex flex-column align-items-center">
               <h4 className="text-center">
                 Total Active Users (<b>{totalActiveUsers}</b>)
-                {totalActiveUsersData && (
-                  <BarChart
-                    data={totalActiveUsersData}
-                    width={300}
-                    height={300}
-                    minColor="#eeeeee"
-                    maxColor="#2b388f"
-                  />
-                )}
               </h4>
+              {totalActiveUsersData && (
+                <BarChart
+                  data={totalActiveUsersData}
+                  width={300}
+                  height={300}
+                  minColor="#aaa"
+                  maxColor="#2b388f"
+                />
+              )}
             </div>
           </div>
         </>
