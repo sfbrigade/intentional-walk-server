@@ -1,6 +1,9 @@
 from django.test import Client, TestCase
 
-#    for x in range(5):
+# import json
+# import random
+# import requests
+# for x in range(5):
 #         num = random.randint(30, 90)
 #         testd = Device.objects.values("device_id").order_by('?').first()
 #         post_data = {

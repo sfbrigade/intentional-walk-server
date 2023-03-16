@@ -7,6 +7,7 @@ from django.db.models.expressions import Window
 from django.db.models import F
 from django.core.exceptions import ObjectDoesNotExist
 
+
 from home.models import (
     Contest,
     Device,
@@ -77,23 +78,27 @@ class LeaderboardListView(View):
         # Convert to List    #### Move this after for loop
         leaderboard_list = [user for user in leaderboard]
 
-        # Check if user should be added after top 10 displayed
+        eleventh_place = False
         current_user = {}
+
+        # Check if user should be added after top 10 displayed
         for user in leaderboard_list:  # ###in leaderboard
+            print(user)
             if (
                 user["device_id"] == account_id
                 and user["rank"] > leaderboard_length
             ):
 
                 current_user = user
+                eleventh_place = True
 
         # Cut list length to specified length (10)
         leaderboard_list = leaderboard_list[:leaderboard_length]
 
-        # if ____
-        leaderboard_list.append(current_user)
+        # If user not in top 10, add as 11th in list
+        if eleventh_place is True:
+            leaderboard_list.append(current_user)
 
-        # cut list to 10 items, add current user
         json_response["payload"]["leaderboard"] = leaderboard_list
 
         if current_contest is None:
