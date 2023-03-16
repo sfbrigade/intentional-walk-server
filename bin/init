@@ -27,6 +27,7 @@ if [ $RESULT -ne 0 ]; then
 
   echo "Importing random SQL data..."
   echo $sql | psql --quiet "${DATABASE_URL}"
+  python /app/scripts/leaderboard.py
 
   echo "Done importing random SQL data to the new database."
   echo "To create a superuser, run a bash shell in the \

@@ -1,4 +1,11 @@
+import json
 from django.db import models
+from home.models.leaderboard import Leaderboard
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Sum
+
+
+
 
 from home.templatetags.format_helpers import m_to_mi
 
@@ -44,6 +51,36 @@ class DailyWalk(models.Model):
 
     def __str__(self):
         return f"{self.account.email} | {self.date}"
+    
+    def test(self):
+        print(self)
+
+    def update_leaderboard(**kwargs):
+
+        device = kwargs.get("device")
+        contest = kwargs.get("contest")
+        total_steps = (
+            DailyWalk.objects.filter(account__email=device.account.email)
+            .filter(date__range=(contest.start, contest.end))
+            .aggregate(Sum("steps"))
+        )
+        try:
+            # Updation
+
+            leaderboard = Leaderboard.objects.get(
+                account__email=device.account.email, contest=contest
+            )
+            leaderboard.steps = total_steps["steps__sum"]
+            leaderboard.contest = contest
+
+            leaderboard.device_id = device.device_id 
+            leaderboard.save()
+        except ObjectDoesNotExist:
+            leaderboard = Leaderboard.objects.create(
+                steps=total_steps["steps__sum"],
+                device=device,
+                contest=contest,
+            )
 
     class Meta:
         ordering = ("-date",)
