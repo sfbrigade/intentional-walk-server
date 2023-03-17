@@ -4,6 +4,7 @@ from datetime import datetime
 from django.db import migrations
 
 import json
+from pytest import console_main
 import requests
 
 
@@ -30,8 +31,10 @@ def GenerateLeaderboard(apps, schema_editor):
                 data=json.dumps(post_data),
             )
             print(response.content)
-    except:
-      print("Error creating Leaderboard")
+    except IOError as e:  # fix that
+        testd = e
+        console_main.log("Error creating leaderbord")
+        print("Error creating Leaderboard")
 
 
 class Migration(migrations.Migration):
