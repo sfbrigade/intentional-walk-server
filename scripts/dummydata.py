@@ -294,6 +294,7 @@ class SQLGenerator:
             end=kwargs.get("end"),  # timestamp with timezone
             steps=kwargs.get("steps"),  # double
             pause_time=kwargs.get("pause_time"),  # double
+            walk_time=kwargs.get("walk_time"),  # double
             distance=kwargs.get("distance"),  # double
             created=kwargs.get("created", None),  # timestamp with timezone
             account_id=kwargs.get("account_id"),  # int
@@ -545,6 +546,7 @@ class SQLGenerator:
                     start=start_fmt,
                     end=end_fmt,
                     pause_time=0.0,
+                    walk_time=(end_time - start_time).total_seconds(),
                     # Google says average walk is 0.7km per 1000 steps.
                     # So, we approximate here based on the number of steps.
                     distance=steps * (0.7 / 1000),
