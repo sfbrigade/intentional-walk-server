@@ -7,7 +7,6 @@ import json
 import requests
 
 
-
 def GenerateLeaderboard(apps, schema_editor):
     Device = apps.get_model("home", "Device")
 
@@ -32,7 +31,7 @@ def GenerateLeaderboard(apps, schema_editor):
             )
             print(response.content)
     except Exception:
-            print("Error creating leaderbord")
+        print("Error creating leaderbord")
 
 
 class Migration(migrations.Migration):
