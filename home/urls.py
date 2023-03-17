@@ -141,9 +141,6 @@ urlpatterns = urlpatterns + [
         name="contest_current",
     ),
     path(
-        # r'^api/leaderboard/get/$',
-        # "api/leaderboard/get/<str:contest_id>/<str:account_id>/",
-        # "api/leaderboard/get",
         "api/leaderboard/get/",
         views.LeaderboardListView.as_view(),
         name="leaderboard_get",

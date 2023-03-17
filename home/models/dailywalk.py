@@ -1,10 +1,7 @@
-import json
 from django.db import models
 from home.models.leaderboard import Leaderboard
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Sum
-
-
 
 
 from home.templatetags.format_helpers import m_to_mi
@@ -51,7 +48,7 @@ class DailyWalk(models.Model):
 
     def __str__(self):
         return f"{self.account.email} | {self.date}"
-    
+
     def test(self):
         print(self)
 
@@ -73,7 +70,7 @@ class DailyWalk(models.Model):
             leaderboard.steps = total_steps["steps__sum"]
             leaderboard.contest = contest
 
-            leaderboard.device_id = device.device_id 
+            leaderboard.device_id = device.device_id
             leaderboard.save()
         except ObjectDoesNotExist:
             leaderboard = Leaderboard.objects.create(
