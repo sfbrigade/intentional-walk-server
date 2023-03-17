@@ -298,6 +298,7 @@ class SQLGenerator:
             created=kwargs.get("created", None),  # timestamp with timezone
             account_id=kwargs.get("account_id"),  # int
             device_id=kwargs.get("device_id", None),  # str
+            walk_time=1
         )
 
     def make_accounts(self, n: int) -> Tuple[List[str], List[int]]:
@@ -551,6 +552,7 @@ class SQLGenerator:
                     created=end_fmt,
                     account_id=account_id,
                     device_id=devices.get(account_id),
+                    walk_time=1
                 )
 
                 outputs.append(output)

@@ -10,28 +10,28 @@ import requests
 def GenerateLeaderboard(apps, schema_editor):
     Device = apps.get_model("home", "Device")
 
-    # try:
-    for x in range(50):
-        testd = Device.objects.values("device_id").order_by("?").first()
-        print("td", testd)
-        post_data = {
-            "account_id": testd["device_id"],
-            "daily_walks": [
-                {
-                    "date": datetime.now().strftime("%Y-%m-%d"),
-                    "steps": 0,
-                    "distance": 0,
-                }
-            ],
-        }
+    try:
+        for x in range(50):
+            testd = Device.objects.values("device_id").order_by("?").first()
+            print("td", testd)
+            post_data = {
+                "account_id": testd["device_id"],
+                "daily_walks": [
+                    {
+                        "date": datetime.now().strftime("%Y-%m-%d"),
+                        "steps": 0,
+                        "distance": 0,
+                    }
+                ],
+            }
 
-        response = requests.post(
-            "http://localhost:8000/api/dailywalk/create",
-            data=json.dumps(post_data),
-        )
-        print(response.content)
-    # except:
-    #  print("Error creating Leaderboard")
+            response = requests.post(
+                "http://localhost:8000/api/dailywalk/create",
+                data=json.dumps(post_data),
+            )
+            print(response.content)
+    except:
+      print("Error creating Leaderboard")
 
 
 class Migration(migrations.Migration):
