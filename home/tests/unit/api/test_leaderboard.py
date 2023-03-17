@@ -2,8 +2,8 @@ from django.test import Client, TestCase
 
 # import json
 # import requests
-from models import Device
-from datetime import datetime
+# from models import Device
+# from datetime import datetime
 
 # for x in range(30):
 #     testd = Device.objects.values("device_id").order_by("?").first()
@@ -17,14 +17,13 @@ from datetime import datetime
 #             }
 #         ],
 #     }
-
-    # response = requests.post(
-    #     "http://localhost:8000/api/dailywalk/create",
-    #     data=json.dumps(post_data),
-    # )
-    # content = response.content
-
-
+# response = requests.post(
+#     "http://localhost:8000/api/dailywalk/create",
+#     data=json.dumps(post_data),
+# )
+#
+# content = response.content
+#
 #  real_response = {
 #     "account_id": "691d690b-da13-4864-b5ff-4d1535a6528d",
 #     "daily_walks": [
