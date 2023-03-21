@@ -30,7 +30,6 @@ from collections import OrderedDict
 from datetime import date, datetime
 from random import randint
 from typing import Any, Dict, List, Tuple
-from leaderboard import make_leaderboard
 
 try:
     from zoneinfo import ZoneInfo
@@ -610,8 +609,6 @@ def main() -> int:
 
     (outputs,) = sql.make_intentionalwalks(devices)
     print("\n".join(outputs))
-
-    make_leaderboard()
 
     return 0
 

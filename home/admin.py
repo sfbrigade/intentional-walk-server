@@ -61,6 +61,6 @@ class AppUserAdmin(admin.ModelAdmin):
 
 @admin.register(Leaderboard)
 class LeaderboardUserAdmin(admin.ModelAdmin):
-    list_display = ["account", "device", "steps"]
-    ordering = ["-steps"]
+    list_display = ["account", "device", "steps", "contest"]
+    ordering = ["contest", "-steps"]
     # search_fields = []

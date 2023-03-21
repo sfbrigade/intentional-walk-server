@@ -49,9 +49,6 @@ class DailyWalk(models.Model):
     def __str__(self):
         return f"{self.account.email} | {self.date}"
 
-    def test(self):
-        print(self)
-
     def update_leaderboard(**kwargs):
 
         device = kwargs.get("device")
