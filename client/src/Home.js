@@ -170,15 +170,10 @@ function Home() {
             >
               <option value="">None</option>
               {contests?.map((c) => (
-                <>
-                  <option key={c.contest_id} value={c.contest_id}>
-                    {DateTime.fromISO(c.start).toLocaleString(
-                      DateTime.DATE_MED
-                    )}{" "}
-                    -{" "}
-                    {DateTime.fromISO(c.end).toLocaleString(DateTime.DATE_MED)}
-                  </option>
-                </>
+                <option key={c.contest_id} value={c.contest_id}>
+                  {DateTime.fromISO(c.start).toLocaleString(DateTime.DATE_MED)}{" "}
+                  - {DateTime.fromISO(c.end).toLocaleString(DateTime.DATE_MED)}
+                </option>
               ))}
             </select>
             {!contest_id && (

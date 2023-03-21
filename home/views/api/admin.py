@@ -6,7 +6,6 @@ from dateutil import parser
 from django.db import connection
 from django.db.models import BooleanField, Count, ExpressionWrapper, F, Q, Sum
 from django.db.models.functions import TruncDate
-from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 
@@ -22,7 +21,15 @@ class AdminMeView(View):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return JsonResponse(model_to_dict(request.user))
+            return JsonResponse(
+                {
+                    "id": request.user.id,
+                    "username": request.user.username,
+                    "first_name": request.user.first_name,
+                    "last_name": request.user.last_name,
+                    "email": request.user.email,
+                }
+            )
         else:
             return HttpResponse(status=204)
 
