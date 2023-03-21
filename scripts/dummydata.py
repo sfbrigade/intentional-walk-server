@@ -30,6 +30,8 @@ from collections import OrderedDict
 from datetime import date, datetime
 from random import randint
 from typing import Any, Dict, List, Tuple
+from itertools import groupby
+from operator import itemgetter
 
 try:
     from zoneinfo import ZoneInfo
@@ -286,6 +288,15 @@ class SQLGenerator:
             device_id=kwargs.get("device_id"),  # str
         )
 
+    def leaderboard(self, **kwargs) -> Tuple[str, Tuple[Any]]:
+        return insert(
+            "home_leaderboard",
+            steps=kwargs.get("steps"),
+            account_id=kwargs.get("account_id"),  # int
+            device_id=kwargs.get("device_id"),  # str
+            contest_id=kwargs.get("contest_id"),
+        )
+
     def intentional_walk(self, **kwargs) -> Tuple[str, Tuple[Any]]:
         return insert(
             "home_intentionalwalk",
@@ -445,6 +456,8 @@ class SQLGenerator:
         end = datetime.now(tz=TIMEZONE)
         tracked = []
         outputs = []
+        dailywalks = []
+
         while dt < end:
             dt += relativedelta(days=1)
 
@@ -465,10 +478,13 @@ class SQLGenerator:
                     break
 
             for acct in tracked:
+                dw = {}
                 account_id = acct.get("id")
+                device_id = devices.get(account_id)
                 steps = randint(500, 7500)
+                date = date = dt.date()
                 output = self.daily_walk(
-                    date=dt.date(),
+                    date=date,
                     steps=steps,
                     # Google says average walk is 0.7km per 1000 steps.
                     # So, we approximate here based on the number of steps.
@@ -476,10 +492,52 @@ class SQLGenerator:
                     created=dt.strftime("%Y-%m-%d %H:%M:%S (%Z)"),
                     updated=dt.strftime("%Y-%m-%d %H:%M:%S (%Z)"),
                     account_id=account_id,
-                    device_id=devices.get(account_id),
+                    device_id=device_id,
                 )
+                # Create dictionary for generating Leaderboard entries
+                dw["date"] = dt.date()
+                dw["steps"] = steps
+                dw["account_id"] = account_id
+                dw["device_id"] = device_id
+                dw["contest_id"] = "na"
 
                 outputs.append(output)
+                dailywalks.append(dw)
+
+        return [outputs, dailywalks]
+
+    def make_leaderboards(self, dailywalks: List[str]) -> List[List[str]]:
+        """Generate SQL statements to insert Leaderboard entries based on daily walk records"""
+        outputs = []
+        for walk in dailywalks:
+            for contest_id, dt in self.contests.items():
+                start, end = dt
+
+                if walk["date"] >= start and walk["date"] <= end:
+                    walk["contest_id"] = contest_id
+
+        grouper = itemgetter(
+            "account_id",
+            "device_id",
+            "contest_id",
+        )
+        for key, grp in groupby(sorted(dailywalks, key=grouper), grouper):
+
+            temp_dict = dict(
+                zip(["account_id", "device_id", "contest_id"], key)
+            )
+            temp_dict["steps"] = sum(item["steps"] for item in grp)
+
+            output = self.leaderboard(
+                steps=temp_dict["steps"],
+                account_id=temp_dict["account_id"],
+                device_id=temp_dict["device_id"],
+                contest_id=temp_dict["contest_id"],
+            )
+
+            outputs.append(output)
+            if temp_dict["contest_id"] == "na":
+                outputs.pop()
 
         return [outputs]
 
@@ -604,7 +662,10 @@ def main() -> int:
     outputs, devices = sql.make_devices(account_ids)
     print("\n".join(outputs))
 
-    (outputs,) = sql.make_dailywalks(devices)
+    outputs, dailywalks = sql.make_dailywalks(devices)
+    print("\n".join(outputs))
+
+    (outputs,) = sql.make_leaderboards(dailywalks)
     print("\n".join(outputs))
 
     (outputs,) = sql.make_intentionalwalks(devices)
