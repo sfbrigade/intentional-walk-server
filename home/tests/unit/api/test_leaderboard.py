@@ -1,11 +1,9 @@
 import urllib
 
 from django.test import Client, TestCase
-from home.models import Contest, Device, Leaderboard, DailyWalk
+from home.models import Contest, Device, Leaderboard
 from home.utils.generators import (
     AccountGenerator,
-    # ContestGenerator,
-    # DailyWalkGenerator,
     DeviceGenerator,
 )
 
@@ -95,8 +93,6 @@ class TestLeaderboard(TestCase):
         leaderboard_steps_count = Leaderboard.objects.get(
             device=self.device_id
         ).steps
-        print(leaderboard_steps_count)
-        print(DailyWalk.objects.all())
 
         # Expected: 1 Leaderboard entry with 500 steps
         self.assertEqual(1, leaderboard_count)
@@ -242,7 +238,6 @@ class TestLeaderboard(TestCase):
         response = self.client.get("/api/leaderboard/get/?" + query)
 
         response_data = response.json()
-        print(response_data)
 
         # Validate 10 Leaderboard entries received as user is in top 10
         self.assertEqual(response.status_code, 200)

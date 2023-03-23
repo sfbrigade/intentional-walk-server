@@ -119,17 +119,6 @@ class DailyWalkCreateView(View):
 
         # Update Leaderboard
         if contest:
-            # print("updaterterteleaderboard")
-            # if Leaderboard.objects.exists():
-            #     print(Leaderboard.objects.count())
-            #     print("exists")
-
-            # else:
-            #     print("dne")
-            #     print(Leaderboard.objects.count())
-            #     #for user in Account.objects.all():
-
-            #     make_leadeboard(device=device, contest=contest)
             DailyWalk.update_leaderboard(device=device, contest=contest)
         else:
             # No active contest

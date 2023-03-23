@@ -181,14 +181,11 @@ class LeaderboardGenerator:
 
         for _ in range(n):
             params = {**self.random_params(), **kwargs}
-            print("pppp", params)
-
             yield Leaderboard.objects.create(**params)
 
     def random_params(self):
         values = dict(
             steps=random.randint(100, 10000),
-            # distance=random.randint(100, 10000),  # up to 10 km
         )
         if self.devices:
             values["device"] = random.choice(self.devices)
