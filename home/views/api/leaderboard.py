@@ -39,7 +39,7 @@ class LeaderboardListView(View):
         # get?contest_id=<contest>?account_id=<account_id>
 
         # Validate request. If any field is missing,
-        #  send back the response message
+        # send back the response message
         # Get the device if already registered
         try:
             device = Device.objects.get(device_id=account_id)
@@ -75,15 +75,14 @@ class LeaderboardListView(View):
             )
         )
 
-        # Convert to List    #### Move this after for loop
+        # Convert to List
         leaderboard_list = [user for user in leaderboard]
 
         eleventh_place = False
         current_user = {}
 
         # Check if user should be added after top 10 displayed
-        for user in leaderboard_list:  # ###in leaderboard
-            print(user)
+        for user in leaderboard_list:
             if (
                 user["device_id"] == account_id
                 and user["rank"] > leaderboard_length
