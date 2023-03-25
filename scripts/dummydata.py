@@ -348,6 +348,9 @@ class SQLGenerator:
             outputs.append(output)
 
         self.accounts.sort(key=lambda x: x["created"])
+        outputs.append(
+            f'ALTER SEQUENCE "home_account_id_seq" RESTART WITH {n + 1};'
+        )
         return [outputs, account_ids]
 
     def make_contests(
