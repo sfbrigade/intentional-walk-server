@@ -41,7 +41,6 @@ jobs:
           command: |
             poetry run coverage run --omit="/home/circleci/.cache/pypoetry/virtualenvs/*" -m pytest
             poetry run coveralls
-
 workflows:
   main:
     jobs:

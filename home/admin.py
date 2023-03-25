@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import Account, Contest, DailyWalk, Device, IntentionalWalk
+from .models import (
+    Account,
+    Contest,
+    DailyWalk,
+    Device,
+    IntentionalWalk,
+    Leaderboard,
+)
 
 
 @admin.register(Device)
@@ -50,3 +57,10 @@ class AppUserAdmin(admin.ModelAdmin):
     list_display_links = ["contest_id"]
     ordering = ["-start_promo"]
     search_fields = []
+
+
+@admin.register(Leaderboard)
+class LeaderboardUserAdmin(admin.ModelAdmin):
+    list_display = ["account", "device", "steps", "contest_id"]
+    list_filter = ["contest"]
+    ordering = ["contest", "-steps"]

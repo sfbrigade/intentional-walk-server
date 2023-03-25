@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from home.models import Contest, DailyWalk, Device
 
+
 from .utils import validate_request_json
 
 logger = logging.getLogger(__name__)
@@ -116,7 +117,13 @@ class DailyWalkCreateView(View):
                 }
             )
 
-        # Associate contest with user (account)
+        # Update Leaderboard
+        if contest:
+            DailyWalk.update_leaderboard(device=device, contest=contest)
+        else:
+            # No active contest
+            pass
+
         for contest in active_contests:
             try:
                 acct = device.account

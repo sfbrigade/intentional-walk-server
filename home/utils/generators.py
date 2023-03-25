@@ -6,7 +6,14 @@ from uuid import uuid4
 from django.utils import timezone
 from faker import Faker
 
-from home.models import Account, Contest, DailyWalk, Device, IntentionalWalk
+from home.models import (
+    Account,
+    Contest,
+    DailyWalk,
+    Device,
+    IntentionalWalk,
+    Leaderboard,
+)
 from home.models.account import (
     SAN_FRANCISCO_ZIP_CODES,
     GenderLabels,
@@ -151,3 +158,35 @@ class ContestGenerator:
             start=start,
             end=(start + timedelta(days=30)),
         )
+
+
+class LeaderboardGenerator:
+    # Requires a list of device ids
+    def __init__(
+        self, account: str, devices: List[str], contest: str
+    ):  # , steps: int):
+        self.fake = Faker()
+        self.devices = devices
+        self.contest = contest
+        self.account = account
+        # self.steps = steps
+
+    def generate(self, n: int, **kwargs):
+        if not self.device and "device" not in kwargs:
+            raise ValueError("Must provide a Device object as `device`")
+        if not self.contest and "contest" not in kwargs:
+            raise ValueError(
+                "Must provide a contest object as `contest`"
+            )  # string?
+
+        for _ in range(n):
+            params = {**self.random_params(), **kwargs}
+            yield Leaderboard.objects.create(**params)
+
+    def random_params(self):
+        values = dict(
+            steps=random.randint(100, 10000),
+        )
+        if self.devices:
+            values["device"] = random.choice(self.devices)
+        return values
