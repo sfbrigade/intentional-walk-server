@@ -59,15 +59,12 @@ class DailyWalk(models.Model):
             .aggregate(Sum("steps"))
         )
         try:
-            # Updation
-
+            # Update
             leaderboard = Leaderboard.objects.get(
-                account__email=device.account.email, contest=contest
+                account=device.account, contest=contest
             )
             leaderboard.steps = total_steps["steps__sum"]
-            leaderboard.contest = contest
-
-            leaderboard.device_id = device.device_id
+            leaderboard.device = device
             leaderboard.save()
         except ObjectDoesNotExist:
             leaderboard = Leaderboard.objects.create(

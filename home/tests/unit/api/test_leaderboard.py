@@ -1,3 +1,4 @@
+import logging
 import urllib
 
 from django.test import Client, TestCase
@@ -6,6 +7,9 @@ from home.utils.generators import (
     AccountGenerator,
     DeviceGenerator,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class TestLeaderboard(TestCase):
@@ -232,7 +236,7 @@ class TestLeaderboard(TestCase):
 
         data = {
             "contest_id": contest.contest_id,
-            "account_id": device10[0].device_id,
+            "device_id": device10[0].device_id,
         }
         query = urllib.parse.urlencode(data)
         response = self.client.get("/api/leaderboard/get/?" + query)
@@ -246,7 +250,7 @@ class TestLeaderboard(TestCase):
 
         data = {
             "contest_id": contest.contest_id,
-            "account_id": device2[0].device_id,
+            "device_id": device2[0].device_id,
         }
         query = urllib.parse.urlencode(data)
         response = self.client.get("/api/leaderboard/get/?" + query)
@@ -317,7 +321,7 @@ class TestLeaderboard(TestCase):
         # Check if Leaderboard has changed,
         data = {
             "contest_id": contest.contest_id,
-            "account_id": device2[0].device_id,
+            "device_id": device2[0].device_id,
         }
         query = urllib.parse.urlencode(data)
         response = self.client.get("/api/leaderboard/get/?" + query)
@@ -345,7 +349,7 @@ class TestLeaderboard(TestCase):
         # Check if Leaderboard changes
         data = {
             "contest_id": contest.contest_id,
-            "account_id": device2[0].device_id,
+            "device_id": device2[0].device_id,
         }
         query = urllib.parse.urlencode(data)
         response = self.client.get("/api/leaderboard/get/?" + query)
