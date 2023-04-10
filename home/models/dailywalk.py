@@ -50,7 +50,6 @@ class DailyWalk(models.Model):
         return f"{self.account.email} | {self.date}"
 
     def update_leaderboard(**kwargs):
-
         device = kwargs.get("device")
         contest = kwargs.get("contest")
         total_steps = (

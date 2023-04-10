@@ -26,6 +26,7 @@ class DailyWalkCreateView(View):
 
     def post(self, request, *args, **kwargs):
         json_data = json.loads(request.body)
+        logger.info(json_data)
 
         # Validate json. If any field is missing, send back the response message
         json_status = validate_request_json(
@@ -118,6 +119,8 @@ class DailyWalkCreateView(View):
             )
 
         # Update Leaderboard
+        logger.info(contest)
+        logger.info(device)
         if contest:
             DailyWalk.update_leaderboard(device=device, contest=contest)
         else:
