@@ -1,4 +1,5 @@
 from django.test import Client, TestCase
+from freezegun import freeze_time
 from home.models import Contest, Device
 
 
@@ -69,46 +70,49 @@ class ApiTestCase(TestCase):
         acct = Device.objects.get(device_id=self.device_id).account
         self.assertFalse(acct.contests.exists())
 
-        # Send the request
-        response = self.client.post(
-            path=self.url,
-            data=self.request_params,
-            content_type=self.content_type,
-        )
-        # Check for a successful response by the server
-        self.assertEqual(response.status_code, 200)
-        # Parse the response
-        response_data = response.json()
-        fail_message = f"Server response - {response_data}"
-        self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertEqual(
-            response_data["message"],
-            "Dailywalks recorded successfully",
-            msg=fail_message,
-        )
-        self.assertEqual(
-            response_data["payload"]["account_id"],
-            self.request_params["account_id"],
-            msg=fail_message,
-        )
-        self.assertEqual(
-            response_data["payload"]["daily_walks"][0]["date"],
-            self.request_params["daily_walks"][0]["date"],
-            msg=fail_message,
-        )
-        self.assertEqual(
-            response_data["payload"]["daily_walks"][0]["steps"],
-            self.request_params["daily_walks"][0]["steps"],
-            msg=fail_message,
-        )
-        self.assertEqual(
-            response_data["payload"]["daily_walks"][0]["distance"],
-            self.request_params["daily_walks"][0]["distance"],
-            msg=fail_message,
-        )
+        with freeze_time("3000-02-15"):
+            # Send the request
+            response = self.client.post(
+                path=self.url,
+                data=self.request_params,
+                content_type=self.content_type,
+            )
+            # Check for a successful response by the server
+            self.assertEqual(response.status_code, 200)
+            # Parse the response
+            response_data = response.json()
+            fail_message = f"Server response - {response_data}"
+            self.assertEqual(
+                response_data["status"], "success", msg=fail_message
+            )
+            self.assertEqual(
+                response_data["message"],
+                "Dailywalks recorded successfully",
+                msg=fail_message,
+            )
+            self.assertEqual(
+                response_data["payload"]["account_id"],
+                self.request_params["account_id"],
+                msg=fail_message,
+            )
+            self.assertEqual(
+                response_data["payload"]["daily_walks"][0]["date"],
+                self.request_params["daily_walks"][0]["date"],
+                msg=fail_message,
+            )
+            self.assertEqual(
+                response_data["payload"]["daily_walks"][0]["steps"],
+                self.request_params["daily_walks"][0]["steps"],
+                msg=fail_message,
+            )
+            self.assertEqual(
+                response_data["payload"]["daily_walks"][0]["distance"],
+                self.request_params["daily_walks"][0]["distance"],
+                msg=fail_message,
+            )
 
-        # Verify that the user now has a contest
-        self.assertEqual(1, len(acct.contests.all()))
+            # Verify that the user now has a contest
+            self.assertEqual(1, len(acct.contests.all()))
 
     # Test that a daily walk outside of a contest does not show up as
     # contest participation for that user
