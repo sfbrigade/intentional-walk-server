@@ -2,6 +2,8 @@ import logging
 import urllib
 
 from django.test import Client, TestCase
+from freezegun import freeze_time
+
 from home.models import Contest, Device, Leaderboard
 from home.utils.generators import (
     AccountGenerator,
@@ -80,27 +82,30 @@ class TestLeaderboard(TestCase):
         acct = Device.objects.get(device_id=self.device_id).account
         self.assertFalse(acct.contests.exists())
 
-        # Send the request
-        response = self.client.post(
-            path=self.url,
-            data=self.request_params,
-            content_type=self.content_type,
-        )
-        # Check for a successful response by the server
-        self.assertEqual(response.status_code, 200)
-        # Parse the response
-        response_data = response.json()
-        fail_message = f"Server response - {response_data}"
-        self.assertEqual(response_data["status"], "success", msg=fail_message)
+        with freeze_time("3000-02-15"):
+            # Send the request
+            response = self.client.post(
+                path=self.url,
+                data=self.request_params,
+                content_type=self.content_type,
+            )
+            # Check for a successful response by the server
+            self.assertEqual(response.status_code, 200)
+            # Parse the response
+            response_data = response.json()
+            fail_message = f"Server response - {response_data}"
+            self.assertEqual(
+                response_data["status"], "success", msg=fail_message
+            )
 
-        leaderboard_count = Leaderboard.objects.count()
-        leaderboard_steps_count = Leaderboard.objects.get(
-            device=self.device_id
-        ).steps
+            leaderboard_count = Leaderboard.objects.count()
+            leaderboard_steps_count = Leaderboard.objects.get(
+                device=self.device_id
+            ).steps
 
-        # Expected: 1 Leaderboard entry with 500 steps
-        self.assertEqual(1, leaderboard_count)
-        self.assertEqual(500, leaderboard_steps_count)
+            # Expected: 1 Leaderboard entry with 500 steps
+            self.assertEqual(1, leaderboard_count)
+            self.assertEqual(500, leaderboard_steps_count)
 
     # Leaderboard Get request test and data validation
     def test_get_leaderboard(self):
@@ -334,18 +339,23 @@ class TestLeaderboard(TestCase):
             response_data_pretest["payload"]["leaderboard"],
         )
         self.assertEqual(response.status_code, 200)
-        # Dailywalk submitted during contest period
-        response = self.client.post(
-            path=self.url,
-            data=self.request_params_during_fail,
-            content_type=self.content_type,
-        )
-        # Check for a successful response by the server
-        self.assertEqual(response.status_code, 200)
-        # Parse the response
-        response_data = response.json()
-        fail_message = f"Server response - {response_data}"
-        self.assertEqual(response_data["status"], "success", msg=fail_message)
+
+        with freeze_time("3000-02-15"):
+            # Dailywalk submitted during contest period
+            response = self.client.post(
+                path=self.url,
+                data=self.request_params_during_fail,
+                content_type=self.content_type,
+            )
+            # Check for a successful response by the server
+            self.assertEqual(response.status_code, 200)
+            # Parse the response
+            response_data = response.json()
+            fail_message = f"Server response - {response_data}"
+            self.assertEqual(
+                response_data["status"], "success", msg=fail_message
+            )
+
         # Check if Leaderboard changes
         data = {
             "contest_id": contest.contest_id,

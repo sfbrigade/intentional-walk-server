@@ -72,9 +72,6 @@ class DailyWalkCreateView(View):
                 return JsonResponse(json_status)
 
             walk_date = daily_walk_data["date"]
-
-            # Register contest for account if walk_date falls between contest
-            # start and contest end (Can be async)
             contest = Contest.active(
                 for_date=date.fromisoformat(walk_date), strict=True
             )
@@ -118,13 +115,12 @@ class DailyWalkCreateView(View):
             )
 
         # Update Leaderboard
-        if contest:
-            DailyWalk.update_leaderboard(device=device, contest=contest)
-        else:
-            # No active contest
-            pass
-
         for contest in active_contests:
+            DailyWalk.update_leaderboard(device=device, contest=contest)
+
+        # Register contest for account if the day falls between contest dates
+        contest = Contest.active(for_date=date.today(), strict=True)
+        if contest:
             try:
                 acct = device.account
                 acct.contests.add(contest)
@@ -134,6 +130,9 @@ class DailyWalkCreateView(View):
                     f"{contest} with account {acct}!",
                     exc_info=True,
                 )
+        else:
+            # No active contest
+            pass
 
         return JsonResponse(json_response)
 

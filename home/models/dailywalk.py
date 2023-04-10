@@ -1,3 +1,5 @@
+import logging
+
 from django.db import models
 from home.models.leaderboard import Leaderboard
 from django.core.exceptions import ObjectDoesNotExist
@@ -5,6 +7,8 @@ from django.db.models import Sum
 
 
 from home.templatetags.format_helpers import m_to_mi
+
+logger = logging.getLogger(__name__)
 
 
 # Event model
@@ -50,14 +54,15 @@ class DailyWalk(models.Model):
         return f"{self.account.email} | {self.date}"
 
     def update_leaderboard(**kwargs):
-
         device = kwargs.get("device")
         contest = kwargs.get("contest")
         total_steps = (
-            DailyWalk.objects.filter(account__email=device.account.email)
+            DailyWalk.objects.filter(account=device.account)
             .filter(date__range=(contest.start, contest.end))
             .aggregate(Sum("steps"))
         )
+        if total_steps["steps__sum"] is None:
+            total_steps["steps__sum"] = 0
         try:
             # Update
             leaderboard = Leaderboard.objects.get(
