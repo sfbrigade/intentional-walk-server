@@ -60,6 +60,8 @@ class DailyWalkCreateView(View):
             },
         }
 
+        active_contests = set()
+
         for daily_walk_data in json_data["daily_walks"]:
             # Validate data
             json_status = validate_request_json(
@@ -70,6 +72,11 @@ class DailyWalkCreateView(View):
                 return JsonResponse(json_status)
 
             walk_date = daily_walk_data["date"]
+            contest = Contest.active(
+                for_date=date.fromisoformat(walk_date), strict=True
+            )
+            if contest is not None:
+                active_contests.add(contest)
 
             # Check if there is already an entry for this date. If there is,
             # update the entry.
@@ -107,6 +114,10 @@ class DailyWalkCreateView(View):
                 }
             )
 
+        # Update Leaderboard
+        for contest in active_contests:
+            DailyWalk.update_leaderboard(device=device, contest=contest)
+
         # Register contest for account if the day falls between contest dates
         contest = Contest.active(for_date=date.today(), strict=True)
         if contest:
@@ -119,8 +130,6 @@ class DailyWalkCreateView(View):
                     f"{contest} with account {acct}!",
                     exc_info=True,
                 )
-            # Update Leaderboard
-            DailyWalk.update_leaderboard(device=device, contest=contest)
         else:
             # No active contest
             pass
