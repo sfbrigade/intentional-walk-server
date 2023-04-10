@@ -70,6 +70,8 @@ class DailyWalkCreateView(View):
                 required_fields=["date", "steps", "distance"],
             )
             if "status" in json_status and json_status["status"] == "error":
+                logger.info(daily_walk_data)
+                logger.info(json_status)
                 return JsonResponse(json_status)
 
             walk_date = daily_walk_data["date"]
