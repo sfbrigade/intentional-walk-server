@@ -26,7 +26,6 @@ class DailyWalkCreateView(View):
 
     def post(self, request, *args, **kwargs):
         json_data = json.loads(request.body)
-        logger.info(json_data)
 
         # Validate json. If any field is missing, send back the response message
         json_status = validate_request_json(
@@ -61,8 +60,6 @@ class DailyWalkCreateView(View):
             },
         }
 
-        active_contests = set()
-
         for daily_walk_data in json_data["daily_walks"]:
             # Validate data
             json_status = validate_request_json(
@@ -70,19 +67,9 @@ class DailyWalkCreateView(View):
                 required_fields=["date", "steps", "distance"],
             )
             if "status" in json_status and json_status["status"] == "error":
-                logger.info(daily_walk_data)
-                logger.info(json_status)
                 return JsonResponse(json_status)
 
             walk_date = daily_walk_data["date"]
-
-            # Register contest for account if walk_date falls between contest
-            # start and contest end (Can be async)
-            contest = Contest.active(
-                for_date=date.fromisoformat(walk_date), strict=True
-            )
-            if contest is not None:
-                active_contests.add(contest)
 
             # Check if there is already an entry for this date. If there is,
             # update the entry.
@@ -120,16 +107,9 @@ class DailyWalkCreateView(View):
                 }
             )
 
-        # Update Leaderboard
-        logger.info(contest)
-        logger.info(device)
+        # Register contest for account if the day falls between contest dates
+        contest = Contest.active(for_date=date.today(), strict=True)
         if contest:
-            DailyWalk.update_leaderboard(device=device, contest=contest)
-        else:
-            # No active contest
-            pass
-
-        for contest in active_contests:
             try:
                 acct = device.account
                 acct.contests.add(contest)
@@ -139,6 +119,11 @@ class DailyWalkCreateView(View):
                     f"{contest} with account {acct}!",
                     exc_info=True,
                 )
+            # Update Leaderboard
+            DailyWalk.update_leaderboard(device=device, contest=contest)
+        else:
+            # No active contest
+            pass
 
         return JsonResponse(json_response)
 
