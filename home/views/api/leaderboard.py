@@ -75,7 +75,9 @@ class LeaderboardListView(View):
         leaderboard_list = []
         leaderboard_length = 10
         leaderboard = (
-            Leaderboard.objects.filter(account__is_tester=False,contest_id=contest_id)
+            Leaderboard.objects.filter(
+                contest_id=contest_id, account__is_tester=False
+            )
             .values("account_id", "steps")
             .annotate(
                 rank=Window(expression=Rank(), order_by=F("steps").desc())
