@@ -576,3 +576,37 @@ class AdminUsersByZipMedianStepsView(View):
             return response
         else:
             return HttpResponse(status=401)
+
+
+class AdminUsersByAgeGroup(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            is_tester = request.GET.get("is_tester", None) == "true"
+            contest_id = request.GET.get("contest_id", None)
+            if contest_id is None:
+                return HttpResponse(status=422)
+            contest = Contest.objects.get(pk=contest_id)
+            age = #something?
+            payload = {}
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM home_account
+                    WHERE home_account.is_tester=%s AND
+                            home_account_contests.contest_id=%s AND
+                            home_dailywalk.date BETWEEN %s AND %s AND
+                            home_account.age BETWEEN %s AND %s
+                    """,
+                        [is_tester, contest_id, contest.start, contest.end, age.start, age.end],
+                )
+            rows = cursor.fetchall()
+            for row in rows:
+                payload[row[0]] = row[1]
+
+            response = JsonResponse(payload)
+            return response
+        else:
+            return HttpResponse(status=401)
