@@ -27,6 +27,7 @@ function Home() {
   const [stepsCumulative, setStepsCumulative] = useState();
   const [distanceDaily, setDistanceDaily] = useState();
   const [distanceCumulative, setDistanceCumulative] = useState();
+  const [ageDistribution, setAgeDistribution] = useState();
 
   useEffect(() => {
     let cancelled = false;
@@ -328,6 +329,29 @@ function Home() {
                     viewWindow: { min: 0 },
                   },
                   colors: ["#1ABC9C"],
+                }}
+                width="100%"
+                height="400px"
+              />
+            )}
+          </div>
+          <div className="col-lg-6 text-center">
+            <h3>Age Distribution</h3>
+            {distanceCumulative && (
+              <Chart
+                chartType="ColumnChart"
+                data={distanceCumulative}
+                options={{
+                  legend: { position: "none" },
+                  bar: { groupWidth: "95%" },
+                  hAxis: {
+                    title: "Age"
+                  },
+                  vAxis: {
+                    title: "Number of Users",
+                    viewWindow: { min: 0 },
+                  },
+                  colors: ["#AF7AC5"],
                 }}
                 width="100%"
                 height="400px"
