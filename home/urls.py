@@ -100,13 +100,11 @@ urlpatterns = urlpatterns + [
         views.AdminUsersByZipMedianStepsView.as_view(),
         name="admin_users_zip_steps",
     ),
-
     path(
         "api/admin/users/age/between",
         views.AdminUsersByAgeGroupView.as_view(),
         name="admin_users_age_between",
     ),
-
     path(
         "api/appuser/create",
         views.AppUserCreateView.as_view(),

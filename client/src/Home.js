@@ -27,7 +27,21 @@ function Home() {
   const [stepsCumulative, setStepsCumulative] = useState();
   const [distanceDaily, setDistanceDaily] = useState();
   const [distanceCumulative, setDistanceCumulative] = useState();
-  const [ageDistribution, setAgeDistribution] = useState();
+  const [ageDistribution1, setAgeDistribution1] = useState();
+  const [ageDistribution2, setAgeDistribution2] = useState();
+  const [ageDistribution3, setAgeDistribution3] = useState();
+  const [ageDistribution4, setAgeDistribution4] = useState();
+
+
+  const ageRange1Min= 18;
+  const ageRange1Max= 29;
+  const ageRange2Min= 30;
+  const ageRange2Max= 44;
+  const ageRange3Min= 45;
+  const ageRange3Max= 59;
+  const ageRange4Min= 60;
+  const ageRange4Max= null;
+
 
   useEffect(() => {
     let cancelled = false;
@@ -92,8 +106,40 @@ function Home() {
             ])
           )
       );
+    Api.admin
+    .homeUsersByAgeGroup({ contest_id, ageRange1Min, ageRange1Max })
+    .then(
+      (response) =>
+        !cancelled &&
+        setAgeDistribution1(response.data)
+    );
+    Api.admin
+    .homeUsersByAgeGroup({ contest_id, ageRange2Min, ageRange2Max })
+    .then(
+      (response) =>
+        !cancelled &&
+        setAgeDistribution2(response.data)
+    );
+    Api.admin
+    .homeUsersByAgeGroup({ contest_id, ageRange3Min, ageRange3Max })
+    .then(
+      (response) =>
+        !cancelled &&
+        setAgeDistribution3(response.data)
+    );
+    Api.admin
+    .homeUsersByAgeGroup({ contest_id, ageRange4Min, ageRange4Max })
+    .then(
+      (response) =>
+        !cancelled &&
+        setAgeDistribution4(response.data)
+    );
     return () => (cancelled = true);
-  }, [contest_id, start_date, end_date]);
+  }, [
+    contest_id,
+    start_date,
+    end_date
+  ]);
 
   function onChange(params) {
     navigate(

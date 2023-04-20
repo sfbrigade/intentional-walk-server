@@ -94,8 +94,7 @@ function UsersList() {
       Api.admin
         .usersByZipMedianSteps({ contest_id, is_tester })
         .then(
-          (response) => !cancelled && setUsersByZipMedianSteps(response.data)
-        );
+          (response) => !cancelled && setUsersByZipMedianSteps(response.data));
     }
     return () => (cancelled = true);
   }, [contest_id, is_tester]);

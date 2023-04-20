@@ -583,7 +583,6 @@ class AdminUsersByAgeGroupView(View):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            is_tester = request.GET.get("is_tester", None) == "true"
             contest_id = request.GET.get("contest_id", None)
             if contest_id is None:
                 return HttpResponse(status=422)
@@ -596,13 +595,12 @@ class AdminUsersByAgeGroupView(View):
                     """
                     SELECT COUNT(*)
                     FROM home_account
-                    WHERE home_account.is_tester=%s AND
-                            home_account_contests.contest_id=%s AND
-                            home_dailywalk.date BETWEEN %s AND %s AND
-                            home_account.age >= %s AND
-                            home_account.age <= %s
+                    WHERE home_account_contests.contest_id=%s AND
+                        home_dailywalk.date BETWEEN %s AND %s AND
+                        home_account.age >= %s AND
+                        home_account.age <= %s
                     """,
-                        [is_tester, contest_id, contest.start, contest.end, age_min, age_max],
+                        [contest_id, contest.start, contest.end, age_min, age_max],
                 )
             rows = cursor.fetchall()
             for row in rows:

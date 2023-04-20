@@ -70,6 +70,11 @@ const Api = {
         params: { contest_id, start_date, end_date },
       });
     },
+    homeUsersByAgeGroup({ contest_id, age_min, age_max }) {
+      return instance.get("api/admin/users/age/between", {
+        params: { contest_id, age_min, age_max }
+      });
+    },
     contests() {
       return instance.get("/api/admin/contests");
     },
