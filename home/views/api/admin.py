@@ -578,7 +578,7 @@ class AdminUsersByZipMedianStepsView(View):
             return HttpResponse(status=401)
 
 
-class AdminUsersByAgeGroup(View):
+class AdminUsersByAgeGroupView(View):
     http_method_names = ["get"]
 
     def get(self, request, *args, **kwargs):
@@ -588,7 +588,8 @@ class AdminUsersByAgeGroup(View):
             if contest_id is None:
                 return HttpResponse(status=422)
             contest = Contest.objects.get(pk=contest_id)
-            age = #something?
+            age_min = request.GET.get("age_min", None)
+            age_max = request.GET.get("age_max", None)
             payload = {}
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -598,9 +599,10 @@ class AdminUsersByAgeGroup(View):
                     WHERE home_account.is_tester=%s AND
                             home_account_contests.contest_id=%s AND
                             home_dailywalk.date BETWEEN %s AND %s AND
-                            home_account.age BETWEEN %s AND %s
+                            home_account.age >= %s AND
+                            home_account.age <= %s
                     """,
-                        [is_tester, contest_id, contest.start, contest.end, age.start, age.end],
+                        [is_tester, contest_id, contest.start, contest.end, age_min, age_max],
                 )
             rows = cursor.fetchall()
             for row in rows:
