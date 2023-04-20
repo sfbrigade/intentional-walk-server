@@ -335,28 +335,30 @@ function Home() {
               />
             )}
           </div>
-          <div className="col-lg-6 text-center">
-            <h3>Age Distribution</h3>
-            {distanceCumulative && (
-              <Chart
-                chartType="ColumnChart"
-                data={distanceCumulative}
-                options={{
-                  legend: { position: "none" },
-                  bar: { groupWidth: "95%" },
-                  hAxis: {
-                    title: "Age"
-                  },
-                  vAxis: {
-                    title: "Number of Users",
-                    viewWindow: { min: 0 },
-                  },
-                  colors: ["#AF7AC5"],
-                }}
-                width="100%"
-                height="400px"
-              />
-            )}
+          <div className="row my-5">
+            <div className="col-lg-6 text-center">
+              <h3>Age Distribution</h3>
+              {distanceCumulative && (
+                <Chart
+                  chartType="ColumnChart"
+                  data={distanceCumulative}
+                  options={{
+                    legend: { position: "none" },
+                    bar: { groupWidth: "95%" },
+                    hAxis: {
+                      title: "Age"
+                    },
+                    vAxis: {
+                      title: "Number of Users",
+                      viewWindow: { min: 0 },
+                    },
+                    colors: ["#AF7AC5"],
+                  }}
+                  width="100%"
+                  height="400px"
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
