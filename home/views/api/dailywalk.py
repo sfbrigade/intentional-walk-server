@@ -114,13 +114,10 @@ class DailyWalkCreateView(View):
                 }
             )
 
-        # Update Leaderboard
-        for contest in active_contests:
-            DailyWalk.update_leaderboard(device=device, contest=contest)
-
         # Register contest for account if the day falls between contest dates
         contest = Contest.active(for_date=date.today(), strict=True)
         if contest:
+            active_contests.add(contest)
             try:
                 acct = device.account
                 acct.contests.add(contest)
@@ -133,6 +130,10 @@ class DailyWalkCreateView(View):
         else:
             # No active contest
             pass
+
+        # Update Leaderboard
+        for contest in active_contests:
+            DailyWalk.update_leaderboard(device=device, contest=contest)
 
         return JsonResponse(json_response)
 
