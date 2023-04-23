@@ -137,7 +137,7 @@ class IntentionalWalkListView(View):
 
         # Get walks from all the accounts tied to the email
         intentional_walks = IntentionalWalk.objects.filter(
-            account__email=device.account.email
+            account=device.account
         )
 
         # Hacky serializer

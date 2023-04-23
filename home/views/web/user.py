@@ -199,7 +199,9 @@ class UserListView(generic.ListView):
 
         # Add all accounts found in filtered daily walk data
         for email, dw_row in daily_walks.items():
-            acct = Account.objects.values(*ACCOUNT_FIELDS).get(email=email)
+            acct = Account.objects.values(*ACCOUNT_FIELDS).get(
+                email__iexact=email
+            )
 
             # Skip testers unless include_testers
             if not include_testers and acct.get("is_tester"):

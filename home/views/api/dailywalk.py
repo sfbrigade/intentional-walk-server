@@ -90,7 +90,7 @@ class DailyWalkCreateView(View):
             try:
                 # Updation
                 daily_walk = DailyWalk.objects.get(
-                    account__email=device.account.email, date=walk_date
+                    account=device.account, date=walk_date
                 )
                 daily_walk.steps = daily_walk_data["steps"]
                 daily_walk.distance = daily_walk_data["distance"]
@@ -183,9 +183,7 @@ class DailyWalkListView(View):
         # email id and have the metrics simply aggregated.
         # For the simple use case, this is likely not an issue and would need
         # to be handled manually if needed
-        daily_walks = DailyWalk.objects.filter(
-            account__email=device.account.email
-        )
+        daily_walks = DailyWalk.objects.filter(account=device.account)
 
         # Hacky serializer
         total_steps = 0
