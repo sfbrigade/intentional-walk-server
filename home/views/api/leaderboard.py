@@ -75,7 +75,10 @@ class LeaderboardListView(View):
         leaderboard_list = []
         leaderboard_length = 10
         leaderboard = (
-            Leaderboard.objects.filter(contest_id=contest_id)
+            Leaderboard.objects.filter(
+                contest_id=contest_id,
+                account__is_tester=device.account.is_tester,
+            )
             .values("account_id", "steps")
             .annotate(
                 rank=Window(expression=Rank(), order_by=F("steps").desc())
@@ -102,7 +105,9 @@ class LeaderboardListView(View):
                 user = leaderboard[0]
                 user["device_id"] = device_id
                 user["rank"] = Leaderboard.objects.filter(
-                    contest_id=contest_id, steps__gte=user["steps"]
+                    contest_id=contest_id,
+                    steps__gte=user["steps"],
+                    account__is_tester=device.account.is_tester,
                 ).count()
                 leaderboard_list.append(user)
 
