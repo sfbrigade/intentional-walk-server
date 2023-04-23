@@ -170,7 +170,7 @@ class AppUserCreateView(View):
 
         # Update user attributes.
         device = Device.objects.get(device_id=json_data["account_id"])
-        account = Account.objects.get(email=device.account.email)
+        account = Account.objects.get(email__iexact=device.account.email)
         update_account(account, json_data)
         message = "Account updated successfully"
 
@@ -316,8 +316,7 @@ class AppUserDeleteView(View):
                 }
             )
 
-        account = Account.objects.get(email=device.account.email)
-        account.delete()
+        device.account.delete()
         device.delete()
 
         return JsonResponse(
