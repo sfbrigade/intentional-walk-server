@@ -208,7 +208,7 @@ class AppUserCreateView(View):
             # Get the registered device if it exists
             device = Device.objects.get(device_id=json_data["account_id"])
             # If it is an email update fail and return
-            if device.account.email != json_data["email"]:
+            if device.account.email.lower() != json_data["email"].lower():
                 return JsonResponse(
                     {
                         "status": "error",
@@ -217,7 +217,7 @@ class AppUserCreateView(View):
                 )
 
             # Otherwise, update the account's other details
-            account = Account.objects.get(email=json_data["email"])
+            account = Account.objects.get(email__iexact=json_data["email"])
             update_account(account, json_data)
             message = "Device & account updated successfully"
 
@@ -225,7 +225,7 @@ class AppUserCreateView(View):
         except ObjectDoesNotExist:
             # Check if the user account exists. If not, create it
             try:
-                account = Account.objects.get(email=json_data["email"])
+                account = Account.objects.get(email__iexact=json_data["email"])
                 update_account(account, json_data)
                 message = "Account updated successfully"
                 account_updated = True

@@ -170,8 +170,10 @@ class ApiTestCase(TestCase):
             request_params["account_id"],
             msg=fail_message,
         )
-        dupe_user_obj = Account.objects.get(email=request_params["email"])
-        for field in ["name", "email", "zip", "age"]:
+        dupe_user_obj = Account.objects.get(
+            email__iexact=request_params["email"]
+        )
+        for field in ["name", "zip", "age"]:
             self.assertEqual(
                 getattr(dupe_user_obj, field),
                 request_params[field],
@@ -241,8 +243,10 @@ class ApiTestCase(TestCase):
             request_params["account_id"],
             msg=fail_message,
         )
-        dupe_user_obj = Account.objects.get(email=request_params["email"])
-        for field in ["name", "email", "zip", "age"]:
+        dupe_user_obj = Account.objects.get(
+            email__iexact=request_params["email"]
+        )
+        for field in ["name", "zip", "age"]:
             self.assertEqual(
                 getattr(dupe_user_obj, field),
                 request_params[field],
