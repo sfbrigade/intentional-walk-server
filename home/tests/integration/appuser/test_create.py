@@ -144,10 +144,14 @@ class ApiTestCase(TestCase):
             )
 
         # Create the same user again
+        # Create the same user but with different case email
+        # This should NOT create a new user record
+        request_params = {**self.request_params, "email": "John@blah.com"}
+
         # This should default to an UPDATE
         response = self.client.post(
             path=self.url,
-            data=self.request_params,
+            data=request_params,
             content_type=self.content_type,
         )
         # Check for a successful response by the server
@@ -163,16 +167,17 @@ class ApiTestCase(TestCase):
         )
         self.assertEqual(
             response_data["payload"]["account_id"],
-            self.request_params["account_id"],
+            request_params["account_id"],
             msg=fail_message,
         )
-        user_obj = Account.objects.get(email=self.request_params["email"])
+        dupe_user_obj = Account.objects.get(email=request_params["email"])
         for field in ["name", "email", "zip", "age"]:
             self.assertEqual(
-                getattr(user_obj, field),
-                self.request_params[field],
+                getattr(dupe_user_obj, field),
+                request_params[field],
                 msg=f"{field}",
             )
+        self.assertEqual(user_obj.id, dupe_user_obj.id)
 
     # Test creation of the same user using a different device
     # This should create a new account with the same email
@@ -209,8 +214,12 @@ class ApiTestCase(TestCase):
             )
 
         # Create the same user but with a different account id
-        # This should create a new user
-        request_params = {**self.request_params, "account_id": "54321"}
+        # This should NOT create a new user
+        request_params = {
+            **self.request_params,
+            "email": "John@blah.com",
+            "account_id": "54321",
+        }
 
         # Register the user first
         response = self.client.post(
@@ -232,13 +241,14 @@ class ApiTestCase(TestCase):
             request_params["account_id"],
             msg=fail_message,
         )
-        user_obj = Account.objects.get(email=request_params["email"])
+        dupe_user_obj = Account.objects.get(email=request_params["email"])
         for field in ["name", "email", "zip", "age"]:
             self.assertEqual(
-                getattr(user_obj, field),
+                getattr(dupe_user_obj, field),
                 request_params[field],
                 msg=fail_message,
             )
+        self.assertEqual(dupe_user_obj.id, user_obj.id)
 
     # Test failure while create a new app with missing information
     def test_create_appuser_failure_missing_field_age(self):
