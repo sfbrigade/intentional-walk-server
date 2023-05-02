@@ -27,10 +27,10 @@ function Home() {
   const [stepsCumulative, setStepsCumulative] = useState();
   const [distanceDaily, setDistanceDaily] = useState();
   const [distanceCumulative, setDistanceCumulative] = useState();
-  const [ageDistribution1, setAgeDistribution1] = useState();
-  const [ageDistribution2, setAgeDistribution2] = useState();
-  const [ageDistribution3, setAgeDistribution3] = useState();
-  const [ageDistribution4, setAgeDistribution4] = useState();
+  const [ageDistribution1, setAgeDistribution1] = useState(0);
+  const [ageDistribution2, setAgeDistribution2] = useState(0);
+  const [ageDistribution3, setAgeDistribution3] = useState(0);
+  const [ageDistribution4, setAgeDistribution4] = useState(0);
 
 
   const ageRange1Min= 18;
@@ -106,40 +106,53 @@ function Home() {
             ])
           )
       );
-    Api.admin
-    .homeUsersByAgeGroup({ contest_id, ageRange1Min, ageRange1Max })
-    .then(
-      (response) =>
-        !cancelled &&
-        setAgeDistribution1(response.data)
-    );
-    Api.admin
-    .homeUsersByAgeGroup({ contest_id, ageRange2Min, ageRange2Max })
-    .then(
-      (response) =>
-        !cancelled &&
-        setAgeDistribution2(response.data)
-    );
-    Api.admin
-    .homeUsersByAgeGroup({ contest_id, ageRange3Min, ageRange3Max })
-    .then(
-      (response) =>
-        !cancelled &&
-        setAgeDistribution3(response.data)
-    );
-    Api.admin
-    .homeUsersByAgeGroup({ contest_id, ageRange4Min, ageRange4Max })
-    .then(
-      (response) =>
-        !cancelled &&
-        setAgeDistribution4(response.data)
-    );
+
+      // New Code which fetches age distributions from backend
+      const fetchAgeData = async () => {
+        const ageRanges = [
+          { ageRangeMin: ageRange1Min, ageRangeMax: ageRange1Max, setAgeDistribution: setAgeDistribution1 },
+          { ageRangeMin: ageRange2Min, ageRangeMax: ageRange2Max, setAgeDistribution: setAgeDistribution2 },
+          { ageRangeMin: ageRange3Min, ageRangeMax: ageRange3Max, setAgeDistribution: setAgeDistribution3 },
+          { ageRangeMin: ageRange4Min, ageRangeMax: ageRange4Max, setAgeDistribution: setAgeDistribution4 },
+        ];
+
+        const promises = ageRanges.map(({ ageRangeMin, ageRangeMax, setAgeDistribution }) => {
+          return Api.admin
+            .homeUsersByAgeGroup({ contest_id, age_min: ageRangeMin, age_max: ageRangeMax })
+            .then((response) => {
+              if (!cancelled) {
+                setAgeDistribution(response.data.count);
+              }
+            });
+        });
+
+        await Promise.all(promises);
+      };
+      { contest_id != "" ? fetchAgeData() : void 0 };
+
     return () => (cancelled = true);
   }, [
     contest_id,
     start_date,
     end_date
   ]);
+
+  useEffect(() => {
+    console.log(`Dist 1 is ${ageDistribution1}`);
+    console.log(`Dist 2 is ${ageDistribution2}`);
+    console.log(`Dist 3 is ${ageDistribution3}`);
+    console.log(`Dist 4 is ${ageDistribution4}`);
+  }, [ageDistribution1, ageDistribution2, ageDistribution3, ageDistribution4]);
+
+  let ageDistData = [
+    [`${ageRange1Min} to ${ageRange1Max}`, ageDistribution1, ],
+    [`${ageRange2Min} to ${ageRange2Max}`, ageDistribution2, ],
+    [`${ageRange3Min} to ${ageRange3Max}`, ageDistribution3, ],
+    [`${ageRange4Min} to ${ageRange4Max}`, ageDistribution4, ]
+  ];
+
+
+
 
   function onChange(params) {
     navigate(
@@ -381,31 +394,33 @@ function Home() {
               />
             )}
           </div>
-          <div className="row my-5">
-            <div className="col-lg-6 text-center">
-              <h3>Age Distribution</h3>
-              {distanceCumulative && (
-                <Chart
-                  chartType="ColumnChart"
-                  data={distanceCumulative}
-                  options={{
-                    legend: { position: "none" },
-                    bar: { groupWidth: "95%" },
-                    hAxis: {
-                      title: "Age"
-                    },
-                    vAxis: {
-                      title: "Number of Users",
-                      viewWindow: { min: 0 },
-                    },
-                    colors: ["#AF7AC5"],
-                  }}
-                  width="100%"
-                  height="400px"
-                />
-              )}
+          { contest_id != "" ?
+            <div className="row my-5">
+              <div className="col-lg-6 text-center">
+                <h3>Age Distribution</h3>
+                {ageDistData && (
+                  <Chart
+                    chartType="ColumnChart"
+                    data={ageDistData}
+                    options={{
+                      legend: { position: "none" },
+                      bar: { groupWidth: "95%" },
+                      hAxis: {
+                        title: "Age"
+                      },
+                      vAxis: {
+                        title: "Number of Users",
+                        viewWindow: { min: 0 },
+                      },
+                      colors: ["#AF7AC5"],
+                    }}
+                    width="100%"
+                    height="400px"
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          : void 0 }
         </div>
       </div>
     </>

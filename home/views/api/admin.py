@@ -589,24 +589,24 @@ class AdminUsersByAgeGroupView(View):
             contest = Contest.objects.get(pk=contest_id)
             age_min = request.GET.get("age_min", None)
             age_max = request.GET.get("age_max", None)
-            payload = {}
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
                     SELECT COUNT(*)
-                    FROM home_account
-                    WHERE home_account_contests.contest_id=%s AND
-                        home_dailywalk.date BETWEEN %s AND %s AND
-                        home_account.age >= %s AND
-                        home_account.age <= %s
+                    FROM (
+                        SELECT home_account.id AS id, home_account.age AS age FROM home_account
+                        JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
+                        JOIN home_account_contests ON home_account.id=home_account_contests.account_id
+                        WHERE home_account_contests.contest_id=%s AND
+                            home_dailywalk.date BETWEEN %s AND %s AND
+                            home_account.age >= %s AND
+                            home_account.age <= %s
+                        ) subquery
                     """,
                         [contest_id, contest.start, contest.end, age_min, age_max],
                 )
-            rows = cursor.fetchall()
-            for row in rows:
-                payload[row[0]] = row[1]
-
-            response = JsonResponse(payload)
-            return response
+                result = cursor.fetchone()[0]
+            response_data = {'count': result}
+            return JsonResponse(response_data)
         else:
             return HttpResponse(status=401)

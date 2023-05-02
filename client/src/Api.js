@@ -71,7 +71,7 @@ const Api = {
       });
     },
     homeUsersByAgeGroup({ contest_id, age_min, age_max }) {
-      return instance.get("api/admin/users/age/between", {
+      return instance.get("/api/admin/users/age/between", {
         params: { contest_id, age_min, age_max }
       });
     },
