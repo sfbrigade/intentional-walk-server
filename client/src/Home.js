@@ -107,7 +107,6 @@ function Home() {
           )
       );
 
-      // New Code which fetches age distributions from backend
       const fetchAgeData = async () => {
         const ageRanges = [
           { ageRangeMin: ageRange1Min, ageRangeMax: ageRange1Max, setAgeDistribution: setAgeDistribution1 },
@@ -137,26 +136,13 @@ function Home() {
     end_date
   ]);
 
-  useEffect(() => {
-    console.log(`Dist 1 is ${ageDistribution1}`);
-    console.log(`Dist 2 is ${ageDistribution2}`);
-    console.log(`Dist 3 is ${ageDistribution3}`);
-    console.log(`Dist 4 is ${ageDistribution4}`);
-  }, [ageDistribution1, ageDistribution2, ageDistribution3, ageDistribution4]);
-
-
-
     const ageDistData = [
       ["Age Range", "Quantity"],
       [`${ageRange1Min} to ${ageRange1Max}`, ageDistribution1],
       [`${ageRange2Min} to ${ageRange2Max}`, ageDistribution2],
       [`${ageRange3Min} to ${ageRange3Max}`, ageDistribution3],
-      [`${ageRange4Min} to ${ageRange4Max}`, ageDistribution4]
+      [`${ageRange4Min} ${ageRange4Max === null ? "and up" : `to ${ageRange4Max}`}`, ageDistribution4]
     ];
-
-
-
-
 
   function onChange(params) {
     navigate(
@@ -402,7 +388,7 @@ function Home() {
             <div className="row my-5">
               <div className="col-lg-6 text-center">
                 <h3>Age Distribution</h3>
-                {/* {ageDistData && ( */}
+                {ageDistData && (
                   <Chart
                     chartType="ColumnChart"
                     data={ageDistData}
@@ -421,7 +407,7 @@ function Home() {
                     width="100%"
                     height="400px"
                   />
-                {/* )} */}
+                )}
               </div>
             </div>
           : void 0 }
