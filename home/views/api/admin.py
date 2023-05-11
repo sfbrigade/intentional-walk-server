@@ -584,8 +584,8 @@ class AdminUsersByAgeGroupView(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             contest_id = request.GET.get("contest_id", None)
-            if contest_id is None:
-                return HttpResponse(status=422)
+            # if contest_id is None:
+            #     return HttpResponse(status=422)
             contest = Contest.objects.get(pk=contest_id)
             age_min = request.GET.get("age_min", None)
             age_max = request.GET.get("age_max", None)
