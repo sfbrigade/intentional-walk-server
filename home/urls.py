@@ -106,6 +106,11 @@ urlpatterns = urlpatterns + [
         name="admin_users_age_between",
     ),
     path(
+        "api/admin/users/age/between/dates",
+        views.AdminUsersByAgeGroupDatesView.as_view(),
+        name="admin_users_age_between",
+    ),
+    path(
         "api/appuser/create",
         views.AppUserCreateView.as_view(),
         name="appuser_create",

@@ -584,8 +584,8 @@ class AdminUsersByAgeGroupView(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             contest_id = request.GET.get("contest_id", None)
-            # if contest_id is None:
-            #     return HttpResponse(status=422)
+            if contest_id is None:
+                return HttpResponse(status=422)
             contest = Contest.objects.get(pk=contest_id)
             age_min = request.GET.get("age_min", None)
             age_max = request.GET.get("age_max", None)
@@ -604,6 +604,37 @@ class AdminUsersByAgeGroupView(View):
                         ) subquery
                     """,
                     [contest_id, contest.start, contest.end, age_min, age_max],
+                )
+                result = cursor.fetchone()[0]
+            response_data = {"count": result}
+            return JsonResponse(response_data)
+        else:
+            return HttpResponse(status=401)
+
+
+class AdminUsersByAgeGroupDatesView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            start_date = request.GET.get("start_date", None)
+            end_date = request.GET.get("end_date", None)
+            age_min = request.GET.get("age_min", None)
+            age_max = request.GET.get("age_max", None)
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM (
+                        SELECT home_account.id AS id, home_account.age AS age FROM home_account
+                        JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
+                        JOIN home_account_contests ON home_account.id=home_account_contests.account_id
+                        WHERE home_dailywalk.date BETWEEN %s AND %s AND
+                            home_account.age >= %s AND
+                            home_account.age <= %s
+                        ) subquery
+                    """,
+                    [start_date, end_date, age_min, age_max],
                 )
                 result = cursor.fetchone()[0]
             response_data = {"count": result}

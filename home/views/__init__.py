@@ -14,6 +14,7 @@ from .api.admin import (
     AdminUsersActiveByZipView,
     AdminUsersByZipMedianStepsView,
     AdminUsersByAgeGroupView,
+    AdminUsersByAgeGroupDatesView,
 )
 from .api.appuser import AppUserCreateView, AppUserDeleteView
 from .api.dailywalk import DailyWalkCreateView, DailyWalkListView

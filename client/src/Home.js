@@ -116,18 +116,30 @@ function Home() {
         ];
 
         const promises = ageRanges.map(({ ageRangeMin, ageRangeMax, setAgeDistribution }) => {
-          return Api.admin
-            .homeUsersByAgeGroup({ contest_id, age_min: ageRangeMin, age_max: ageRangeMax })
-            .then((response) => {
-              if (!cancelled) {
-                setAgeDistribution(response.data.count);
-              }
-            });
+          if (contest_id) {
+            return Api.admin
+              .homeUsersByAgeGroup({ contest_id, age_min: ageRangeMin, age_max: ageRangeMax })
+              .then((response) => {
+                if (!cancelled) {
+                  setAgeDistribution(response.data.count);
+                }
+              });
+          } else {
+            return Api.admin
+              .homeUsersByAgeGroupDates({ start_date, end_date, age_min: ageRangeMin, age_max: ageRangeMax })
+              .then((response) => {
+                if (!cancelled) {
+                  setAgeDistribution(response.data.count);
+                }
+              });
+          }
         });
+
 
         await Promise.all(promises);
       };
-      { contest_id != "" ? fetchAgeData() : void 0 };
+      // { contest_id != "" ? fetchAgeData() : void 0 };
+      fetchAgeData();
 
     return () => (cancelled = true);
   }, [
