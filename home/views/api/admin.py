@@ -603,10 +603,10 @@ class AdminUsersByAgeGroupView(View):
                             home_account.age <= %s
                         ) subquery
                     """,
-                        [contest_id, contest.start, contest.end, age_min, age_max],
+                    [contest_id, contest.start, contest.end, age_min, age_max],
                 )
                 result = cursor.fetchone()[0]
-            response_data = {'count': result}
+            response_data = {"count": result}
             return JsonResponse(response_data)
         else:
             return HttpResponse(status=401)
