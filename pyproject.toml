@@ -6,7 +6,7 @@ authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-django = "^3.2.15"
+django = "^4.2.1"
 psycopg2 = "^2.9.1"
 dj-database-url = "^0.5.0"
 python-dotenv = "^0.11.0"
@@ -22,7 +22,7 @@ django-postgres-setfield = "^0.0.1"
 black = "^22.8.0"
 flake8 = "^5.0.4"
 autoflake = "^1.5.3"
-"backports.zoneinfo" = "^0.2.1"
+# "backports.zoneinfo" = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 freezegun = "^1.1.0"

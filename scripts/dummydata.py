@@ -33,11 +33,10 @@ from typing import Any, Dict, List, Tuple
 from itertools import groupby
 from operator import itemgetter
 
-try:
-    from zoneinfo import ZoneInfo
-except ImportError:
-    from backports.zoneinfo import ZoneInfo
-
+# try:
+from zoneinfo import ZoneInfo
+# except ImportError:
+# from backports.zoneinfo import ZoneInfo
 from dateutil.relativedelta import relativedelta
 
 # All San Francisco zip codes based on:
