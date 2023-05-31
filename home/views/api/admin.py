@@ -595,10 +595,9 @@ class AdminUsersByAgeGroupView(View):
                     SELECT COUNT(*)
                     FROM (
                         SELECT home_account.id AS id, home_account.age AS age FROM home_account
-                        JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
                         JOIN home_account_contests ON home_account.id=home_account_contests.account_id
                         WHERE home_account_contests.contest_id=%s AND
-                            home_dailywalk.date BETWEEN %s AND %s AND
+                            home_account.created BETWEEN %s AND %s AND
                             home_account.age >= %s AND
                             home_account.age <= %s
                         ) subquery
@@ -626,10 +625,9 @@ class AdminUsersByAgeGroupDatesView(View):
                     """
                     SELECT COUNT(*)
                     FROM (
-                        SELECT home_account.id AS id, home_account.age AS age FROM home_account
-                        JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
-                        JOIN home_account_contests ON home_account.id=home_account_contests.account_id
-                        WHERE home_dailywalk.date BETWEEN %s AND %s AND
+                        SELECT home_account.id, home_account.age
+                        FROM home_account
+                        WHERE home_account.created BETWEEN %s AND %s AND
                             home_account.age >= %s AND
                             home_account.age <= %s
                         ) subquery

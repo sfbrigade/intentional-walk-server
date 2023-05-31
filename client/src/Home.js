@@ -122,6 +122,7 @@ function Home() {
               .then((response) => {
                 if (!cancelled) {
                   setAgeDistribution(response.data.count);
+                  console.log("contest version ran")
                 }
               });
           } else {
@@ -130,6 +131,7 @@ function Home() {
               .then((response) => {
                 if (!cancelled) {
                   setAgeDistribution(response.data.count);
+                  console.log("dates version ran: ", ageRangeMin, "-", ageRangeMax,":", response.data.count);
                 }
               });
           }
@@ -138,7 +140,6 @@ function Home() {
 
         await Promise.all(promises);
       };
-      // { contest_id != "" ? fetchAgeData() : void 0 };
       fetchAgeData();
 
     return () => (cancelled = true);
