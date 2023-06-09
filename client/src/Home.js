@@ -41,11 +41,18 @@ function Home() {
     let cancelled = false;
     Api.admin
       .homeUsersDaily({ contest_id, start_date, end_date })
-      .then(
-        (response) =>
-          !cancelled &&
-          setUsersDaily(response.data.map((r) => [new Date([r[0]]), r[1]]))
-      );
+      .then((response) => {
+        if (!cancelled) {
+          setUsersDaily(
+            response.data.map((r) => {
+              const utcDate = new Date(r[0]);
+              const offset = utcDate.getTimezoneOffset();
+              const withOffset = new Date(utcDate.getTime() - (offset * 60 * 1000));
+              return [withOffset, r[1]];
+            })
+          );
+        }
+      });
     Api.admin
       .homeUsersCumulative({ contest_id, start_date, end_date })
       .then(
