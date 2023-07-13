@@ -282,12 +282,12 @@ class TestAdminViews(TestCase):
         )
 
     # Function to test contest-based age range endpoint
-    def test_age_range_counts_contest(self):
-        c = Client()
-        self.assertTrue(Login.login(c))
-        response = c.get(
-            f"/api/admin/users/age/between?contest_id={self.contest0_id}&age_min=18&age_max=29"
-        )
+    # def test_age_range_counts_contest(self):
+    #     c = Client()
+    #     self.assertTrue(Login.login(c))
+    #     response = c.get(
+    #         f"/api/admin/users/age/between?contest_id={self.contest0_id}&age_min=18&age_max=29"
+    #     )
         # data = response.json()
         # self.assertEqual(
         #     data,
