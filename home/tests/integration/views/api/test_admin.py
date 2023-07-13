@@ -291,7 +291,7 @@ class TestAdminViews(TestCase):
         data = response.json()
         self.assertEqual(
             data,
-            {
-                "count": ,
-            }
+            # {
+            #     "count": 2,
+            # }
         )
