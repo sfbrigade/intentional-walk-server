@@ -50,11 +50,16 @@ def generate_test_data():
     # Generate 3 accounts during the contest
     with freeze_time("3000-03-02 12:00:00", tz_offset=-8):
         accounts = accounts + list(AccountGenerator().generate(3))
-    # Set names for testing ordering, zip codes for grouping
+    # Define ages for testing
+    test_ages = [20, 30, 40, 50, 60, 70]
+    # Set names for testing ordering, set ages, set zip codes for grouping
     for i, account in enumerate(accounts):
         account.name = f"User {i}"
         account.zip = f"{94102 + math.floor(i / 2)}"
+        account.age = test_ages[i]
         account.save()
+
+
 
     # generate devices for the active accounts
     device1 = list(DeviceGenerator(accounts[1:2]).generate(1))

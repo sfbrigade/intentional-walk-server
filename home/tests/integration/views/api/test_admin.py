@@ -281,17 +281,14 @@ class TestAdminViews(TestCase):
             },  # median of [70k, 105k] = avg of the two = 87.5k
         )
 
-    # Function to test contest-based age range endpoint
-    # def test_age_range_counts_contest(self):
-    #     c = Client()
-    #     self.assertTrue(Login.login(c))
-    #     response = c.get(
-    #         f"/api/admin/users/age/between?contest_id={self.contest0_id}&age_min=18&age_max=29"
-    #     )
-    # data = response.json()
-    # self.assertEqual(
-    #     data,
-    #     {
-    #         "count": 2,
-    #     }
-    # )
+    def test_account_ages(self):
+        c = Client()
+        self.assertTrue(Login.login(c))
+
+        response = c.get("/api/admin/users")
+        data = response.json
+
+        expected_ages = sorted([20, 30, 40, 50, 60, 70])
+        actual_ages = sorted([user['age'] for user in data])
+
+        self.assertEqual(expected_ages, actual_ages)
