@@ -289,6 +289,6 @@ class TestAdminViews(TestCase):
         data = response.json
 
         expected_ages = sorted([20, 30, 40, 50, 60, 70])
-        actual_ages = sorted([user['age'] for user in data])
+        actual_ages = sorted([user["age"] for user in data])
 
         self.assertEqual(expected_ages, actual_ages)

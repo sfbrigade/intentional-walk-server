@@ -59,8 +59,6 @@ def generate_test_data():
         account.age = test_ages[i]
         account.save()
 
-
-
     # generate devices for the active accounts
     device1 = list(DeviceGenerator(accounts[1:2]).generate(1))
     device2 = list(DeviceGenerator(accounts[2:3]).generate(1))

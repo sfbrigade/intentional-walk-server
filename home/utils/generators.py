@@ -63,6 +63,7 @@ class AccountGenerator:
             is_latino=random.choice([en.name for en in self.ethnicity]),
         )
 
+
 class DeviceGenerator:
     def __init__(self, accounts: Optional[List[Account]] = None):
         self.accounts = accounts
