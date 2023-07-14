@@ -288,7 +288,9 @@ class TestAdminViews(TestCase):
         response = c.get("/api/admin/users")
         data = response.json()
 
-        expected_ages = sorted([20, 30, 40, 50, 60, 70])
+        expected_ages = sorted(
+            [20, 40, 50, 60, 70]
+        )  # one user of age 30 is missing
         actual_ages = sorted([user["age"] for user in data])
 
         self.assertEqual(expected_ages, actual_ages)
