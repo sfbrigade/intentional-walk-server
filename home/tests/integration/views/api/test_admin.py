@@ -286,7 +286,7 @@ class TestAdminViews(TestCase):
         self.assertTrue(Login.login(c))
 
         response = c.get("/api/admin/users")
-        data = response.json
+        data = response.json()
 
         expected_ages = sorted([20, 30, 40, 50, 60, 70])
         actual_ages = sorted([user["age"] for user in data])
