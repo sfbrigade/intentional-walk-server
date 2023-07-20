@@ -1,7 +1,9 @@
 from enum import Enum
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from setfield import SetField
+
 
 SAN_FRANCISCO_ZIP_CODES = set(
     [
