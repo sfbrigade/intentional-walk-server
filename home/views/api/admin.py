@@ -1,11 +1,21 @@
 import logging
+import os
 
 from datetime import timedelta
 from dateutil import parser
 
 from django.db import connection
-from django.db.models import BooleanField, Count, ExpressionWrapper, F, Q, Sum
-from django.db.models.functions import TruncDate
+from django.db.models import (
+    BooleanField,
+    CharField,
+    Count,
+    ExpressionWrapper,
+    F,
+    Q,
+    Sum,
+    Value,
+)
+from django.db.models.functions import Concat, TruncDate
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 
@@ -87,19 +97,20 @@ class AdminHomeGraphView(View):
         if len(results) > 0:
             if (
                 self.start_date
-                and results[0][0].isoformat() != self.start_date
+                and results[0][0] != f"{self.start_date}T00:00:00"
             ):
-                results.insert(0, [self.start_date, 0])
-            if self.end_date and results[-1][0].isoformat() != self.end_date:
+                results.insert(0, [f"{self.start_date}T00:00:00", 0])
+            if self.end_date and results[-1][0] != f"{self.end_date}T00:00:00":
                 if self.is_cumulative():
-                    results.append([self.end_date, results[-1][1]])
+                    results.append(
+                        [f"{self.end_date}T00:00:00", results[-1][1]]
+                    )
                 else:
-                    results.append([self.end_date, 0])
+                    results.append([f"{self.end_date}T00:00:00", 0])
         else:
             results.append([self.start_date, 0])
             results.append([self.end_date, 0])
         results.insert(0, ["Date", "Count"])
-
         return JsonResponse(results, safe=False)
 
 
@@ -117,7 +128,13 @@ class AdminHomeUsersDailyView(AdminHomeGraphView):
             )
         results = (
             Account.objects.filter(filters)
-            .annotate(date=TruncDate("created"))
+            .annotate(
+                date=Concat(
+                    TruncDate("created"),
+                    Value("T00:00:00"),
+                    output_field=CharField(),
+                )
+            )
             .values("date")
             .annotate(count=Count("id"))
             .order_by("date")
@@ -152,7 +169,8 @@ class AdminHomeUsersCumulativeView(AdminHomeGraphView):
                 SELECT "date", (SUM("count") OVER (ORDER BY "date"))::int AS "count"
                 FROM
                     (SELECT
-                        ("created" AT TIME ZONE 'America/Los_Angeles')::date AS "date",
+                        CONCAT(("created" AT TIME ZONE '{os.getenv("TIME_ZONE", "America/Los_Angeles")}')::date,
+                                'T00:00:00') AS "date",
                         COUNT("id") AS "count"
                      FROM "home_account"
                      WHERE {conditions}
@@ -180,11 +198,18 @@ class AdminHomeWalksDailyView(AdminHomeGraphView):
             filters = filters & Q(date__lte=self.end_date)
         results = (
             DailyWalk.objects.filter(filters)
-            .values("date")
-            .annotate(count=Sum(self.get_value_type()))
-            .order_by("date")
+            .annotate(
+                date_time=Concat(
+                    "date",
+                    Value("T00:00:00"),
+                    output_field=CharField(),
+                ),
+                count=Sum(self.get_value_type()),
+            )
+            .values("date_time", "count")
+            .order_by("date_time")
         )
-        results = [[row["date"], row["count"]] for row in results]
+        results = [[row["date_time"], row["count"]] for row in results]
         return results
 
 
@@ -227,7 +252,7 @@ class AdminHomeWalksCumulativeView(AdminHomeGraphView):
                 SELECT "date", (SUM("count") OVER (ORDER BY "date"))::int AS "count"
                 FROM
                     (SELECT
-                        "date",
+                        CONCAT("date", 'T00:00:00') AS "date",
                         SUM("{self.get_value_type()}") AS "count"
                      FROM "home_dailywalk"
                      JOIN "home_account" ON "home_account"."id"="home_dailywalk"."account_id"
