@@ -204,9 +204,11 @@ class AdminHomeWalksDailyView(AdminHomeGraphView):
                     Value("T00:00:00"),
                     output_field=CharField(),
                 ),
+            )
+            .values("date_time")
+            .annotate(
                 count=Sum(self.get_value_type()),
             )
-            .values("date_time", "count")
             .order_by("date_time")
         )
         results = [[row["date_time"], row["count"]] for row in results]
