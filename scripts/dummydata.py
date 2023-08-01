@@ -32,11 +32,7 @@ from random import randint
 from typing import Any, Dict, List, Tuple
 from itertools import groupby
 from operator import itemgetter
-
-try:
-    from zoneinfo import ZoneInfo
-except ImportError:
-    from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
 
