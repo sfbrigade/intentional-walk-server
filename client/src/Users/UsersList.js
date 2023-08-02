@@ -40,7 +40,7 @@ function UsersList() {
   const [usersByZipActive, setUsersByZipActive] = useState();
   const [usersByZipMedianSteps, setUsersByZipMedianSteps] = useState();
   const [selectedFeature, setSelectedFeature] = useState();
-  const [resetTimeoutId, setResetTimeoutId] = useState(false);
+  const [resetTimeoutId, setResetTimeoutId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
