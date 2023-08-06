@@ -307,6 +307,7 @@ class AdminUsersView(View):
             annotate = None
             contest_id = request.GET.get("contest_id", None)
             intentionalwalk_filter = None
+            dailywalk_filter = None
             if contest_id:
                 filters = Q(contests__contest_id=contest_id)
                 contest = Contest.objects.get(pk=contest_id)
@@ -395,6 +396,19 @@ class AdminUsersView(View):
                         "intentionalwalk__walk_time",
                         filter=intentionalwalk_filter,
                     ),
+                    dw_count = Count(
+                        "dailywalk", 
+                        filter=dailywalk_filter
+                    ),
+                    dw_steps = Sum(
+                        "dailywalk__steps", 
+                        filter=dailywalk_filter
+                    ),
+
+                    dw_distance= Sum(
+                        "dailywalk__distance", 
+                        filter=dailywalk_filter
+                    )
                 )
                 .order_by(*order_by)
             )
