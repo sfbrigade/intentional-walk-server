@@ -31,6 +31,7 @@ class AdminMeView(View):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
+            
             return JsonResponse(
                 {
                     "id": request.user.id,
@@ -48,6 +49,7 @@ class AdminHomeView(View):
     http_method_names = ["get"]
 
     def get(self, request, *args, **kwargs):
+        
         filters = {"is_tester": False}
         if request.user.is_authenticated:
             results = Account.objects.filter(**filters).aggregate(
@@ -76,6 +78,8 @@ class AdminHomeGraphView(View):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return HttpResponse(status=401)
+        
+       
 
         # handle common parameters for all the chart data API endpoints
         contest_id = request.GET.get("contest_id", None)
@@ -116,6 +120,7 @@ class AdminHomeGraphView(View):
 
 class AdminHomeUsersDailyView(AdminHomeGraphView):
     def get_results(self):
+        
         filters = Q()
         # filter to show users vs testers
         filters = filters & Q(is_tester=self.is_tester)
@@ -148,6 +153,7 @@ class AdminHomeUsersCumulativeView(AdminHomeGraphView):
         return True
 
     def get_results(self):
+       
         conditions = """
             "is_tester"=%s
         """
@@ -188,6 +194,7 @@ class AdminHomeWalksDailyView(AdminHomeGraphView):
         return None
 
     def get_results(self):
+        
         filters = Q()
         # filter to show users vs testers
         filters = filters & Q(account__is_tester=self.is_tester)
@@ -233,6 +240,7 @@ class AdminHomeWalksCumulativeView(AdminHomeGraphView):
         return None
 
     def get_results(self):
+        
         conditions = """
             "home_account"."is_tester"=%s
         """
@@ -296,6 +304,7 @@ class AdminUsersView(View):
     http_method_names = ["get"]
 
     def get(self, request, *args, **kwargs):
+        
         if request.user.is_authenticated:
             values = ["id", "name", "email", "age", "zip", "created"]
             order_by = request.GET.get("order_by", "name")
@@ -309,6 +318,7 @@ class AdminUsersView(View):
             intentionalwalk_filter = None
             dailywalk_filter = None
             if contest_id:
+                
                 filters = Q(contests__contest_id=contest_id)
                 contest = Contest.objects.get(pk=contest_id)
                 dailywalk_filter = Q(
@@ -335,6 +345,7 @@ class AdminUsersView(View):
                     ),
                 }
             else:
+                
                 filters = Q()
                 annotate = {
                     "dw_count": Count("dailywalk"),
@@ -354,32 +365,37 @@ class AdminUsersView(View):
                 filters = filters & Q(
                     Q(name__icontains=query) | Q(email__icontains=query)
                 )
-
+           
             # set ordering
             add_name = False
             if order_by.startswith("-"):
                 add_name = order_by[1:] != "name"
                 order_by = [F(order_by[1:]).desc(nulls_last=True)]
+            
             else:
                 add_name = order_by != "name"
                 order_by = [F(order_by).asc(nulls_first=False)]
+               
             if add_name:
                 order_by.append("name")
-
+           
             # perform query!
             results = (
-                Account.objects.filter(filters)
+                Account.objects
+                .filter(filters)
                 .values(*values)
                 .annotate(**annotate)
                 .order_by(*order_by)
             )
+            
             (results, links) = paginate(request, results, page, per_page)
             results = list(results)
-
+        
             # now query for and add in recorded IntentionalWalk stats
             ids = [row["id"] for row in results]
             iw_results = (
-                Account.objects.filter(id__in=ids)
+                Account.objects.annotate(**annotate)
+                .filter(id__in=ids)
                 .values("id")
                 .annotate(
                     iw_count=Count(
@@ -395,23 +411,12 @@ class AdminUsersView(View):
                     iw_time=Sum(
                         "intentionalwalk__walk_time",
                         filter=intentionalwalk_filter,
-                    ),
-                    dw_count = Count(
-                        "dailywalk", 
-                        filter=dailywalk_filter
-                    ),
-                    dw_steps = Sum(
-                        "dailywalk__steps", 
-                        filter=dailywalk_filter
-                    ),
-
-                    dw_distance= Sum(
-                        "dailywalk__distance", 
-                        filter=dailywalk_filter
                     )
+                    
                 )
                 .order_by(*order_by)
             )
+            
             for i, row in enumerate(iw_results):
                 results[i].update(row)
                 # at this point, we have enough info to determine if user is "active"
@@ -431,9 +436,11 @@ class AdminUsersView(View):
 
 
 class AdminUsersByZipView(View):
+    
     http_method_names = ["get"]
 
     def get(self, request, *args, **kwargs):
+       
         values = ["zip"]
         order_by = ["zip"]
         if request.user.is_authenticated:
@@ -487,6 +494,7 @@ class AdminUsersActiveByZipView(View):
     http_method_names = ["get"]
 
     def get(self, request, *args, **kwargs):
+        
         contest_id = request.GET.get("contest_id", None)
         is_tester = request.GET.get("is_tester", None) == "true"
         if not contest_id:
@@ -565,6 +573,7 @@ class AdminUsersByZipMedianStepsView(View):
     http_method_names = ["get"]
 
     def get(self, request, *args, **kwargs):
+      
         if request.user.is_authenticated:
             is_tester = request.GET.get("is_tester", None) == "true"
             contest_id = request.GET.get("contest_id", None)

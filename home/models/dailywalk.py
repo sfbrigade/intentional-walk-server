@@ -40,7 +40,7 @@ class DailyWalk(models.Model):
     updated = models.DateTimeField(
         auto_now=True, help_text="Record updation timestamp"
     )
-
+    
     @property
     def distance_in_miles(self):
         return m_to_mi(self.distance)
