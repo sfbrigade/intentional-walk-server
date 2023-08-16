@@ -1,7 +1,7 @@
 version: '3'
 services:
   db:
-    image: postgres:12
+    image: postgres:12-bullseye
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
