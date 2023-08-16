@@ -17,6 +17,7 @@ from dotenv import find_dotenv, load_dotenv
 
 import django
 from django.utils.translation import gettext
+
 django.utils.translation.ugettext = gettext
 
 load_dotenv(find_dotenv())
