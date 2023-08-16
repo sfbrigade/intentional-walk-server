@@ -538,7 +538,7 @@ function UsersList() {
         <Pagination
           page={page}
           lastPage={lastPage}
-          otherParams={{ contest_id, order_by, is_tester, query }}
+          otherParams={{ contest_id, order_by, is_tester, query, show_rw }}
         />
       </div>
     </div>

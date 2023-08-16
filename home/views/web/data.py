@@ -111,7 +111,7 @@ def _get_user_summary_acct_and_walk_data(
 
     # Add all accounts found in filtered walk summary data
     for email in user_emails:
-        acct = Account.objects.values(*ACCOUNT_FIELDS).get(email=email)
+        acct = Account.objects.values(*ACCOUNT_FIELDS).get(email__iexact=email)
 
         # Skip testers
         if acct.get("is_tester"):
