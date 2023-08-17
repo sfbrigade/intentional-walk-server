@@ -15,11 +15,6 @@ from pathlib import Path
 import dj_database_url
 from dotenv import find_dotenv, load_dotenv
 
-import django
-from django.utils.translation import gettext
-
-django.utils.translation.ugettext = gettext
-
 load_dotenv(find_dotenv())
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
