@@ -182,6 +182,12 @@ def random_string(n: int):
         raise ValueError("random_string(n): n % 2 == 0 must be true")
     return binascii.b2a_hex(os.urandom(int(n / 2))).decode()
 
+def random_step_goal():
+    return randint(500, 10000)
+
+def random_days_goal():
+    return randint(1, 7)
+
 
 class SQLGenerator:
     accounts = list()
@@ -306,6 +312,15 @@ class SQLGenerator:
             created=kwargs.get("created", None),  # timestamp with timezone
             account_id=kwargs.get("account_id"),  # int
             device_id=kwargs.get("device_id", None),  # str
+        )
+    
+    def weekly_goal(self, **kwargs) -> Tuple[str, Tuple[Any]]:
+        return insert(
+            "home_weekly_goal",
+            start_of_week=kwargs.get("start_of_week"),  # date
+            steps=kwargs.get("steps"),  # int
+            days=kwargs.get("days"),  # int
+            account_id=kwargs.get("account_id"),  # #int
         )
 
     def make_accounts(self, n: int) -> Tuple[List[str], List[int]]:
@@ -615,6 +630,39 @@ class SQLGenerator:
                 outputs.append(output)
 
         return [outputs]
+    
+    def make_weeklygoals(self) -> Tuple[List[str]]:
+        """Generate SQL statements to insert random weekly goal records"""
+        tmp_accounts = self.accounts
+
+        startDate = tmp_accounts[0].get("created")
+        dt = startDate
+        end_date = datetime.now(tz=TIMEZONE)
+
+        outputs = []
+
+        for acct in tmp_accounts:
+            start_date = acct.get("created")
+            dt = start_date
+            
+
+            while dt < end_date:
+                dt += relativedelta(weeks=1)
+                start_of_week = dt - relativedelta(days=date.weekday())
+                steps = random_step_goal()
+                days = random_days_goal()
+
+                output = self.weekly_goal(
+                    start_of_week=start_of_week,
+                    steps=steps,
+                    days=days,
+                    account_id=acct.get("id"),
+                )
+            
+                outputs.append(output)
+        
+        return [outputs]
+
 
 
 def set_timezone(tz: str) -> None:
@@ -668,6 +716,9 @@ def main() -> int:
     print("\n".join(outputs))
 
     (outputs,) = sql.make_intentionalwalks(devices)
+    print("\n".join(outputs))
+
+    (outputs,) = sql.make_weeklygoals()
     print("\n".join(outputs))
 
     return 0

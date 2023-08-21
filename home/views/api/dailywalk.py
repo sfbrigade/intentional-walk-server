@@ -142,7 +142,7 @@ class DailyWalkCreateView(View):
             {"status": "error", "message": "Method not allowed!"}
         )
 
-
+# Should pagination be added?
 @method_decorator(csrf_exempt, name="dispatch")
 class DailyWalkListView(View):
     """View to retrieve Daily Walks"""
