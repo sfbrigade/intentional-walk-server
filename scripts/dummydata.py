@@ -182,8 +182,10 @@ def random_string(n: int):
         raise ValueError("random_string(n): n % 2 == 0 must be true")
     return binascii.b2a_hex(os.urandom(int(n / 2))).decode()
 
+
 def random_step_goal():
     return randint(500, 10000)
+
 
 def random_days_goal():
     return randint(1, 7)
@@ -313,10 +315,10 @@ class SQLGenerator:
             account_id=kwargs.get("account_id"),  # int
             device_id=kwargs.get("device_id", None),  # str
         )
-    
+
     def weekly_goal(self, **kwargs) -> Tuple[str, Tuple[Any]]:
         return insert(
-            "home_weekly_goal",
+            "home_weeklygoal",
             start_of_week=kwargs.get("start_of_week"),  # date
             steps=kwargs.get("steps"),  # int
             days=kwargs.get("days"),  # int
@@ -630,7 +632,7 @@ class SQLGenerator:
                 outputs.append(output)
 
         return [outputs]
-    
+
     def make_weeklygoals(self) -> Tuple[List[str]]:
         """Generate SQL statements to insert random weekly goal records"""
         tmp_accounts = self.accounts
@@ -644,7 +646,6 @@ class SQLGenerator:
         for acct in tmp_accounts:
             start_date = acct.get("created")
             dt = start_date
-            
 
             while dt < end_date:
                 dt += relativedelta(weeks=1)
@@ -658,11 +659,10 @@ class SQLGenerator:
                     days=days,
                     account_id=acct.get("id"),
                 )
-            
-                outputs.append(output)
-        
-        return [outputs]
 
+                outputs.append(output)
+
+        return [outputs]
 
 
 def set_timezone(tz: str) -> None:
