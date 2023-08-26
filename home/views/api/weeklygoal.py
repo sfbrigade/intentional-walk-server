@@ -16,6 +16,7 @@ from .utils import validate_request_json
 
 logger = logging.getLogger(__name__)
 
+
 # Exempt from csrf validation
 @method_decorator(csrf_exempt, name="dispatch")
 class WeeklyGoalCreateView(View):
@@ -34,7 +35,7 @@ class WeeklyGoalCreateView(View):
         )
         if "status" in json_status and json_status["status"] == "error":
             return JsonResponse(json_status)
-        
+
         # Validate weekly_goal json fields
         json_status = validate_request_json(
             json_data["weekly_goal"],
@@ -72,7 +73,7 @@ class WeeklyGoalCreateView(View):
 
         start_of_week = weekly_goal_update["start_of_week"]
         start_of_week_update = get_start_of_week(datetime.strptime(start_of_week, DATE_FORMAT).date())
-        steps_update =  weekly_goal_update["steps"]
+        steps_update = weekly_goal_update["steps"]
         days_update = weekly_goal_update["days"]
 
         # Check if there's already a goal for the week. If there is,
@@ -102,12 +103,13 @@ class WeeklyGoalCreateView(View):
         }
 
         return JsonResponse(json_response)
-    
+
     def http_method_not_allowed(self, request):
         return JsonResponse(
             {"status": "error", "message": "Method not allowed!"}
         )
-    
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 class WeeklyGoalsListView(View):
     """View to retrieve Weekly Goals"""
@@ -125,7 +127,7 @@ class WeeklyGoalsListView(View):
 
         if "status" in json_status and json_status["status"] == "error":
             return JsonResponse(json_status)
-        
+
         # Get the account
         try:
             account = Account.objects.get(id=json_data["account_id"])
@@ -140,7 +142,7 @@ class WeeklyGoalsListView(View):
                     )
                 }
             )
-        
+
         # Get weekly goals tied to this account
         weekly_goals = WeeklyGoal.objects.filter(account=account)
 
@@ -149,7 +151,7 @@ class WeeklyGoalsListView(View):
             "status": "success",
         }
         return JsonResponse(payload)
-    
+
     def http_method_not_allowed(self, request):
         return JsonResponse(
             {"status": "error", "message": "Method not allowed!"}

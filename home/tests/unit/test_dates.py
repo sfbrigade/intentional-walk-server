@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from home.utils.dates import get_start_of_week
 
+
 class TestDates(TestCase):
     
     # Test get_start_of_week

@@ -1,7 +1,7 @@
-from dateutil import parser
 from django.test import Client, TestCase
 
 from home.models import WeeklyGoal, Account
+
 
 class ApiTestCase(TestCase):
     def setUp(self):
@@ -106,7 +106,7 @@ class ApiTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         # Parse the response
         response_data = response.json()
-    
+
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "error", msg=fail_message)
         self.assertEqual(
@@ -131,7 +131,7 @@ class ApiTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         # Parse the response
         response_data = response.json()
-    
+
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "error", msg=fail_message)
         self.assertEqual(

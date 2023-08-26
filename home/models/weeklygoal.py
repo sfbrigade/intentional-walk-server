@@ -2,9 +2,12 @@ from django.db import models
 
 from home.utils.dates import get_start_of_current_week
 
+
 class WeeklyGoal(models.Model):
     """
-    Stores a weekly goal. An entry is created for the first weekly goal set by a user and when a user updates their weekly goal 
+    Stores a weekly goal.
+    An entry is created for the first weekly goal
+    set by a user and when a user updates their weekly goal
     """
 
     start_of_week = models.DateField(

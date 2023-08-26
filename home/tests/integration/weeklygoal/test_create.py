@@ -1,8 +1,7 @@
-from datetime import date
 from django.test import Client, TestCase
 
 from home.models import Account
-from home.utils.dates import DATE_FORMAT
+
 
 class ApiTestCase(TestCase):
     def setUp(self):
@@ -22,7 +21,7 @@ class ApiTestCase(TestCase):
             content_type="application/json",
         )
 
-         # Check for a successful response by the server
+        # Check for a successful response by the server
         self.assertEqual(response.status_code, 200)
         # Parse the response
         response_data = response.json()
@@ -192,7 +191,7 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "error", msg=fail_message)
-        
+
         self.assertEqual(
             response_data["message"],
             "Unregistered account - "
@@ -201,7 +200,6 @@ class ApiTestCase(TestCase):
             msg=fail_message,
         )
 
-    
     # Test a creation of a weekly goal with missing weekly_goal
     def test_create_weeklygoal_wihtout_weeklygoal(self):
 
@@ -219,8 +217,6 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "error", msg=fail_message)
-        
-
         self.assertEqual(
             response_data["message"],
             "Required input 'weekly_goal' missing in the request",
