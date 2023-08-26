@@ -33,11 +33,11 @@ class ApiTestCase(TestCase):
             msg=fail_message,
         )
 
-        account_id = Account.objects.only('id').get(email="abhay@blah.com").id
+        account_id = Account.objects.only("id").get(email="abhay@blah.com").id
         # Details for Weekly Goal creation
         self.url = "/api/weeklygoal/create"
-        self.start_of_week = '2023-08-21'
-        self.start_of_week_param = '2023-08-23'
+        self.start_of_week = "2023-08-21"
+        self.start_of_week_param = "2023-08-23"
         # Request parameters
         self.request_params = {
             "account_id": account_id,
@@ -45,7 +45,7 @@ class ApiTestCase(TestCase):
                 "start_of_week": self.start_of_week_param,
                 "steps": 2000,
                 "days": 3,
-            }
+            },
         }
         # Content type
         self.content_type = "application/json"

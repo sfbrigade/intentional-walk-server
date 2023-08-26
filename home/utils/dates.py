@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-DATE_FORMAT = '%Y-%m-%d'
+DATE_FORMAT = "%Y-%m-%d"
 
 
 def get_start_of_week(dt: date) -> date:

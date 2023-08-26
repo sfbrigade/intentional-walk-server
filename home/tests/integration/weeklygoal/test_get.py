@@ -45,20 +45,20 @@ class ApiTestCase(TestCase):
                 account=self.account,
                 start_of_week="2023-08-21",
                 steps=3,
-                days=2000
+                days=2000,
             ),
             WeeklyGoal(
                 account=self.account,
                 start_of_week="2023-08-27",
                 steps=4,
-                days=2500
+                days=2500,
             ),
             WeeklyGoal(
                 account=self.account,
                 start_of_week="2023-09-04",
                 steps=5,
-                days=3000
-            )
+                days=3000,
+            ),
         ]
 
         # Create weekly goals

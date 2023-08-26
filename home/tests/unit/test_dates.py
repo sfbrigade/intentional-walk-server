@@ -6,7 +6,7 @@ from home.utils.dates import get_start_of_week
 
 
 class TestDates(TestCase):
-    
+
     # Test get_start_of_week
     def test_get_start_of_week(self):
         dt = date(2023, 8, 23)

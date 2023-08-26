@@ -39,7 +39,7 @@ class WeeklyGoalCreateView(View):
         # Validate weekly_goal json fields
         json_status = validate_request_json(
             json_data["weekly_goal"],
-            required_fields=["start_of_week", "steps", "days"]
+            required_fields=["start_of_week", "steps", "days"],
         )
         if "status" in json_status and json_status["status"] == "error":
             return JsonResponse(json_status)
@@ -55,7 +55,7 @@ class WeeklyGoalCreateView(View):
                         "Unregistered account - "
                         f"{json_data['account_id']}."
                         " Please register first!"
-                    )
+                    ),
                 }
             )
 
@@ -72,7 +72,9 @@ class WeeklyGoalCreateView(View):
         weekly_goal_update = json_data["weekly_goal"]
 
         start_of_week = weekly_goal_update["start_of_week"]
-        start_of_week_update = get_start_of_week(datetime.strptime(start_of_week, DATE_FORMAT).date())
+        start_of_week_update = get_start_of_week(
+            datetime.strptime(start_of_week, DATE_FORMAT).date()
+        )
         steps_update = weekly_goal_update["steps"]
         days_update = weekly_goal_update["days"]
 
@@ -139,7 +141,7 @@ class WeeklyGoalsListView(View):
                         "Unregistered account - "
                         f"{json_data['account_id']}."
                         " Please register first!"
-                    )
+                    ),
                 }
             )
 
