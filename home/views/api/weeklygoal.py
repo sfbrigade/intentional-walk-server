@@ -8,7 +8,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from home.models import WeeklyGoal, Account
+from home.models import WeeklyGoal, Device
 from home.utils.dates import get_start_of_week, DATE_FORMAT
 
 
@@ -44,15 +44,16 @@ class WeeklyGoalCreateView(View):
         if "status" in json_status and json_status["status"] == "error":
             return JsonResponse(json_status)
 
-        # Get the account
+        # Get the device
         try:
-            account = Account.objects.get(id=json_data["account_id"])
+            device = Device.objects.get(device_id=json_data["account_id"])
+            account = device.account
         except ObjectDoesNotExist:
             return JsonResponse(
                 {
                     "status": "error",
                     "message": (
-                        "Unregistered account - "
+                        "Unregistered device - "
                         f"{json_data['account_id']}."
                         " Please register first!"
                     ),
@@ -132,7 +133,8 @@ class WeeklyGoalsListView(View):
 
         # Get the account
         try:
-            account = Account.objects.get(id=json_data["account_id"])
+            device = Device.objects.get(device_id=json_data["account_id"])
+            account = device.account
         except ObjectDoesNotExist:
             return JsonResponse(
                 {
@@ -146,10 +148,12 @@ class WeeklyGoalsListView(View):
             )
 
         # Get weekly goals tied to this account
-        weekly_goals = WeeklyGoal.objects.filter(account=account)
+        weekly_goals = WeeklyGoal.objects.filter(account=account).values()
 
+        """ for goal in weekly_goals:
+            goal = model_to_dict(goal) """
         payload = {
-            "weekly_goals": weekly_goals,
+            "weekly_goals": list(weekly_goals),
             "status": "success",
         }
         return JsonResponse(payload)

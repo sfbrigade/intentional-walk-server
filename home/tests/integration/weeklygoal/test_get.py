@@ -1,6 +1,7 @@
 from django.test import Client, TestCase
+from django.forms.models import model_to_dict
 
-from home.models import WeeklyGoal, Account
+from home.models import WeeklyGoal, Device
 
 
 class ApiTestCase(TestCase):
@@ -8,8 +9,8 @@ class ApiTestCase(TestCase):
         # Test client
         self.client = Client()
 
-        self.account_id = "12345"
         self.email = "abhay@blah.com"
+        self.account_id = "12345"
 
         # Create a user
         response = self.client.post(
@@ -36,8 +37,8 @@ class ApiTestCase(TestCase):
             "Device registered & account registered successfully",
             msg=fail_message,
         )
-
-        self.account = Account.objects.get(email=self.email)
+        device = Device.objects.get(device_id=self.account_id)
+        self.account = device.account
 
         # Define weekly goals
         self.weekly_goals = [
@@ -90,7 +91,15 @@ class ApiTestCase(TestCase):
         # Parse the response
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
-        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(response_data["status"], "success", msg=fail_message)
+        self.assertIn("weekly_goals", response_data, msg=fail_message)
+        i = 2
+        for goal in response_data["weekly_goals"]:
+            goalDict = model_to_dict(self.weekly_goals[i])
+            goalDict["account_id"] = goalDict.get("account")
+            del goalDict["account"]
+            self.assertEqual(goal, goalDict)
+            i -= 1
 
     # Test getting weekly goals from an account that doesn't exist
     def test_weeklygoal_get_failure_invalid_account(self):

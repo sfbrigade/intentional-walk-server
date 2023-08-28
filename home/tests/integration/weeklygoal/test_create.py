@@ -1,12 +1,14 @@
 from django.test import Client, TestCase
 
-from home.models import Account
+from home.models import Device
 
 
 class ApiTestCase(TestCase):
     def setUp(self):
         # Test client
         self.client = Client()
+
+        self.account_id = "12345"
 
         # Create a user
         response = self.client.post(
@@ -16,7 +18,7 @@ class ApiTestCase(TestCase):
                 "email": "abhay@blah.com",
                 "zip": "72185",
                 "age": 99,
-                "account_id": "12345",
+                "account_id": self.account_id,
             },
             content_type="application/json",
         )
@@ -33,14 +35,16 @@ class ApiTestCase(TestCase):
             msg=fail_message,
         )
 
-        account_id = Account.objects.only("id").get(email="abhay@blah.com").id
+        device = Device.objects.get(device_id=self.account_id)
+        self.account = device.account
+
         # Details for Weekly Goal creation
         self.url = "/api/weeklygoal/create"
         self.start_of_week = "2023-08-21"
         self.start_of_week_param = "2023-08-23"
         # Request parameters
         self.request_params = {
-            "account_id": account_id,
+            "account_id": self.account_id,
             "weekly_goal": {
                 "start_of_week": self.start_of_week_param,
                 "steps": 2000,
@@ -72,7 +76,7 @@ class ApiTestCase(TestCase):
         )
         self.assertEqual(
             response_data["payload"]["account_id"],
-            self.request_params["account_id"],
+            self.account.id,
             msg=fail_message,
         )
         self.assertEqual(
@@ -113,7 +117,7 @@ class ApiTestCase(TestCase):
         )
         self.assertEqual(
             response_data["payload"]["account_id"],
-            self.request_params["account_id"],
+            self.account.id,
             msg=fail_message,
         )
         self.assertEqual(
@@ -156,7 +160,7 @@ class ApiTestCase(TestCase):
         )
         self.assertEqual(
             response_data["payload"]["account_id"],
-            self.request_params["account_id"],
+            self.account.id,
             msg=fail_message,
         )
         self.assertEqual(
@@ -194,7 +198,7 @@ class ApiTestCase(TestCase):
 
         self.assertEqual(
             response_data["message"],
-            "Unregistered account - "
+            "Unregistered device - "
             f'{self.request_params["account_id"]}.'
             " Please register first!",
             msg=fail_message,
