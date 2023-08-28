@@ -216,6 +216,7 @@ class SQLGenerator:
                 "updated": dt,
             }
         )
+
         self.accounts.append(acct)
 
         return insert(
@@ -639,17 +640,17 @@ class SQLGenerator:
 
         startDate = tmp_accounts[0].get("created")
         dt = startDate
-        end_date = datetime.now(tz=TIMEZONE)
+        end_date = date.today()
 
         outputs = []
 
         for acct in tmp_accounts:
-            start_date = acct.get("created")
-            dt = start_date
+            account_id = acct.get("id")
+            dt = acct.get("created").date()
 
             while dt < end_date:
                 dt += relativedelta(weeks=1)
-                start_of_week = dt - relativedelta(days=date.weekday())
+                start_of_week = dt - relativedelta(days=dt.weekday())
                 steps = random_step_goal()
                 days = random_days_goal()
 
@@ -657,7 +658,7 @@ class SQLGenerator:
                     start_of_week=start_of_week,
                     steps=steps,
                     days=days,
-                    account_id=acct.get("id"),
+                    account_id=account_id,
                 )
 
                 outputs.append(output)
