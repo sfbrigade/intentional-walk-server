@@ -92,9 +92,9 @@ class ApiTestCase(TestCase):
         response_data = response.json()
         fail_message = f"Server response - {response_data}"
         self.assertEqual(response_data["status"], "success", msg=fail_message)
-        self.assertIn("weekly_goals", response_data, msg=fail_message)
+        self.assertIn("payload", response_data, msg=fail_message)
         i = 2
-        for goal in response_data["weekly_goals"]:
+        for goal in response_data["payload"]:
             goalDict = model_to_dict(self.weekly_goals[i])
             goalDict["account_id"] = goalDict.get("account")
             del goalDict["account"]

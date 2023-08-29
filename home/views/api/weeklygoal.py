@@ -41,6 +41,7 @@ class WeeklyGoalCreateView(View):
             json_data["weekly_goal"],
             required_fields=["start_of_week", "steps", "days"],
         )
+
         if "status" in json_status and json_status["status"] == "error":
             return JsonResponse(json_status)
 
@@ -147,16 +148,25 @@ class WeeklyGoalsListView(View):
                 }
             )
 
-        # Get weekly goals tied to this account
-        weekly_goals = WeeklyGoal.objects.filter(account=account).values()
+        # Json response template
+        json_response = {
+            "status": "success",
+            "message": "Weekly goals accessed successfully",
+            "payload": {},
+        }
 
+        # Get weekly goals tied to this account
+        weekly_goals = list(
+            WeeklyGoal.objects.filter(account=account).values()
+        )
         """ for goal in weekly_goals:
             goal = model_to_dict(goal) """
-        payload = {
-            "weekly_goals": list(weekly_goals),
-            "status": "success",
-        }
-        return JsonResponse(payload)
+        for goal in weekly_goals:
+            goal["start_of_week"] = goal["start_of_week"].strftime(DATE_FORMAT)
+
+        json_response["payload"] = weekly_goals
+
+        return JsonResponse(json_response)
 
     def http_method_not_allowed(self, request):
         return JsonResponse(
