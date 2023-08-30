@@ -7,6 +7,7 @@ from .models import (
     Device,
     IntentionalWalk,
     Leaderboard,
+    WeeklyGoal,
 )
 
 
@@ -64,3 +65,10 @@ class LeaderboardUserAdmin(admin.ModelAdmin):
     list_display = ["account", "device", "steps", "contest_id"]
     list_filter = ["contest"]
     ordering = ["contest", "-steps"]
+
+
+@admin.register(WeeklyGoal)
+class WeeklyGoalAdmin(admin.ModelAdmin):
+    list_display = ["account", "start_of_week", "steps", "days"]
+    list_filter = ["account"]
+    ordering = ["-start_of_week"]
