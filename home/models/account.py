@@ -3,9 +3,6 @@ from enum import Enum
 from django.db import models
 from setfield import SetField
 
-# from django.utils.translation import gettext_lazy as ugettext_lazy
-
-
 SAN_FRANCISCO_ZIP_CODES = set(
     [
         "94102",
