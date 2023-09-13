@@ -613,14 +613,14 @@ class AdminUsersByAgeGroupView(View):
             contest_id = request.GET.get("contest_id", None)
             if contest_id is None:
                 return HttpResponse(status=422)
-            age_min1 = request.GET.get("age_min", None)
-            age_max1 = request.GET.get("age_max", None)
-            age_min2 = request.GET.get("age_min", None)
-            age_max2 = request.GET.get("age_max", None)
-            age_min3 = request.GET.get("age_min", None)
-            age_max3 = request.GET.get("age_max", None)
-            age_min4 = request.GET.get("age_min", None)
-            age_max4 = request.GET.get("age_max", None)
+            age_min1 = request.GET.get("age_min1", None)
+            age_max1 = request.GET.get("age_max1", None)
+            age_min2 = request.GET.get("age_min2", None)
+            age_max2 = request.GET.get("age_max2", None)
+            age_min3 = request.GET.get("age_min3", None)
+            age_max3 = request.GET.get("age_max3", None)
+            age_min4 = request.GET.get("age_min4", None)
+            age_max4 = request.GET.get("age_max4", None)
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
@@ -679,6 +679,7 @@ class AdminUsersByAgeGroupView(View):
                 "count3": result3,
                 "count4": result4
             }
+            print(response_data)
             return JsonResponse(response_data)
         else:
             return HttpResponse(status=401)
@@ -691,14 +692,14 @@ class AdminUsersByAgeGroupDatesView(View):
         if request.user.is_authenticated:
             start_date = request.GET.get("start_date", None)
             end_date = request.GET.get("end_date", None)
-            age_min1 = request.GET.get("age_min", None)
-            age_max1 = request.GET.get("age_max", None)
-            age_min2 = request.GET.get("age_min", None)
-            age_max2 = request.GET.get("age_max", None)
-            age_min3 = request.GET.get("age_min", None)
-            age_max3 = request.GET.get("age_max", None)
-            age_min4 = request.GET.get("age_min", None)
-            age_max4 = request.GET.get("age_max", None)
+            age_min1 = request.GET.get("age_min1", None)
+            age_max1 = request.GET.get("age_max1", None)
+            age_min2 = request.GET.get("age_min2", None)
+            age_max2 = request.GET.get("age_max2", None)
+            age_min3 = request.GET.get("age_min3", None)
+            age_max3 = request.GET.get("age_max3", None)
+            age_min4 = request.GET.get("age_min4", None)
+            age_max4 = request.GET.get("age_max4", None)
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
@@ -765,6 +766,7 @@ class AdminUsersByAgeGroupDatesView(View):
                 "count3": result3,
                 "count4": result4
             }
+            print(response_data)
             return JsonResponse(response_data)
         else:
             return HttpResponse(status=401)
