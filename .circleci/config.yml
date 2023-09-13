@@ -10,7 +10,7 @@ jobs:
         environment:
           DATABASE_URL: "postgresql://postgres@localhost/webtool"
           SECRET_KEY: "secretkey"
-      - image: cimg/postgres:12
+      - image: cimg/postgres:12.16
         environment:
           POSTGRES_HOST_AUTH_METHOD=trust
     steps:
