@@ -613,8 +613,14 @@ class AdminUsersByAgeGroupView(View):
             contest_id = request.GET.get("contest_id", None)
             if contest_id is None:
                 return HttpResponse(status=422)
-            age_min = request.GET.get("age_min", None)
-            age_max = request.GET.get("age_max", None)
+            age_min1 = request.GET.get("age_min", None)
+            age_max1 = request.GET.get("age_max", None)
+            age_min2 = request.GET.get("age_min", None)
+            age_max2 = request.GET.get("age_max", None)
+            age_min3 = request.GET.get("age_min", None)
+            age_max3 = request.GET.get("age_max", None)
+            age_min4 = request.GET.get("age_min", None)
+            age_max4 = request.GET.get("age_max", None)
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
@@ -625,10 +631,54 @@ class AdminUsersByAgeGroupView(View):
                           home_account.age >= %s AND
                           home_account.age <= %s
                     """,
-                    [contest_id, age_min, age_max],
+                    [contest_id, age_min1, age_max1],
                 )
-                result = cursor.fetchone()[0]
-            response_data = {"count": result}
+                result1 = cursor.fetchone()[0]
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM home_account
+                    JOIN home_account_contests ON home_account.id=home_account_contests.account_id
+                    WHERE home_account_contests.contest_id=%s AND
+                          home_account.age >= %s AND
+                          home_account.age <= %s
+                    """,
+                    [contest_id, age_min2, age_max2],
+                )
+                result2 = cursor.fetchone()[0]
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM home_account
+                    JOIN home_account_contests ON home_account.id=home_account_contests.account_id
+                    WHERE home_account_contests.contest_id=%s AND
+                          home_account.age >= %s AND
+                          home_account.age <= %s
+                    """,
+                    [contest_id, age_min3, age_max3],
+                )
+                result3 = cursor.fetchone()[0]
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM home_account
+                    JOIN home_account_contests ON home_account.id=home_account_contests.account_id
+                    WHERE home_account_contests.contest_id=%s AND
+                          home_account.age >= %s AND
+                          home_account.age <= %s
+                    """,
+                    [contest_id, age_min4, age_max4],
+                )
+                result4 = cursor.fetchone()[0]
+            response_data = {
+                "count1": result1,
+                "count2": result2,
+                "count3": result3,
+                "count4": result4
+            }
             return JsonResponse(response_data)
         else:
             return HttpResponse(status=401)
@@ -641,8 +691,14 @@ class AdminUsersByAgeGroupDatesView(View):
         if request.user.is_authenticated:
             start_date = request.GET.get("start_date", None)
             end_date = request.GET.get("end_date", None)
-            age_min = request.GET.get("age_min", None)
-            age_max = request.GET.get("age_max", None)
+            age_min1 = request.GET.get("age_min", None)
+            age_max1 = request.GET.get("age_max", None)
+            age_min2 = request.GET.get("age_min", None)
+            age_max2 = request.GET.get("age_max", None)
+            age_min3 = request.GET.get("age_min", None)
+            age_max3 = request.GET.get("age_max", None)
+            age_min4 = request.GET.get("age_min", None)
+            age_max4 = request.GET.get("age_max", None)
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
@@ -655,10 +711,60 @@ class AdminUsersByAgeGroupDatesView(View):
                             home_account.age <= %s
                         ) subquery
                     """,
-                    [start_date, end_date, age_min, age_max],
+                    [start_date, end_date, age_min1, age_max1],
                 )
-                result = cursor.fetchall()[0][0]
-            response_data = {"count": result}
+                result1 = cursor.fetchall()[0][0]
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM (
+                        SELECT home_account.id AS id, home_account.age
+                        FROM home_account
+                        WHERE home_account.created BETWEEN %s AND %s AND
+                            home_account.age >= %s AND
+                            home_account.age <= %s
+                        ) subquery
+                    """,
+                    [start_date, end_date, age_min2, age_max2],
+                )
+                result2 = cursor.fetchall()[0][0]
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM (
+                        SELECT home_account.id AS id, home_account.age
+                        FROM home_account
+                        WHERE home_account.created BETWEEN %s AND %s AND
+                            home_account.age >= %s AND
+                            home_account.age <= %s
+                        ) subquery
+                    """,
+                    [start_date, end_date, age_min3, age_max3],
+                )
+                result3 = cursor.fetchall()[0][0]
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM (
+                        SELECT home_account.id AS id, home_account.age
+                        FROM home_account
+                        WHERE home_account.created BETWEEN %s AND %s AND
+                            home_account.age >= %s AND
+                            home_account.age <= %s
+                        ) subquery
+                    """,
+                    [start_date, end_date, age_min4, age_max4],
+                )
+                result4 = cursor.fetchall()[0][0]
+            response_data = {
+                "count1": result1,
+                "count2": result2,
+                "count3": result3,
+                "count4": result4
+            }
             return JsonResponse(response_data)
         else:
             return HttpResponse(status=401)

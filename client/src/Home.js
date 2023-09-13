@@ -158,7 +158,11 @@ function Home() {
               })
               .then((response) => {
                 if (!cancelled) {
-                  setAgeDistribution(response.data.count);
+                  setAgeDistribution1(response.data.count1);
+                  console.log(response.data.count1);
+                  setAgeDistribution2(response.data.count2);
+                  setAgeDistribution3(response.data.count3);
+                  setAgeDistribution4(response.data.count4);
                 }
               });
           } else {
@@ -177,7 +181,11 @@ function Home() {
               })
               .then((response) => {
                 if (!cancelled) {
-                  setAgeDistribution(response.data.count);
+                  setAgeDistribution1(response.data.count1);
+                  console.log(response.data.count1);
+                  setAgeDistribution2(response.data.count2);
+                  setAgeDistribution3(response.data.count3);
+                  setAgeDistribution4(response.data.count4);
                 }
               });
           }
