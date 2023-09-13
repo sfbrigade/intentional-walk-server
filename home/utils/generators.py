@@ -125,10 +125,6 @@ class IntentionalWalkGenerator:
 
     def random_params(self):
         tz = timezone.get_default_timezone()
-        print("testt")
-        print(tz)
-        print("testt")
-        print(self.fake.date_time())
         values = dict(
             event_id=uuid4(),
             # start=tz.localize(self.fake.date_time()),
