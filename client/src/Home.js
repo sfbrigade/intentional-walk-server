@@ -141,7 +141,7 @@ function Home() {
       // fetchAgeData();
 
 
-      const fetchAgeData2 = async () => {
+      const fetchAgeData = async () => {
         const promises = () => {
           if (contest_id) {
             return Api.admin
@@ -160,6 +160,7 @@ function Home() {
                 if (!cancelled) {
                   setAgeDistribution1(response.data.count1);
                   console.log(response.data.count1);
+                  console.log(ageDistribution1);
                   setAgeDistribution2(response.data.count2);
                   setAgeDistribution3(response.data.count3);
                   setAgeDistribution4(response.data.count4);
@@ -183,6 +184,7 @@ function Home() {
                 if (!cancelled) {
                   setAgeDistribution1(response.data.count1);
                   console.log(response.data.count1);
+                  console.log(ageDistribution1);
                   setAgeDistribution2(response.data.count2);
                   setAgeDistribution3(response.data.count3);
                   setAgeDistribution4(response.data.count4);
@@ -190,11 +192,9 @@ function Home() {
               });
           }
         }
-
         await Promise.all(promises);
       }
-      fetchAgeData2();
-
+      fetchAgeData();
 
     return () => (cancelled = true);
   }, [
