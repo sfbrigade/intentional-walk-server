@@ -411,7 +411,6 @@ function Home() {
               />
             )}
           </div>
-          {/* { contest_id != "" ? */}
             <div className="row my-5">
               <div className="col-lg-6 text-center">
                 <h3>Age Distribution</h3>
@@ -437,7 +436,6 @@ function Home() {
                 )}
               </div>
             </div>
-          {/* : void 0 }*/}
         </div>
       </div>
     </>
