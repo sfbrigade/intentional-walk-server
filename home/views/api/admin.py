@@ -615,10 +615,22 @@ class AdminUsersByAgeGroupView(View):
                 return HttpResponse(status=422)
 
             age_ranges = [
-                (request.GET.get("age_min1", None), request.GET.get("age_max1", None)),
-                (request.GET.get("age_min2", None), request.GET.get("age_max2", None)),
-                (request.GET.get("age_min3", None), request.GET.get("age_max3", None)),
-                (request.GET.get("age_min4", None), request.GET.get("age_max4", None)),
+                (
+                    request.GET.get("age_min1", None),
+                    request.GET.get("age_max1", None),
+                ),
+                (
+                    request.GET.get("age_min2", None),
+                    request.GET.get("age_max2", None),
+                ),
+                (
+                    request.GET.get("age_min3", None),
+                    request.GET.get("age_max3", None),
+                ),
+                (
+                    request.GET.get("age_min4", None),
+                    request.GET.get("age_max4", None),
+                ),
             ]
 
             counts = []
@@ -634,20 +646,20 @@ class AdminUsersByAgeGroupView(View):
 
             with connection.cursor() as cursor:
                 for age_min, age_max in age_ranges:
-                    cursor.execute(sql_template, [contest_id, age_min, age_max])
+                    cursor.execute(
+                        sql_template, [contest_id, age_min, age_max]
+                    )
                     result = cursor.fetchone()[0]
                     counts.append(result)
 
             response_data = {
-                f"count{i + 1}": count
-                for i, count in enumerate(counts)
+                f"count{i + 1}": count for i, count in enumerate(counts)
             }
 
             print(response_data)
             return JsonResponse(response_data)
         else:
             return HttpResponse(status=401)
-
 
 
 class AdminUsersByAgeGroupDatesView(View):
@@ -659,10 +671,22 @@ class AdminUsersByAgeGroupDatesView(View):
             end_date = request.GET.get("end_date", None)
 
             age_ranges = [
-                (request.GET.get("age_min1", None), request.GET.get("age_max1", None)),
-                (request.GET.get("age_min2", None), request.GET.get("age_max2", None)),
-                (request.GET.get("age_min3", None), request.GET.get("age_max3", None)),
-                (request.GET.get("age_min4", None), request.GET.get("age_max4", None)),
+                (
+                    request.GET.get("age_min1", None),
+                    request.GET.get("age_max1", None),
+                ),
+                (
+                    request.GET.get("age_min2", None),
+                    request.GET.get("age_max2", None),
+                ),
+                (
+                    request.GET.get("age_min3", None),
+                    request.GET.get("age_max3", None),
+                ),
+                (
+                    request.GET.get("age_min4", None),
+                    request.GET.get("age_max4", None),
+                ),
             ]
 
             counts = []
@@ -680,13 +704,14 @@ class AdminUsersByAgeGroupDatesView(View):
 
             with connection.cursor() as cursor:
                 for age_min, age_max in age_ranges:
-                    cursor.execute(sql_template, [start_date, end_date, age_min, age_max])
+                    cursor.execute(
+                        sql_template, [start_date, end_date, age_min, age_max]
+                    )
                     result = cursor.fetchone()[0]
                     counts.append(result)
 
             response_data = {
-                f"count{i + 1}": count
-                for i, count in enumerate(counts)
+                f"count{i + 1}": count for i, count in enumerate(counts)
             }
 
             print(response_data)
