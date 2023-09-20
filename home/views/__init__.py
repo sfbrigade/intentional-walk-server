@@ -22,6 +22,7 @@ from .api.export import ExportUsersView
 from .api.intentionalwalk import IntentionalWalkView, IntentionalWalkListView
 from .api.contest import ContestCurrentView
 from .api.leaderboard import LeaderboardListView
+from .api.weeklygoal import WeeklyGoalCreateView, WeeklyGoalsListView
 
 # Import web views
 from .web.home import HomeView

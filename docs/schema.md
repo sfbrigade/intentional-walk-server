@@ -68,3 +68,12 @@ pause_time
 steps
 distance
 created
+
+## WeeklyGoal
+
+A WeeklyGoal represents a user's step and days goal for a week. Entries represent the creation or updates to a user's goal
+
+account_id: integer
+start_of_week: timestamp of record creation
+steps: integer
+days: integer

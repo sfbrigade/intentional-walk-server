@@ -155,4 +155,14 @@ urlpatterns = urlpatterns + [
         views.LeaderboardListView.as_view(),
         name="leaderboard_get",
     ),
+    path(
+        "api/weeklygoal/create",
+        views.WeeklyGoalCreateView.as_view(),
+        name="weeklygoal_create",
+    ),
+    path(
+        "api/weeklygoal/get",
+        views.WeeklyGoalsListView.as_view(),
+        name="weeklygoal_get",
+    ),
 ]
