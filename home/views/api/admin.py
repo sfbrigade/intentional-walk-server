@@ -605,86 +605,6 @@ class AdminUsersByZipMedianStepsView(View):
             return HttpResponse(status=401)
 
 
-# class AdminUsersByAgeGroupView(View):
-#     http_method_names = ["get"]
-
-#     def get(self, request, *args, **kwargs):
-#         if request.user.is_authenticated:
-#             contest_id = request.GET.get("contest_id", None)
-#             if contest_id is None:
-#                 return HttpResponse(status=422)
-#             age_min1 = request.GET.get("age_min1", None)
-#             age_max1 = request.GET.get("age_max1", None)
-#             age_min2 = request.GET.get("age_min2", None)
-#             age_max2 = request.GET.get("age_max2", None)
-#             age_min3 = request.GET.get("age_min3", None)
-#             age_max3 = request.GET.get("age_max3", None)
-#             age_min4 = request.GET.get("age_min4", None)
-#             age_max4 = request.GET.get("age_max4", None)
-#             with connection.cursor() as cursor:
-#                 cursor.execute(
-#                     """
-#                     SELECT COUNT(*)
-#                     FROM home_account
-#                     JOIN home_account_contests ON home_account.id=home_account_contests.account_id
-#                     WHERE home_account_contests.contest_id=%s AND
-#                           home_account.age >= %s AND
-#                           home_account.age <= %s
-#                     """,
-#                     [contest_id, age_min1, age_max1],
-#                 )
-#                 result1 = cursor.fetchone()[0]
-#             with connection.cursor() as cursor:
-#                 cursor.execute(
-#                     """
-#                     SELECT COUNT(*)
-#                     FROM home_account
-#                     JOIN home_account_contests ON home_account.id=home_account_contests.account_id
-#                     WHERE home_account_contests.contest_id=%s AND
-#                           home_account.age >= %s AND
-#                           home_account.age <= %s
-#                     """,
-#                     [contest_id, age_min2, age_max2],
-#                 )
-#                 result2 = cursor.fetchone()[0]
-#             with connection.cursor() as cursor:
-#                 cursor.execute(
-#                     """
-#                     SELECT COUNT(*)
-#                     FROM home_account
-#                     JOIN home_account_contests ON home_account.id=home_account_contests.account_id
-#                     WHERE home_account_contests.contest_id=%s AND
-#                           home_account.age >= %s AND
-#                           home_account.age <= %s
-#                     """,
-#                     [contest_id, age_min3, age_max3],
-#                 )
-#                 result3 = cursor.fetchone()[0]
-#             with connection.cursor() as cursor:
-#                 cursor.execute(
-#                     """
-#                     SELECT COUNT(*)
-#                     FROM home_account
-#                     JOIN home_account_contests ON home_account.id=home_account_contests.account_id
-#                     WHERE home_account_contests.contest_id=%s AND
-#                           home_account.age >= %s AND
-#                           home_account.age <= %s
-#                     """,
-#                     [contest_id, age_min4, age_max4],
-#                 )
-#                 result4 = cursor.fetchone()[0]
-#             response_data = {
-#                 "count1": result1,
-#                 "count2": result2,
-#                 "count3": result3,
-#                 "count4": result4
-#             }
-#             print(response_data)
-#             return JsonResponse(response_data)
-#         else:
-#             return HttpResponse(status=401)
-
-
 class AdminUsersByAgeGroupView(View):
     http_method_names = ["get"]
 
@@ -748,14 +668,14 @@ class AdminUsersByAgeGroupDatesView(View):
             counts = []
 
             sql_template = """
-                    SELECT COUNT(*)
-                    FROM (
-                        SELECT home_account.id AS id, home_account.age
-                        FROM home_account
-                        WHERE home_account.created BETWEEN %s AND %s AND
-                            home_account.age >= %s AND
-                            home_account.age <= %s
-                        ) subquery
+                SELECT COUNT(*)
+                FROM (
+                    SELECT home_account.id AS id, home_account.age
+                    FROM home_account
+                    WHERE home_account.created BETWEEN %s AND %s AND
+                        home_account.age >= %s AND
+                        home_account.age <= %s
+                    ) subquery
             """
 
             with connection.cursor() as cursor:

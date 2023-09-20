@@ -107,93 +107,53 @@ function Home() {
           )
       );
 
-      // const fetchAgeData = async () => {
-      //   const ageRanges = [
-      //     { ageRangeMin: ageRange1Min, ageRangeMax: ageRange1Max, setAgeDistribution: setAgeDistribution1 },
-      //     { ageRangeMin: ageRange2Min, ageRangeMax: ageRange2Max, setAgeDistribution: setAgeDistribution2 },
-      //     { ageRangeMin: ageRange3Min, ageRangeMax: ageRange3Max, setAgeDistribution: setAgeDistribution3 },
-      //     { ageRangeMin: ageRange4Min, ageRangeMax: ageRange4Max, setAgeDistribution: setAgeDistribution4 },
-      //   ];
-
-      //   const promises = ageRanges.map(({ ageRangeMin, ageRangeMax, setAgeDistribution }) => {
-      //     if (contest_id) {
-      //       return Api.admin
-      //         .homeUsersByAgeGroup({ contest_id, age_min: ageRangeMin, age_max: ageRangeMax })
-      //         .then((response) => {
-      //           if (!cancelled) {
-      //             setAgeDistribution(response.data.count);
-      //           }
-      //         });
-      //     } else {
-      //       return Api.admin
-      //         .homeUsersByAgeGroupDates({ start_date, end_date, age_min: ageRangeMin, age_max: ageRangeMax })
-      //         .then((response) => {
-      //           if (!cancelled) {
-      //             setAgeDistribution(response.data.count);
-      //           }
-      //         });
-      //     }
-      //   });
-
-
-      //   await Promise.all(promises);
-      // };
-      // fetchAgeData();
-
-
       const fetchAgeData = async () => {
-        const promises = () => {
-          if (contest_id) {
-            return Api.admin
-              .homeUsersByAgeGroup({
-                contest_id,
-                age_min1: ageRange1Min,
-                age_max1: ageRange1Max,
-                age_min2: ageRange2Min,
-                age_max2: ageRange2Max,
-                age_min3: ageRange3Min,
-                age_max3: ageRange3Max,
-                age_min4: ageRange4Min,
-                age_max4: ageRange4Max
-              })
-              .then((response) => {
-                if (!cancelled) {
-                  setAgeDistribution1(response.data.count1);
-                  console.log(response.data.count1);
-                  console.log(ageDistribution1);
-                  setAgeDistribution2(response.data.count2);
-                  setAgeDistribution3(response.data.count3);
-                  setAgeDistribution4(response.data.count4);
-                }
-              });
-          } else {
-            return Api.admin
-              .homeUsersByAgeGroupDates({
-                start_date,
-                end_date,
-                age_min1: ageRange1Min,
-                age_max1: ageRange1Max,
-                age_min2: ageRange2Min,
-                age_max2: ageRange2Max,
-                age_min3: ageRange3Min,
-                age_max3: ageRange3Max,
-                age_min4: ageRange4Min,
-                age_max4: ageRange4Max
-              })
-              .then((response) => {
-                if (!cancelled) {
-                  setAgeDistribution1(response.data.count1);
-                  console.log(response.data.count1);
-                  console.log(ageDistribution1);
-                  setAgeDistribution2(response.data.count2);
-                  setAgeDistribution3(response.data.count3);
-                  setAgeDistribution4(response.data.count4);
-                }
-              });
-          }
+        if (contest_id) {
+          return Api.admin
+            .homeUsersByAgeGroup({
+              contest_id,
+              age_min1: ageRange1Min,
+              age_max1: ageRange1Max,
+              age_min2: ageRange2Min,
+              age_max2: ageRange2Max,
+              age_min3: ageRange3Min,
+              age_max3: ageRange3Max,
+              age_min4: ageRange4Min,
+              age_max4: ageRange4Max
+            })
+            .then((response) => {
+              if (!cancelled) {
+                setAgeDistribution1(response.data.count1);
+                setAgeDistribution2(response.data.count2);
+                setAgeDistribution3(response.data.count3);
+                setAgeDistribution4(response.data.count4);
+              }
+            });
+        } else {
+          return Api.admin
+            .homeUsersByAgeGroupDates({
+              start_date,
+              end_date,
+              age_min1: ageRange1Min,
+              age_max1: ageRange1Max,
+              age_min2: ageRange2Min,
+              age_max2: ageRange2Max,
+              age_min3: ageRange3Min,
+              age_max3: ageRange3Max,
+              age_min4: ageRange4Min,
+              age_max4: ageRange4Max
+            })
+            .then((response) => {
+              if (!cancelled) {
+                setAgeDistribution1(response.data.count1);
+                setAgeDistribution2(response.data.count2);
+                setAgeDistribution3(response.data.count3);
+                setAgeDistribution4(response.data.count4);
+              }
+            });
         }
-        await Promise.all(promises);
       }
+
       fetchAgeData();
 
     return () => (cancelled = true);
