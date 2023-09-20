@@ -172,9 +172,9 @@ class AdminHomeUsersCumulativeView(AdminHomeGraphView):
                         CONCAT(("created" AT TIME ZONE '{os.getenv("TIME_ZONE", "America/Los_Angeles")}')::date,
                                 'T00:00:00') AS "date",
                         COUNT("id") AS "count"
-                     FROM "home_account"
-                     WHERE {conditions}
-                     GROUP BY "date") subquery
+                    FROM "home_account"
+                    WHERE {conditions}
+                    GROUP BY "date") subquery
                 ORDER BY "date"
                 """,
                 params,
@@ -256,10 +256,10 @@ class AdminHomeWalksCumulativeView(AdminHomeGraphView):
                     (SELECT
                         CONCAT("date", 'T00:00:00') AS "date",
                         SUM("{self.get_value_type()}") AS "count"
-                     FROM "home_dailywalk"
-                     JOIN "home_account" ON "home_account"."id"="home_dailywalk"."account_id"
-                     WHERE {conditions}
-                     GROUP BY "date") subquery
+                    FROM "home_dailywalk"
+                    JOIN "home_account" ON "home_account"."id"="home_dailywalk"."account_id"
+                    WHERE {conditions}
+                    GROUP BY "date") subquery
                 ORDER BY "date"
                 """,
                 params,
@@ -492,9 +492,9 @@ class AdminUsersActiveByZipView(View):
                         LEFT JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
                         LEFT JOIN home_intentionalwalk ON home_account.id=home_intentionalwalk.account_id
                         WHERE home_account.is_tester=%s AND
-                              home_account_contests.contest_id=%s AND
-                              ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
-                               (home_intentionalwalk.id IS NOT NULL AND
+                            home_account_contests.contest_id=%s AND
+                            ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
+                            (home_intentionalwalk.id IS NOT NULL AND
                                 home_intentionalwalk.start >= %s AND home_intentionalwalk.start < %s))
                     ) subquery
                     GROUP BY zip
@@ -520,10 +520,10 @@ class AdminUsersActiveByZipView(View):
                         LEFT JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
                         LEFT JOIN home_intentionalwalk ON home_account.id=home_intentionalwalk.account_id
                         WHERE home_account.is_tester=%s AND
-                              home_account_contests.contest_id=%s AND
-                              home_account.created >= %s AND home_account.created < %s AND
-                              ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
-                               (home_intentionalwalk.id IS NOT NULL AND
+                            home_account_contests.contest_id=%s AND
+                            home_account.created >= %s AND home_account.created < %s AND
+                            ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
+                            (home_intentionalwalk.id IS NOT NULL AND
                                 home_intentionalwalk.start >= %s AND home_intentionalwalk.start < %s))
                     ) subquery
                     GROUP BY zip
@@ -568,8 +568,8 @@ class AdminUsersByZipMedianStepsView(View):
                         JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
                         JOIN home_account_contests ON home_account.id=home_account_contests.account_id
                         WHERE home_account.is_tester=%s AND
-                              home_account_contests.contest_id=%s AND
-                              home_dailywalk.date BETWEEN %s AND %s
+                            home_account_contests.contest_id=%s AND
+                            home_dailywalk.date BETWEEN %s AND %s
                         GROUP BY (home_account.id)
                     ) subquery
                 """,
@@ -587,8 +587,8 @@ class AdminUsersByZipMedianStepsView(View):
                         JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
                         JOIN home_account_contests ON home_account.id=home_account_contests.account_id
                         WHERE home_account.is_tester=%s AND
-                              home_account_contests.contest_id=%s AND
-                              home_dailywalk.date BETWEEN %s AND %s
+                            home_account_contests.contest_id=%s AND
+                            home_dailywalk.date BETWEEN %s AND %s
                         GROUP BY (home_account.id, home_account.zip)
                     ) subquery
                     GROUP BY zip
@@ -628,8 +628,8 @@ class AdminUsersByAgeGroupView(View):
                 FROM home_account
                 JOIN home_account_contests ON home_account.id=home_account_contests.account_id
                 WHERE home_account_contests.contest_id=%s AND
-                      home_account.age >= %s AND
-                      home_account.age <= %s
+                    home_account.age >= %s AND
+                    home_account.age <= %s
             """
 
             with connection.cursor() as cursor:
