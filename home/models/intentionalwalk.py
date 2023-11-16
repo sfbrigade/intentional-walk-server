@@ -41,6 +41,7 @@ class IntentionalWalk(models.Model):
     created = models.DateTimeField(
         auto_now_add=True, help_text="Record creation timestamp"
     )
+    
 
     @property
     def walk_time_repr(self):

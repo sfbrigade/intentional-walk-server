@@ -146,6 +146,7 @@ class Account(models.Model):
     updated = models.DateTimeField(
         auto_now=True, help_text="Accounts updation timestamp"
     )
+   
 
     def __str__(self):
         return f"{self.name} | {self.email}"
