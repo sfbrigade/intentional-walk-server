@@ -11,8 +11,7 @@ jobs:
           DATABASE_URL: "postgresql://postgres@localhost/webtool"
           SECRET_KEY: "secretkey"
       - image: cimg/postgres:11.17
-        environment:
-          POSTGRES_HOST_AUTH_METHOD=trust
+        environment: POSTGRES_HOST_AUTH_METHOD=trust
     steps:
       - checkout
       - run:
@@ -39,7 +38,7 @@ jobs:
       - run:
           name: Run Pytest, report coverage
           command: |
-            poetry run coverage run --omit="/home/circleci/.cache/pypoetry/virtualenvs/*" -m pytest
+            make coverage
             poetry run coveralls
 workflows:
   main:
