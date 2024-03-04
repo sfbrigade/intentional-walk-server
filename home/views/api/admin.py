@@ -17,8 +17,12 @@ from django.http import HttpResponse, JsonResponse
 from django.views import View
 
 from home.models import Account, Contest, DailyWalk
-from home.views.api.serializers.request_serializers import GetUsersReqSerializer
-from home.views.api.serializers.response_serializers import GetUsersRespSerializer
+from home.views.api.serializers.request_serializers import (
+    GetUsersReqSerializer,
+)
+from home.views.api.serializers.response_serializers import (
+    GetUsersRespSerializer,
+)
 
 from .utils import paginate, require_authn
 
@@ -300,17 +304,17 @@ class AdminUsersView(View):
         if not serializer.is_valid():
             return JsonResponse(serializer.errors, status=422)
 
-        validated = serializer.validated_data 
-        
+        validated = serializer.validated_data
+
         contest_id = validated["contest_id"]
         filters = validated["filters"]
         order_by = validated["order_by"]
         page = validated["page"]
         per_page = validated["per_page"]
-        
+
         annotate = validated["annotate"]
-        intentionalwalk_annotate= validated["intentionalwalk_annotate"]
-        
+        intentionalwalk_annotate = validated["intentionalwalk_annotate"]
+
         query = (
             Account.objects.filter(filters)
             .values("id", "name", "email", "age", "zip", "created")
@@ -325,24 +329,24 @@ class AdminUsersView(View):
             .annotate(**intentionalwalk_annotate)
             .order_by(*order_by)
         )
+
         def update_user_dto(dto, iw_stats):
             dto.update(iw_stats)
             # at this point, we have enough info to determine if user is "active"
             if contest_id:
-                dto["is_active"] = (
-                    dto["dw_count"] > 0
-                    or dto["iw_count"] > 0
-                )
-            return dto 
+                dto["is_active"] = dto["dw_count"] > 0 or dto["iw_count"] > 0
+            return dto
 
-        result_dto = [update_user_dto(dto, iw_stat) for dto, iw_stat in zip(query, iw_query)]
+        result_dto = [
+            update_user_dto(dto, iw_stat)
+            for dto, iw_stat in zip(query, iw_query)
+        ]
         resp = GetUsersRespSerializer(result_dto, many=True)
         response = JsonResponse(resp.data, safe=False)
         if links:
             response.headers["Link"] = links
 
         return response
-    
 
 
 class AdminUsersByZipView(View):

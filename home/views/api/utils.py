@@ -2,7 +2,8 @@ import functools
 from math import ceil
 from typing import Any, Dict, List, Callable
 from django.http import HttpResponse
-from django.views import View 
+from django.views import View
+
 
 def paginate(request, results, page, per_page):
     count = results.count()
@@ -61,6 +62,7 @@ def validate_request_json(
 
     return response
 
+
 def require_authn(func: Callable[[View, Any, Any], HttpResponse]):
     """Decorator for Django View methods to require authn.
 
@@ -69,7 +71,7 @@ def require_authn(func: Callable[[View, Any, Any], HttpResponse]):
 
     Parameters
     ----------
-    func: 
+    func:
         The View method to decorate.
 
     Returns
@@ -77,9 +79,11 @@ def require_authn(func: Callable[[View, Any, Any], HttpResponse]):
         The decorated method.
 
     """
+
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
         if not self.request.user.is_authenticated:
             return HttpResponse(status=401)
         return func(self, *args, **kwargs)
+
     return wrapper

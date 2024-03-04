@@ -5,7 +5,8 @@ Each serializer in this module corresponds to a specific API endpoint. The seria
 `validate` method is responsible for validating the incoming request data and preparing
 it for further processing.
 """
-from rest_framework import serializers 
+
+from rest_framework import serializers
 from datetime import timedelta
 from home.models import Contest
 from django.db.models import (
@@ -17,23 +18,27 @@ from django.db.models import (
     Sum,
 )
 
+
 class GetUsersReqSerializer(serializers.Serializer):
     contest_id = serializers.CharField(
         required=False,
-        help_text="The ID of the contest to filter by. Providing this also will add additional metrics related to te contest."
+        help_text="The ID of the contest to filter by."
+        + "Providing this also will add additional metrics related to te contest.",
     )
     # If true, will only return tester accounts.
     is_tester = serializers.BooleanField(
-        required=False,
-        help_text="If true, will only return tester accounts."                                  
+        required=False, help_text="If true, will only return tester accounts."
     )
-    # Choices are: age, contests, created, dailywalk, device, email, gender, gender_other, id, intentionalwalk, is_latino, is_sf_resident, is_tester, 
-    # iw_count, iw_distance, iw_steps, iw_time, leaderboard, name, race, race_other, sexual_orien, sexual_orien_other, updated, weeklygoal, zip
-    # TODO: Can move this to the choices field tuple
+    # Choices are: age, contests, created, dailywalk, device, email, gender, gender_other, id,
+    # intentionalwalk,  is_latino, is_sf_resident, is_tester, iw_count, iw_distance, iw_steps,
+    # iw_time, leaderboard, name, race, race_other, sexual_orien, sexual_orien_other, updated,
+    # weeklygoal, zip.
+    # TODO: Can move this to the choices field tuple.
     # which will allow some tools to auto-pick up.
     order_by = serializers.CharField(
         required=False,
-        help_text="The field to order the results by. Prefix with '-' to order in descending order. The secondary sort and default sort will be lexicographically, the 'name'."
+        help_text="The field to order the results by. Prefix with '-' to order in descending order."
+        + "The secondary sort and default sort will be lexicographically, the 'name'.",
     )
     page = serializers.IntegerField(
         required=False,
@@ -42,7 +47,7 @@ class GetUsersReqSerializer(serializers.Serializer):
     )
     query = serializers.CharField(
         required=False,
-        help_text="Query string to filter for containment in the name or email."
+        help_text="Query string to filter for containment in the name or email.",
     )
 
     def validate(self, data):
@@ -106,8 +111,8 @@ class GetUsersReqSerializer(serializers.Serializer):
             "iw_time": Sum(
                 "intentionalwalk__walk_time", filter=intentionalwalk_filter
             ),
-        }  
-        
+        }
+
         # filter to show users vs testers
         filters &= Q(is_tester=is_tester)
 
