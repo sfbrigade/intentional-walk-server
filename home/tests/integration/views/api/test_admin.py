@@ -205,9 +205,11 @@ class TestAdminViews(TestCase):
         self.assertTrue(Login.login(c))
         response = c.get("/api/admin/users")
         data = response.json()
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(len(data), 5)  # 6 accounts - 1 tester
 
         response = c.get(f"/api/admin/users?contest_id={self.contest0_id}")
+        self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 4)  # 5 accounts in the contest - 1 tester
         # default ordering is by name
@@ -235,8 +237,41 @@ class TestAdminViews(TestCase):
         response = c.get(
             f"/api/admin/users?contest_id={self.contest0_id}&is_tester=true"
         )
+        self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 1)  # 1 tester
+
+        # query
+        response = c.get("/api/admin/users?query=2")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 1) 
+        self.assertEqual(data[0]["name"], "User 2")
+        
+        response = c.get("/api/admin/users?query=aintgonfindmeatall")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 0) 
+        
+        # sort 
+        response = c.get("/api/admin/users?order_by=age")
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        ages = [user["age"] for user in data]
+        ascending_order = all(
+            a <= b for a, b in zip(
+                ages,
+                ages[1:]
+            ))
+        self.assertTrue(ascending_order)
+        
+        response = c.get("/api/admin/users?order_by=-age")
+        data = response.json()
+        self.assertEqual(
+                ages,
+                [user["age"] for user in data[::-1]]
+        )
+
 
     def test_get_users_by_zip(self):
         c = Client()
