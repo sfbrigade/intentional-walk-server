@@ -6,7 +6,7 @@ authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-django = "^3.2.15"
+django = ">=4.2.0,<5.0"
 psycopg2 = "^2.9.1"
 dj-database-url = "^0.5.0"
 python-dotenv = "^0.11.0"
@@ -18,7 +18,7 @@ python-dateutil = "^2.8.1"
 whitenoise = "^5.0.1"
 uuid = "^1.30"
 faker = "^8.11.0"
-django-postgres-setfield = "^0.0.1"
+django-postgres-setfield = {git = "https://github.com/benperlman/django-postgres-setfield.git"}
 black = "^22.8.0"
 flake8 = "^5.0.4"
 autoflake = "^1.5.3"
