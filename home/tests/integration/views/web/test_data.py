@@ -117,7 +117,7 @@ class TestCsvViews(TestCase):
         expected_headers = USER_AGG_CSV_BASE_HEADER[:] + [
             str(date(3000, 2, 28) + timedelta(days=dt)) for dt in range(15)
         ]
-        self.assertEquals(headers, expected_headers)
+        self.assertEqual(headers, expected_headers)
 
         rows = list(reader)
 
