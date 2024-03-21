@@ -20,9 +20,9 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 ADD . /app
 WORKDIR /app
 
-# Install client dependencies and update path to include node module executables
+# Install client dependencies and update path to include poetry and node module executables
 RUN npm install && \
-    echo "export PATH=/app/node_modules/.bin:/app/client/node_modules/.bin:\$PATH\n" >> /root/.bashrc
+    echo "export PATH=~/.local/bin:/app/node_modules/.bin:/app/client/node_modules/.bin:\$PATH\n" >> /root/.bashrc
 
 # Run poetry to install dependencies
 RUN poetry config virtualenvs.create false && \
