@@ -128,8 +128,8 @@ class IntentionalWalkGenerator:
 
         values = dict(
             event_id=uuid4(),
-            start=tz.localize(self.fake.date_time()),
-            end=tz.localize(self.fake.date_time()),
+            start=self.fake.date_time().astimezone(tz),
+            end=self.fake.date_time().astimezone(tz),
             steps=random.randint(10, 10000),
             pause_time=random.randint(10, 3600),  # up to 1 hour
             distance=random.randint(100, 10000),  # up to 10 km

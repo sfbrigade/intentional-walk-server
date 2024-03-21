@@ -25,7 +25,7 @@ class TestExportViews(TestCase):
 
         response = c.get(f"/api/export/users?contest_id={self.contest0_id}")
         self.assertEqual(200, response.status_code)
-        self.assertEqual("application/octet-stream", response["Content-Type"])
+        self.assertEqual("text/csv", response["Content-Type"])
 
         content = response.getvalue().decode("utf-8")
         reader = csv.DictReader(io.StringIO(content))

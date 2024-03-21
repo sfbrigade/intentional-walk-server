@@ -6,6 +6,7 @@ from pytz import utc
 
 from django.contrib.auth.models import User
 from django.test import Client
+from django.utils import timezone
 
 from home.utils.generators import (
     AccountGenerator,
@@ -48,7 +49,7 @@ def generate_test_data():
     accounts[1].is_tester = True
     accounts[1].save()
     # Generate 3 accounts during the contest
-    with freeze_time("3000-03-02 12:00:00", tz_offset=-8):
+    with freeze_time("3000-03-02 12:00:00"):
         accounts = accounts + list(AccountGenerator().generate(3))
     # Set names for testing ordering, zip codes for grouping
     for i, account in enumerate(accounts):
@@ -79,9 +80,10 @@ def generate_test_data():
     dwalks1 = DailyWalkGenerator(device1)
     dwalks2 = DailyWalkGenerator(device2)
     dwalks3 = DailyWalkGenerator(device3)
+    tz = timezone.get_default_timezone()
     for dt in range(14):
         # Set dates on walks to 3000-02-28 to 3000-03-14
-        t = utc.localize(datetime(3000, 2, 28, 10, 0)) + timedelta(days=dt)
+        t = datetime(3000, 2, 28, 10, 0).astimezone(tz) + timedelta(days=dt)
         next(dwalks1.generate(1, date=t, steps=5000, distance=4000))
         next(dwalks2.generate(1, date=t, steps=10000, distance=8000))
         next(dwalks3.generate(1, date=t, steps=15000, distance=12000))
