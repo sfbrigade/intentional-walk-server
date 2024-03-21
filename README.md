@@ -95,6 +95,26 @@ server container and perform the following actions within the container CLI.
    # python scripts/dummydata.py > data.dump
    ```
 
+## Testing
+
+This project uses `pytest` for testing. Tests are located in the `tests` directory.
+
+To run tests, invoke the following command in a docker terminal connected to the container:
+
+```bash
+make test
+```
+
+To generate a code coverage report to see which parts of the code are covered by the tests. This is done with the following command:
+
+```bash
+make coverage
+```
+
+This runs the tests, generates a coverage report and displays a nice HTML direcotry `htmlcov`. You can view this report
+on `http://localhost:8001/`.
+Be sure to manually refresh the page each time you run `make coverage`.
+
 ## Heroku deployment info
 
  * Register a free Heroku account here: https://signup.heroku.com/
