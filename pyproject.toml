@@ -22,6 +22,7 @@ django-postgres-setfield = {git = "https://github.com/benperlman/django-postgres
 black = "^22.8.0"
 flake8 = "^5.0.4"
 autoflake = "^1.5.3"
+djangorestframework = "^3.14.0"
 
 [tool.poetry.dev-dependencies]
 freezegun = "^1.1.0"

@@ -6,11 +6,8 @@ from dateutil import parser
 
 from django.db import connection
 from django.db.models import (
-    BooleanField,
     CharField,
     Count,
-    ExpressionWrapper,
-    F,
     Q,
     Sum,
     Value,
@@ -20,8 +17,14 @@ from django.http import HttpResponse, JsonResponse
 from django.views import View
 
 from home.models import Account, Contest, DailyWalk
+from home.views.api.serializers.request_serializers import (
+    GetUsersReqSerializer,
+)
+from home.views.api.serializers.response_serializers import (
+    GetUsersRespSerializer,
+)
 
-from .utils import paginate
+from .utils import paginate, require_authn
 
 logger = logging.getLogger(__name__)
 
@@ -295,125 +298,55 @@ class AdminContestsView(View):
 class AdminUsersView(View):
     http_method_names = ["get"]
 
+    @require_authn
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            values = ["id", "name", "email", "age", "zip", "created"]
-            order_by = request.GET.get("order_by", "name")
-            page = int(request.GET.get("page", "1"))
-            per_page = 25
+        serializer = GetUsersReqSerializer(data=request.GET)
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, status=422)
 
-            # filter and annotate based on contest_id
-            filters = None
-            annotate = None
-            contest_id = request.GET.get("contest_id", None)
-            intentionalwalk_filter = None
+        validated = serializer.validated_data
+
+        contest_id = validated["contest_id"]
+        filters = validated["filters"]
+        order_by = validated["order_by"]
+        page = validated["page"]
+        per_page = validated["per_page"]
+
+        annotate = validated["annotate"]
+        intentionalwalk_annotate = validated["intentionalwalk_annotate"]
+
+        query = (
+            Account.objects.filter(filters)
+            .values("id", "name", "email", "age", "zip", "created")
+            .annotate(**annotate)
+            .order_by(*order_by)
+        )
+        query, links = paginate(request, query, page, per_page)
+
+        iw_query = (
+            Account.objects.filter(id__in=(row["id"] for row in query))
+            .values("id")
+            .annotate(**intentionalwalk_annotate)
+            .order_by(*order_by)
+        )
+
+        def update_user_dto(dto, iw_stats):
+            dto.update(iw_stats)
+            # at this point, we have enough info to determine if user is "active"
             if contest_id:
-                filters = Q(contests__contest_id=contest_id)
-                contest = Contest.objects.get(pk=contest_id)
-                dailywalk_filter = Q(
-                    dailywalk__date__range=(contest.start, contest.end)
-                )
-                intentionalwalk_filter = Q(
-                    intentionalwalk__start__gte=contest.start,
-                    intentionalwalk__start__lt=contest.end + timedelta(days=1),
-                )
-                annotate = {
-                    "is_new": ExpressionWrapper(
-                        Q(
-                            created__gte=contest.start_promo,
-                            created__lt=contest.end + timedelta(days=1),
-                        ),
-                        output_field=BooleanField(),
-                    ),
-                    "dw_count": Count("dailywalk", filter=dailywalk_filter),
-                    "dw_steps": Sum(
-                        "dailywalk__steps", filter=dailywalk_filter
-                    ),
-                    "dw_distance": Sum(
-                        "dailywalk__distance", filter=dailywalk_filter
-                    ),
-                }
-            else:
-                filters = Q()
-                annotate = {
-                    "dw_count": Count("dailywalk"),
-                    "dw_steps": Sum("dailywalk__steps"),
-                    "dw_distance": Sum("dailywalk__distance"),
-                }
-                intentionalwalk_filter = Q()
+                dto["is_active"] = dto["dw_count"] > 0 or dto["iw_count"] > 0
+            return dto
 
-            # filter to show users vs testers
-            filters = filters & Q(
-                is_tester=request.GET.get("is_tester", None) == "true"
-            )
+        result_dto = [
+            update_user_dto(dto, iw_stat)
+            for dto, iw_stat in zip(query, iw_query)
+        ]
+        resp = GetUsersRespSerializer(result_dto, many=True)
+        response = JsonResponse(resp.data, safe=False)
+        if links:
+            response.headers["Link"] = links
 
-            # filter by search query
-            query = request.GET.get("query", None)
-            if query:
-                filters = filters & Q(
-                    Q(name__icontains=query) | Q(email__icontains=query)
-                )
-
-            # set ordering
-            add_name = False
-            if order_by.startswith("-"):
-                add_name = order_by[1:] != "name"
-                order_by = [F(order_by[1:]).desc(nulls_last=True)]
-            else:
-                add_name = order_by != "name"
-                order_by = [F(order_by).asc(nulls_first=False)]
-            if add_name:
-                order_by.append("name")
-
-            # perform query!
-            results = (
-                Account.objects.filter(filters)
-                .values(*values)
-                .annotate(**annotate)
-                .order_by(*order_by)
-            )
-            (results, links) = paginate(request, results, page, per_page)
-            results = list(results)
-
-            # now query for and add in recorded IntentionalWalk stats
-            ids = [row["id"] for row in results]
-            iw_results = (
-                Account.objects.filter(id__in=ids)
-                .values("id")
-                .annotate(
-                    iw_count=Count(
-                        "intentionalwalk", filter=intentionalwalk_filter
-                    ),
-                    iw_steps=Sum(
-                        "intentionalwalk__steps", filter=intentionalwalk_filter
-                    ),
-                    iw_distance=Sum(
-                        "intentionalwalk__distance",
-                        filter=intentionalwalk_filter,
-                    ),
-                    iw_time=Sum(
-                        "intentionalwalk__walk_time",
-                        filter=intentionalwalk_filter,
-                    ),
-                )
-                .order_by(*order_by)
-            )
-            for i, row in enumerate(iw_results):
-                results[i].update(row)
-                # at this point, we have enough info to determine if user is "active"
-                if contest_id:
-                    results[i]["is_active"] = (
-                        results[i]["dw_count"] > 0
-                        or results[i]["iw_count"] > 0
-                    )
-
-            response = JsonResponse(list(results), safe=False)
-            if links:
-                response.headers["Link"] = links
-
-            return response
-        else:
-            return HttpResponse(status=401)
+        return response
 
 
 class AdminUsersByZipView(View):
