@@ -17,7 +17,11 @@ jobs:
       - run:
           name: Install Poetry
           command: |
-            curl -sSL https://install.python-poetry.org | python3 - --version 1.2.2
+            curl -sSL https://install.python-poetry.org | python3 - --version 1.8.2
+      - run:
+          name: Check valid poetry.lock
+          command: |
+            poetry check -vvv
       - restore_cache:
           keys:
             - deps-{{ checksum "poetry.lock" }}
@@ -25,7 +29,7 @@ jobs:
           name: Install Dependencies
           command: |
             poetry config virtualenvs.create false
-            poetry install
+            poetry install -vvv
       - save_cache:
           key: deps-{{ checksum "poetry.lock" }}
           paths:
