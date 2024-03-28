@@ -70,6 +70,16 @@ const Api = {
         params: { contest_id, start_date, end_date },
       });
     },
+    homeUsersByAgeGroup({ contest_id, age_min1, age_max1, age_min2, age_max2, age_min3, age_max3, age_min4, age_max4 }) {
+      return instance.get("/api/admin/users/age/between", {
+        params: { contest_id, age_min1, age_max1, age_min2, age_max2, age_min3, age_max3, age_min4, age_max4 }
+      });
+    },
+    homeUsersByAgeGroupDates({ start_date, end_date, age_min1, age_max1, age_min2, age_max2, age_min3, age_max3, age_min4, age_max4 }) {
+      return instance.get("/api/admin/users/age/between/dates", {
+        params: { start_date, end_date, age_min1, age_max1, age_min2, age_max2, age_min3, age_max3, age_min4, age_max4 }
+      });
+    },
     contests() {
       return instance.get("/api/admin/contests");
     },

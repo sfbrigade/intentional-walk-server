@@ -27,6 +27,21 @@ function Home() {
   const [stepsCumulative, setStepsCumulative] = useState();
   const [distanceDaily, setDistanceDaily] = useState();
   const [distanceCumulative, setDistanceCumulative] = useState();
+  const [ageDistribution1, setAgeDistribution1] = useState(0);
+  const [ageDistribution2, setAgeDistribution2] = useState(0);
+  const [ageDistribution3, setAgeDistribution3] = useState(0);
+  const [ageDistribution4, setAgeDistribution4] = useState(0);
+
+
+  const ageRange1Min= 18;
+  const ageRange1Max= 29;
+  const ageRange2Min= 30;
+  const ageRange2Max= 44;
+  const ageRange3Min= 45;
+  const ageRange3Max= 59;
+  const ageRange4Min= 60;
+  const ageRange4Max= null;
+
 
   useEffect(() => {
     let cancelled = false;
@@ -91,8 +106,70 @@ function Home() {
             ])
           )
       );
+
+      const fetchAgeData = async () => {
+        if (contest_id) {
+          return Api.admin
+            .homeUsersByAgeGroup({
+              contest_id,
+              age_min1: ageRange1Min,
+              age_max1: ageRange1Max,
+              age_min2: ageRange2Min,
+              age_max2: ageRange2Max,
+              age_min3: ageRange3Min,
+              age_max3: ageRange3Max,
+              age_min4: ageRange4Min,
+              age_max4: ageRange4Max
+            })
+            .then((response) => {
+              if (!cancelled) {
+                setAgeDistribution1(response.data.count1);
+                setAgeDistribution2(response.data.count2);
+                setAgeDistribution3(response.data.count3);
+                setAgeDistribution4(response.data.count4);
+              }
+            });
+        } else {
+          return Api.admin
+            .homeUsersByAgeGroupDates({
+              start_date,
+              end_date,
+              age_min1: ageRange1Min,
+              age_max1: ageRange1Max,
+              age_min2: ageRange2Min,
+              age_max2: ageRange2Max,
+              age_min3: ageRange3Min,
+              age_max3: ageRange3Max,
+              age_min4: ageRange4Min,
+              age_max4: ageRange4Max
+            })
+            .then((response) => {
+              if (!cancelled) {
+                setAgeDistribution1(response.data.count1);
+                setAgeDistribution2(response.data.count2);
+                setAgeDistribution3(response.data.count3);
+                setAgeDistribution4(response.data.count4);
+              }
+            });
+        }
+      }
+
+      fetchAgeData();
+
     return () => (cancelled = true);
-  }, [contest_id, start_date, end_date]);
+  }, [
+    contest_id,
+    start_date,
+    end_date
+  ]);
+
+    const ageDistData = [
+      ["Age Range", "Quantity"],
+      [`${ageRange1Min} to ${ageRange1Max}`, ageDistribution1],
+      [`${ageRange2Min} to ${ageRange2Max}`, ageDistribution2],
+      [`${ageRange3Min} to ${ageRange3Max}`, ageDistribution3],
+      [`${ageRange4Min} ${ageRange4Max === null ? "and up" : `to ${ageRange4Max}`}`, ageDistribution4]
+    ];
 
   function onChange(params) {
     navigate(
@@ -334,6 +411,31 @@ function Home() {
               />
             )}
           </div>
+            <div className="row my-5">
+              <div className="col-lg-6 text-center">
+                <h3>Age Distribution</h3>
+                {ageDistData && (
+                  <Chart
+                    chartType="ColumnChart"
+                    data={ageDistData}
+                    options={{
+                      legend: { position: "none" },
+                      bar: { groupWidth: "95%" },
+                      hAxis: {
+                        title: "Age"
+                      },
+                      vAxis: {
+                        title: "Number of Users",
+                        viewWindow: { min: 0 },
+                      },
+                      colors: ["#AF7AC5"],
+                    }}
+                    width="100%"
+                    height="400px"
+                  />
+                )}
+              </div>
+            </div>
         </div>
       </div>
     </>

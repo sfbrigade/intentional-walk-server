@@ -175,9 +175,9 @@ class AdminHomeUsersCumulativeView(AdminHomeGraphView):
                         CONCAT(("created" AT TIME ZONE '{os.getenv("TIME_ZONE", "America/Los_Angeles")}')::date,
                                 'T00:00:00') AS "date",
                         COUNT("id") AS "count"
-                     FROM "home_account"
-                     WHERE {conditions}
-                     GROUP BY "date") subquery
+                    FROM "home_account"
+                    WHERE {conditions}
+                    GROUP BY "date") subquery
                 ORDER BY "date"
                 """,
                 params,
@@ -259,10 +259,10 @@ class AdminHomeWalksCumulativeView(AdminHomeGraphView):
                     (SELECT
                         CONCAT("date", 'T00:00:00') AS "date",
                         SUM("{self.get_value_type()}") AS "count"
-                     FROM "home_dailywalk"
-                     JOIN "home_account" ON "home_account"."id"="home_dailywalk"."account_id"
-                     WHERE {conditions}
-                     GROUP BY "date") subquery
+                    FROM "home_dailywalk"
+                    JOIN "home_account" ON "home_account"."id"="home_dailywalk"."account_id"
+                    WHERE {conditions}
+                    GROUP BY "date") subquery
                 ORDER BY "date"
                 """,
                 params,
@@ -425,9 +425,9 @@ class AdminUsersActiveByZipView(View):
                         LEFT JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
                         LEFT JOIN home_intentionalwalk ON home_account.id=home_intentionalwalk.account_id
                         WHERE home_account.is_tester=%s AND
-                              home_account_contests.contest_id=%s AND
-                              ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
-                               (home_intentionalwalk.id IS NOT NULL AND
+                            home_account_contests.contest_id=%s AND
+                            ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
+                            (home_intentionalwalk.id IS NOT NULL AND
                                 home_intentionalwalk.start >= %s AND home_intentionalwalk.start < %s))
                     ) subquery
                     GROUP BY zip
@@ -453,10 +453,10 @@ class AdminUsersActiveByZipView(View):
                         LEFT JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
                         LEFT JOIN home_intentionalwalk ON home_account.id=home_intentionalwalk.account_id
                         WHERE home_account.is_tester=%s AND
-                              home_account_contests.contest_id=%s AND
-                              home_account.created >= %s AND home_account.created < %s AND
-                              ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
-                               (home_intentionalwalk.id IS NOT NULL AND
+                            home_account_contests.contest_id=%s AND
+                            home_account.created >= %s AND home_account.created < %s AND
+                            ((home_dailywalk.id IS NOT NULL AND home_dailywalk.date BETWEEN %s AND %s) OR
+                            (home_intentionalwalk.id IS NOT NULL AND
                                 home_intentionalwalk.start >= %s AND home_intentionalwalk.start < %s))
                     ) subquery
                     GROUP BY zip
@@ -501,8 +501,8 @@ class AdminUsersByZipMedianStepsView(View):
                         JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
                         JOIN home_account_contests ON home_account.id=home_account_contests.account_id
                         WHERE home_account.is_tester=%s AND
-                              home_account_contests.contest_id=%s AND
-                              home_dailywalk.date BETWEEN %s AND %s
+                            home_account_contests.contest_id=%s AND
+                            home_dailywalk.date BETWEEN %s AND %s
                         GROUP BY (home_account.id)
                     ) subquery
                 """,
@@ -520,8 +520,8 @@ class AdminUsersByZipMedianStepsView(View):
                         JOIN home_dailywalk ON home_account.id=home_dailywalk.account_id
                         JOIN home_account_contests ON home_account.id=home_account_contests.account_id
                         WHERE home_account.is_tester=%s AND
-                              home_account_contests.contest_id=%s AND
-                              home_dailywalk.date BETWEEN %s AND %s
+                            home_account_contests.contest_id=%s AND
+                            home_dailywalk.date BETWEEN %s AND %s
                         GROUP BY (home_account.id, home_account.zip)
                     ) subquery
                     GROUP BY zip
@@ -534,5 +534,120 @@ class AdminUsersByZipMedianStepsView(View):
 
             response = JsonResponse(payload)
             return response
+        else:
+            return HttpResponse(status=401)
+
+
+class AdminUsersByAgeGroupView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            contest_id = request.GET.get("contest_id", None)
+            if contest_id is None:
+                return HttpResponse(status=422)
+
+            age_ranges = [
+                (
+                    request.GET.get("age_min1", None),
+                    request.GET.get("age_max1", None),
+                ),
+                (
+                    request.GET.get("age_min2", None),
+                    request.GET.get("age_max2", None),
+                ),
+                (
+                    request.GET.get("age_min3", None),
+                    request.GET.get("age_max3", None),
+                ),
+                (
+                    request.GET.get("age_min4", None),
+                    request.GET.get("age_max4", None),
+                ),
+            ]
+
+            counts = []
+
+            sql_template = """
+                SELECT COUNT(*)
+                FROM home_account
+                JOIN home_account_contests ON home_account.id=home_account_contests.account_id
+                WHERE home_account_contests.contest_id=%s AND
+                    home_account.age >= %s AND
+                    home_account.age <= %s
+            """
+
+            with connection.cursor() as cursor:
+                for age_min, age_max in age_ranges:
+                    cursor.execute(
+                        sql_template, [contest_id, age_min, age_max]
+                    )
+                    result = cursor.fetchone()[0]
+                    counts.append(result)
+
+            response_data = {
+                f"count{i + 1}": count for i, count in enumerate(counts)
+            }
+
+            print(response_data)
+            return JsonResponse(response_data)
+        else:
+            return HttpResponse(status=401)
+
+
+class AdminUsersByAgeGroupDatesView(View):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            start_date = request.GET.get("start_date", None)
+            end_date = request.GET.get("end_date", None)
+
+            age_ranges = [
+                (
+                    request.GET.get("age_min1", None),
+                    request.GET.get("age_max1", None),
+                ),
+                (
+                    request.GET.get("age_min2", None),
+                    request.GET.get("age_max2", None),
+                ),
+                (
+                    request.GET.get("age_min3", None),
+                    request.GET.get("age_max3", None),
+                ),
+                (
+                    request.GET.get("age_min4", None),
+                    request.GET.get("age_max4", None),
+                ),
+            ]
+
+            counts = []
+
+            sql_template = """
+                SELECT COUNT(*)
+                FROM (
+                    SELECT home_account.id AS id, home_account.age
+                    FROM home_account
+                    WHERE home_account.created BETWEEN %s AND %s AND
+                        home_account.age >= %s AND
+                        home_account.age <= %s
+                    ) subquery
+            """
+
+            with connection.cursor() as cursor:
+                for age_min, age_max in age_ranges:
+                    cursor.execute(
+                        sql_template, [start_date, end_date, age_min, age_max]
+                    )
+                    result = cursor.fetchone()[0]
+                    counts.append(result)
+
+            response_data = {
+                f"count{i + 1}": count for i, count in enumerate(counts)
+            }
+
+            print(response_data)
+            return JsonResponse(response_data)
         else:
             return HttpResponse(status=401)

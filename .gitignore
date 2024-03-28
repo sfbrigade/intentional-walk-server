@@ -119,3 +119,5 @@ home/static
 # React SPA
 /client/build
 /node_modules
+
+.vscode

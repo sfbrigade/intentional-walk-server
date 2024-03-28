@@ -285,6 +285,7 @@ class TestAdminViews(TestCase):
             f"/api/admin/users/zip/active?contest_id={self.contest0_id}"
         )
         data = response.json()
+
         self.assertEqual(
             data,
             {
@@ -307,3 +308,16 @@ class TestAdminViews(TestCase):
                 "94103": 87500.0,
             },  # median of [70k, 105k] = avg of the two = 87.5k
         )
+
+    def test_age_range_counts_contest(self):
+        c = Client()
+        self.assertTrue(Login.login(c))
+
+        # get request for accounts aged 40 to 50
+        response = c.get(
+            f"/api/admin/users/age/between?contest_id={self.contest0_id}&age_min=40&age_max=50"
+        )
+        data = response.json()
+
+        # we know that two of the accounts (Users 2 and 3) will fall within these parameters
+        self.assertEqual(data["count"], 2)
