@@ -6,6 +6,7 @@ import numeral from "numeral";
 
 import "./Home.scss";
 import Api from "./Api";
+import Histogram from "./Components/Histogram";
 
 function Home() {
   const { search } = useLocation();
@@ -335,8 +336,37 @@ function Home() {
             )}
           </div>
         </div>
+        <div className="row my-5">
+          <div className="col-lg-6 text-center">
+            <Histogram
+              path="users"
+              field="age"
+              bin_size={10} // years
+              contest_id={contest_id}
+              start_date={start_date}
+              end_date={end_date}
+              options={chartOptions.histogram}
+              width="100%"
+              height="400px"
+            />
+          </div>
+        </div>
       </div>
     </>
   );
+}
+
+// Histogram chart options, to maintain stable
+// reference for the react reconciliation algorithm. 
+const chartOptions = {
+  histogram: {
+    legend: { position: "none" },
+    bar: { groupWidth: "95%" },
+    vAxis: {
+      title: "Steps",
+      viewWindow: { min: 0 },
+    },
+    colors: ["#2ECC71"],
+  }
 }
 export default Home;
