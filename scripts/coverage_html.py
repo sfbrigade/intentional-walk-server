@@ -15,6 +15,7 @@ works as expected.
 from coverage import Coverage
 import pytest
 
+
 def build_coverage_report():
     """Run tests and generate an html coverage report.
 
@@ -29,8 +30,8 @@ def build_coverage_report():
     cov.stop()
     cov.save()
     cov.report()
-    cov.html_report(directory='htmlcov')
+    cov.html_report(directory="htmlcov")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     build_coverage_report()
-
