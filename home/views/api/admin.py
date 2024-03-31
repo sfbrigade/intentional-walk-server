@@ -1,3 +1,4 @@
+import itertools
 import logging
 import os
 
@@ -13,10 +14,16 @@ from django.db.models import (
     Value,
 )
 from django.db.models.functions import Concat, TruncDate
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views import View
 
 from home.models import Account, Contest, DailyWalk
+from home.models.intentionalwalk import IntentionalWalk
+from home.models.leaderboard import Leaderboard
+from home.views.api.histogram.serializers import (
+    HistogramReqSerializer,
+    ValidatedHistogramReq,
+)
 from home.views.api.serializers.request_serializers import (
     GetUsersReqSerializer,
 )
@@ -536,3 +543,127 @@ class AdminUsersByZipMedianStepsView(View):
             return response
         else:
             return HttpResponse(status=401)
+
+
+class AdminHistogramView(View):
+    http_method_names = ["get"]
+
+    supported_models = {
+        "users": Account,
+        "dailywalk": DailyWalk,
+        "intentionalwalk": IntentionalWalk,
+        "leaderboard": Leaderboard,
+    }
+
+    @require_authn
+    def get(self, request: HttpRequest, model_name: str) -> HttpResponse:
+        """Get histogram data for a given model across a numberic field.
+
+        Binning is done by the bin_size parameter, bin_count parameter,
+        or bin_custom parameter.
+
+        bin_size: The size of each bin.
+        bin_count: The total number of bins.
+        bin_custom: A comma separated list of bin edges.
+        """
+        if model_name not in self.supported_models:
+            return HttpResponse(status=404)
+
+        serializer = HistogramReqSerializer(
+            data=request.GET, model=self.supported_models[model_name]
+        )
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, status=422)
+
+        # TODO: Implement a ResponseSerializer
+        # to handle serialization of the response
+        # (with filling of the bins)
+        # to either JSON or CSV format.
+        res: ValidatedHistogramReq = serializer.validated_data
+
+        # even bins either specified by bin_size or bin_size computed from bin_count
+        if res.get("bin_size"):
+            return JsonResponse(
+                {
+                    "data": list(
+                        self.fill_missing_bin_idx(
+                            query_set=res["query_set"],
+                            bin_size=res["bin_size"],
+                            total_bin_ct=res["bin_count"],
+                        )
+                    ),
+                    "unit": res["unit"],
+                    "bin_size": res["bin_size"],
+                }
+            )
+        # custom bins
+        return JsonResponse(
+            {
+                "data": list(
+                    self.fill_missing_bin_idx(
+                        query_set=res["query_set"],
+                        bin_custom=res["bin_custom"],
+                        total_bin_ct=res["bin_count"],
+                    )
+                ),
+                "unit": res["unit"],
+                "bin_custom": res["bin_custom"],
+            }
+        )
+
+    def fill_missing_bin_idx(
+        self,
+        query_set,
+        bin_size: int = None,
+        bin_custom: list = None,
+        total_bin_ct: int = None,
+    ):
+        """Fill in missing bin intervals lazily.
+
+        This is because the histogram is generated from a query set that may not have
+        found data in certain bins.
+
+        For example, if the bins were [0, 18, 20, 33, 50, 70],
+        which creates bins from 0-17, 18-20, 20-33, 33-50, 50-70.
+
+        There may be no users in in the 18-20 range, and no users in the 51 and 70.
+        In other words, missing on bin_idx = 1 and bin_idx = 4.
+        The query would not return any groupings for the [18, 20], or [50, 70]
+        This function will fill in those missing bins with a count of 0.
+        """
+
+        def create_filler(cursor, bin_size, bin_custom):
+            res = {}
+            # bin_start and bin_end are inclusive.
+            if bin_custom:
+                res["bin_start"] = bin_custom[cursor]
+                if cursor + 1 < len(bin_custom):
+                    res["bin_end"] = bin_custom[cursor + 1]
+            else:
+                res["bin_start"] = cursor * bin_size
+                res["bin_end"] = (cursor + 1) * bin_size
+            # Done down here to maintain stable order of keys.
+            res["count"] = 0
+            res["bin_idx"] = cursor
+            return res
+
+        bin_idx_counter = itertools.count()
+        cursor = 0
+        for bin in query_set:
+            cursor = next(bin_idx_counter)
+            curr_idx = bin["bin_idx"]
+            while curr_idx > cursor:
+                yield create_filler(
+                    cursor=cursor, bin_size=bin_size, bin_custom=bin_custom
+                )
+                cursor = next(bin_idx_counter)
+            yield bin
+
+        cursor = next(bin_idx_counter)
+        # Fill in the rest of the bins with 0 count,
+        # until we reach the total expected count of bins.
+        while cursor < total_bin_ct:
+            yield create_filler(
+                cursor=cursor, bin_size=bin_size, bin_custom=bin_custom
+            )
+            cursor = next(bin_idx_counter)
