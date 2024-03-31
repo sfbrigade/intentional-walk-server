@@ -1,0 +1,46 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: monthly 
+    groups:
+      - name: python-build-tools
+        patterns:
+          - "pip"
+          - "setuptools"
+          - "wheel"
+          - "poetry"
+      - name: python-dev-tools
+        patterns:
+          - "pytest*"
+          - "coverage"
+          - "flake8"
+          - "mypy*"
+          - "black"
+          - "autoflake"
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: monthly
+    groups:
+      - name: javascript-build-tools
+        patterns:
+          - "yarn"
+          - "npm"
+          - "babel*"
+      - name: javascript-dev-tools
+        patterns:
+          - "prettier"
+          - "@testing-library/*"
+          - "react-scripts"
+          - "foreman"
+  # Non-dev/build dependencies remain ungrouped.
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: monthly 
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: monthly 
