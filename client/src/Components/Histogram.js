@@ -13,6 +13,7 @@ function Histogram({
     end_date,
     bin_size,
     bin_count,
+    bin_custom,
     field,
     path,
     // props
@@ -39,6 +40,7 @@ function Histogram({
                     path,
                     bin_size,
                     bin_count,
+                    bin_custom,
                 });
                 const { data, unit } = response.data;
                 !cancelled && setResp({
@@ -60,6 +62,7 @@ function Histogram({
         end_date,
         bin_size,
         bin_count,
+        bin_custom,
         field,
         path,
     ])

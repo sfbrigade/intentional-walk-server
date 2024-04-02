@@ -341,7 +341,7 @@ function Home() {
             <Histogram
               path="users"
               field="age"
-              bin_size={10} // years
+              bin_custom="18,30,45,61"
               contest_id={contest_id}
               start_date={start_date}
               end_date={end_date}
