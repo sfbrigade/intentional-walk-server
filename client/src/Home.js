@@ -363,7 +363,7 @@ const chartOptions = {
     legend: { position: "none" },
     bar: { groupWidth: "95%" },
     vAxis: {
-      title: "Steps",
+      title: "Age",
       viewWindow: { min: 0 },
     },
     colors: ["#2ECC71"],

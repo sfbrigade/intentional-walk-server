@@ -91,7 +91,10 @@ const transform = (data, field) => {
     return [
         [capitalize(field), "Count"],
         ...data.map(
-            ({ bin_start, bin_end, count }) => [`${bin_start}-${bin_end}`, count])
+            ({ bin_start, bin_end, count }) => [
+                bin_end ? `${bin_start}-${bin_end}` : `>${bin_start}`,
+                count,
+            ])
     ]
 }
 
