@@ -10,7 +10,9 @@ jobs:
         environment:
           DATABASE_URL: "postgresql://postgres@localhost/webtool"
           SECRET_KEY: "secretkey"
-      - image: cimg/postgres:11.17
+        # This image MUST be in-sync with our Docker image for production
+        # TODO: Use the same image as our dockerfile to test build instead of this
+      - image: cimg/postgres:12.8
         environment: POSTGRES_HOST_AUTH_METHOD=trust
     steps:
       - checkout
@@ -41,7 +43,11 @@ jobs:
             poetry run flake8 --count home server manage.py
       - run:
           name: Run Pytest, report coverage
+          # make test and make coverage are redundant,
+          # but make coverage actually doesn't fail the build if it fails; it just reports a lower
+          # coverage percentage for failing short, but "succeeds"
           command: |
+            make test
             make coverage
             poetry run coveralls
 workflows:
