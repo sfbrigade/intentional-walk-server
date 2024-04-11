@@ -242,7 +242,7 @@ class TestAdminViews(TestCase):
         self.assertEqual(len(data), 1)  # 1 tester
 
         # query
-        response = c.get("/api/admin/users?query=2")
+        response = c.get("/api/admin/users?query=User 2")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 1)
