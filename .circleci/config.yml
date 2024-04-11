@@ -39,8 +39,8 @@ jobs:
       - run:
           name: Run linter checks
           command: |
-            poetry run black --check home server manage.py
-            poetry run flake8 --count home server manage.py
+            poetry run black --check .
+            poetry run flake8 --count . 
       - run:
           name: Run Pytest, report coverage
           # make test and make coverage are redundant,

@@ -18,3 +18,7 @@ services:
     command: python -m http.server
     ports:
       - "8001:8000"
+  db:
+    image: postgres:12
+    ports:
+      - 5433:5432
