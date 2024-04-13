@@ -92,7 +92,9 @@ const transform = (data, field) => {
         [capitalize(field), "Count"],
         ...data.map(
             ({ bin_start, bin_end, count }) => [
-                bin_end ? `${bin_start}-${bin_end}` : `>${bin_start}`,
+                // Subtract by 1 at the end since the ranges are exclusive, and we want to
+                // display them as inclusive.
+                bin_end ? `${bin_start}-${bin_end - 1}` : `>${bin_start}`,
                 count,
             ])
     ]
