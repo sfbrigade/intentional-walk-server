@@ -34,14 +34,14 @@ jobs:
       - run:
           name: Lint code with Flake8
           command: |
-            docker exec server bash -c "poetry run flake8 --count ."
+            docker-compose -p iwalk exec server bash -c "poetry run flake8 --count ."
       - run:
           name: Run Pytest, report coverage
           # make test and make coverage are redundant,
           # but make coverage actually doesn't fail the build if it fails; it just reports a lower
           # coverage percentage for failing short, but "succeeds"
           command: |
-            docker exec server bash -c "
+            docker-compose -p iwalk exec -e COVERALLS_REPO_TOKEN server bash -c "
               make test
               make coverage
               poetry run coveralls
