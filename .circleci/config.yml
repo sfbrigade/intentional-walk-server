@@ -6,50 +6,54 @@ orbs:
 jobs:
   build-and-test:
     docker:
-      - image: cimg/python:3.11.4
-        environment:
-          DATABASE_URL: "postgresql://postgres@localhost/webtool"
-          SECRET_KEY: "secretkey"
-        # This image MUST be in-sync with our Docker image for production
-        # TODO: Use the same image as our dockerfile to test build instead of this
-      - image: cimg/postgres:12.8
-        environment: POSTGRES_HOST_AUTH_METHOD=trust
+      - image: cimg/base:edge
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true 
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t iwalk .
+      - run:
+          name: Run Docker image
+          command: |
+            docker run -d --name iwalk iwalk &&  docker logs iwalk && docker exec iwalk bash -c "curl -sSL https://install.python-poetry.org | python3 - --version 1.8.2"
       - run:
           name: Install Poetry
           command: |
-            curl -sSL https://install.python-poetry.org | python3 - --version 1.8.2
+            docker exec iwalk bash -c "curl -sSL https://install.python-poetry.org | python3 - --version 1.8.2"
       - run:
-          name: Check valid poetry.lock
+          name: Check Poetry
           command: |
-            poetry check -vvv
-      - restore_cache:
-          keys:
-            - deps-{{ checksum "poetry.lock" }}
+            docker exec iwalk bash -c "poetry check -vvv"
       - run:
-          name: Install Dependencies
+          name: Configure Poetry
           command: |
-            poetry config virtualenvs.create false
-            poetry install -vvv
-      - save_cache:
-          key: deps-{{ checksum "poetry.lock" }}
-          paths:
-            - /home/circleci/.cache/pypoetry/virtualenvs
+            docker exec iwalk bash -c "poetry config virtualenvs.create false"
       - run:
-          name: Run linter checks
+          name: Install dependencies
           command: |
-            poetry run black --check .
-            poetry run flake8 --count . 
+            docker exec iwalk bash -c "poetry install -vvv"
+      - run:
+          name: Check code formatting with Black
+          command: |
+            docker exec iwalk bash -c "poetry run black --check ."
+      - run:
+          name: Lint code with Flake8
+          command: |
+            docker exec iwalk bash -c "poetry run flake8 --count ."
       - run:
           name: Run Pytest, report coverage
           # make test and make coverage are redundant,
           # but make coverage actually doesn't fail the build if it fails; it just reports a lower
           # coverage percentage for failing short, but "succeeds"
           command: |
-            make test
-            make coverage
-            poetry run coveralls
+            docker exec iwalk bash -c "
+              make test
+              make coverage
+              poetry run coveralls
+            "
 workflows:
   main:
     jobs:
