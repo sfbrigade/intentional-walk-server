@@ -19,9 +19,14 @@ jobs:
           command: |
             docker-compose -p iwalk -f docker-compose.yml -f docker-compose.override.yml up -d
       - run:
+          name: LOGS 
+          command: |
+            echo "showing logs..."
+            docker-compose -p iwalk logs
+      - run:
           name: Check Poetry
           command: |
-            docker-compose -p iwalk exec iwalk-server-1 bash -c "poetry check -vvv"
+            docker-compose -p iwalk exec server bash -c "poetry check -vvv"
       - run:
           name: Check code formatting with Black
           command: |
