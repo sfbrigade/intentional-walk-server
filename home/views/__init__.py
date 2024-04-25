@@ -13,6 +13,7 @@ from .api.admin import (
     AdminUsersByZipView,
     AdminUsersActiveByZipView,
     AdminUsersByZipMedianStepsView,
+    AdminHistogramView,
 )
 from .api.appuser import AppUserCreateView, AppUserDeleteView
 from .api.dailywalk import DailyWalkCreateView, DailyWalkListView

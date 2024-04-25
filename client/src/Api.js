@@ -93,6 +93,16 @@ const Api = {
         params: { contest_id, is_tester },
       });
     },
+    histogram({
+      path, field,
+      contest_id, is_tester,
+      start_date, end_date,
+      bin_size, bin_count, bin_custom,
+    }) {
+      return instance.get(`/api/admin/${path}/histogram`, {
+        params: { contest_id, is_tester, field, start_date, end_date, bin_size, bin_count, bin_custom },
+      });
+    }
   },
   static: {
     map() {

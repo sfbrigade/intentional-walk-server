@@ -5,13 +5,13 @@ updates:
     schedule:
       interval: monthly 
     groups:
-      - name: python-build-tools
+      python-build-tools:
         patterns:
           - "pip"
           - "setuptools"
           - "wheel"
           - "poetry"
-      - name: python-dev-tools
+      python-dev-tools:
         patterns:
           - "pytest*"
           - "coverage"
@@ -24,23 +24,14 @@ updates:
     schedule:
       interval: monthly
     groups:
-      - name: javascript-build-tools
+      javascript-build-tools:
         patterns:
           - "yarn"
           - "npm"
           - "babel*"
-      - name: javascript-dev-tools
+      javascript-dev-tools:
         patterns:
           - "prettier"
           - "@testing-library/*"
           - "react-scripts"
           - "foreman"
-  # Non-dev/build dependencies remain ungrouped.
-  - package-ecosystem: pip
-    directory: "/"
-    schedule:
-      interval: monthly 
-  - package-ecosystem: npm
-    directory: "/"
-    schedule:
-      interval: monthly 

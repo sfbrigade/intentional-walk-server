@@ -1,5 +1,5 @@
 import logging
-
+from random import seed
 from django.test import Client, TestCase
 
 from .utils import Login, generate_test_data
@@ -9,6 +9,13 @@ logger = logging.getLogger(__name__)
 
 class TestAdminViews(TestCase):
     contest0_id = None
+
+    def setUp(self):
+        seed(1)
+
+    def tearDown(self) -> None:
+        seed()
+        return super().tearDown()
 
     @classmethod
     def setUpTestData(cls):
