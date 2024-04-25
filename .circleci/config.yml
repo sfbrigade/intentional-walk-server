@@ -5,13 +5,11 @@ orbs:
 
 jobs:
   build-and-test:
-    docker:
-      - image: cimg/base:edge
+    machine:
+      image: ubuntu-2004:current 
+      docker_layer_caching: true 
     steps:
       - checkout
-      - machine:
-          image: ubuntu-2004:202106-01
-          docker_layer_caching: true 
       - run:
           name: Copy example.env to .env
           command: |
