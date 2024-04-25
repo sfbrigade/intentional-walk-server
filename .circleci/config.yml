@@ -12,44 +12,32 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true 
       - run:
-          name: Build Docker image
+          name: Copy example.env to .env
           command: |
-            docker build -t iwalk .
+            cp example.env .env      
       - run:
           name: Run Docker image
           command: |
-            docker run -d --name iwalk iwalk &&  docker logs iwalk && docker exec iwalk bash -c "curl -sSL https://install.python-poetry.org | python3 - --version 1.8.2"
-      - run:
-          name: Install Poetry
-          command: |
-            docker exec iwalk bash -c "curl -sSL https://install.python-poetry.org | python3 - --version 1.8.2"
+            docker-compose -p iwalk -f docker-compose.yml -f docker-compose.override.yml up -d
       - run:
           name: Check Poetry
           command: |
-            docker exec iwalk bash -c "poetry check -vvv"
-      - run:
-          name: Configure Poetry
-          command: |
-            docker exec iwalk bash -c "poetry config virtualenvs.create false"
-      - run:
-          name: Install dependencies
-          command: |
-            docker exec iwalk bash -c "poetry install -vvv"
+            docker-compose -p iwalk exec server bash -c "poetry check -vvv"
       - run:
           name: Check code formatting with Black
           command: |
-            docker exec iwalk bash -c "poetry run black --check ."
+            docker-compose -p iwalk exec server bash -c "black --check ."
       - run:
           name: Lint code with Flake8
           command: |
-            docker exec iwalk bash -c "poetry run flake8 --count ."
+            docker exec server bash -c "poetry run flake8 --count ."
       - run:
           name: Run Pytest, report coverage
           # make test and make coverage are redundant,
           # but make coverage actually doesn't fail the build if it fails; it just reports a lower
           # coverage percentage for failing short, but "succeeds"
           command: |
-            docker exec iwalk bash -c "
+            docker exec server bash -c "
               make test
               make coverage
               poetry run coveralls

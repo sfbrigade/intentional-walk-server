@@ -1,6 +1,7 @@
 version: '3'
 services:
   server:
+    image: server
     command: bash -l -c "bin/init; nf start -j Procfile.dev"
     environment:
       - PORT=3000
