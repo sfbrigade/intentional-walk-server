@@ -9,7 +9,8 @@ jobs:
       - image: cimg/base:edge
     steps:
       - checkout
-      - setup_remote_docker:
+      - machine:
+          image: ubuntu-2004:202106-01
           docker_layer_caching: true 
       - run:
           name: Copy example.env to .env
@@ -22,7 +23,7 @@ jobs:
       - run:
           name: Check Poetry
           command: |
-            docker-compose -p iwalk exec server bash -c "poetry check -vvv"
+            docker-compose -p iwalk exec iwalk-server-1 bash -c "poetry check -vvv"
       - run:
           name: Check code formatting with Black
           command: |
