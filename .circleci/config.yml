@@ -6,20 +6,20 @@ orbs:
 jobs:
   build-and-test:
     machine:
-      image: ubuntu-2004:current 
-      docker_layer_caching: true 
+      image: ubuntu-2004:current
+      docker_layer_caching: true
     steps:
       - checkout
       - run:
           name: Copy example.env to .env
           command: |
-            cp example.env .env      
+            cp example.env .env
       - run:
           name: Run Docker image
           command: |
             docker-compose -p iwalk -f docker-compose.yml -f docker-compose.override.yml up -d
       - run:
-          name: LOGS 
+          name: LOGS
           command: |
             echo "showing logs..."
             docker-compose -p iwalk logs
@@ -40,8 +40,15 @@ jobs:
           # make test and make coverage are redundant,
           # but make coverage actually doesn't fail the build if it fails; it just reports a lower
           # coverage percentage for failing short, but "succeeds"
+          # We are not at risk:
+          # As we are
+          # Building this in a container on a remote ci server,
+          # we are not at risk of the following:
+          # https://stackoverflow.com/a/73100228
+          # git config --global --add safe.directory /app
           command: |
             docker-compose -p iwalk exec -e COVERALLS_REPO_TOKEN server bash -c "
+              git config --global --add safe.directory /app 
               make test
               make coverage
               poetry run coveralls
