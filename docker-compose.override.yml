@@ -15,9 +15,9 @@ services:
     volumes:
       - .:/app
     working_dir: /app/htmlcov
-    command: python -m http.server
+    command: python -m http.server 8001
     ports:
-      - "8001:8000"
+      - "8001:8001"
   db:
     image: postgres:12
     ports:
