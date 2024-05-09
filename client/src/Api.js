@@ -94,15 +94,32 @@ const Api = {
       });
     },
     histogram({
-      path, field,
-      contest_id, is_tester,
-      start_date, end_date,
-      bin_size, bin_count, bin_custom,
+      path,
+      field,
+      contest_id,
+      is_tester,
+      start_date,
+      end_date,
+      bin_size,
+      bin_count,
+      bin_custom,
     }) {
+      if (contest_id) {
+        [start_date, end_date] = "";
+      }
       return instance.get(`/api/admin/${path}/histogram`, {
-        params: { contest_id, is_tester, field, start_date, end_date, bin_size, bin_count, bin_custom },
+        params: {
+          contest_id,
+          is_tester,
+          field,
+          start_date,
+          end_date,
+          bin_size,
+          bin_count,
+          bin_custom,
+        },
       });
-    }
+    },
   },
   static: {
     map() {
