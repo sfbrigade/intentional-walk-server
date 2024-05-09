@@ -5,51 +5,54 @@ orbs:
 
 jobs:
   build-and-test:
-    docker:
-      - image: cimg/python:3.11.4
-        environment:
-          DATABASE_URL: "postgresql://postgres@localhost/webtool"
-          SECRET_KEY: "secretkey"
-        # This image MUST be in-sync with our Docker image for production
-        # TODO: Use the same image as our dockerfile to test build instead of this
-      - image: cimg/postgres:12.8
-        environment: POSTGRES_HOST_AUTH_METHOD=trust
+    machine:
+      image: ubuntu-2004:current
+      docker_layer_caching: true
     steps:
       - checkout
       - run:
-          name: Install Poetry
+          name: Copy example.env to .env
           command: |
-            curl -sSL https://install.python-poetry.org | python3 - --version 1.8.2
+            cp example.env .env
       - run:
-          name: Check valid poetry.lock
+          name: Run Docker image
           command: |
-            poetry check -vvv
-      - restore_cache:
-          keys:
-            - deps-{{ checksum "poetry.lock" }}
+            docker-compose -p iwalk -f docker-compose.yml -f docker-compose.override.yml up -d
       - run:
-          name: Install Dependencies
+          name: LOGS
           command: |
-            poetry config virtualenvs.create false
-            poetry install -vvv
-      - save_cache:
-          key: deps-{{ checksum "poetry.lock" }}
-          paths:
-            - /home/circleci/.cache/pypoetry/virtualenvs
+            echo "showing logs..."
+            docker-compose -p iwalk logs
       - run:
-          name: Run linter checks
+          name: Check Poetry
           command: |
-            poetry run black --check .
-            poetry run flake8 --count . 
+            docker-compose -p iwalk exec server bash -c "poetry check -vvv"
+      - run:
+          name: Check code formatting with Black
+          command: |
+            docker-compose -p iwalk exec server bash -c "black --check ."
+      - run:
+          name: Lint code with Flake8
+          command: |
+            docker-compose -p iwalk exec server bash -c "poetry run flake8 --count ."
       - run:
           name: Run Pytest, report coverage
           # make test and make coverage are redundant,
           # but make coverage actually doesn't fail the build if it fails; it just reports a lower
           # coverage percentage for failing short, but "succeeds"
+          # We are not at risk:
+          # As we are
+          # Building this in a container on a remote ci server,
+          # we are not at risk of the following:
+          # https://stackoverflow.com/a/73100228
+          # git config --global --add safe.directory /app
           command: |
-            make test
-            make coverage
-            poetry run coveralls
+            docker-compose -p iwalk exec -e COVERALLS_REPO_TOKEN server bash -c "
+              git config --global --add safe.directory /app 
+              make test
+              make coverage
+              poetry run coveralls
+            "
 workflows:
   main:
     jobs:
