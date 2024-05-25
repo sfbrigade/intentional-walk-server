@@ -183,7 +183,7 @@ class TestHistogram(TestCase):
                 "expect": {
                     "response": {
                         "data": [],
-                        "unit": "steps", 
+                        "unit": "steps",
                         "bin_size": 10,
                     }
                 },

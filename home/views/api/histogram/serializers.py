@@ -247,7 +247,7 @@ class HistogramReqSerializer(serializers.Serializer):
         )
 
         upper, lower = range.get("max_value"), range.get("min_value")
-        if not upper or not lower: 
+        if not upper or not lower:
             # no data was found in the range.
             return {
                 "query_set": model.objects.none(),
@@ -255,7 +255,7 @@ class HistogramReqSerializer(serializers.Serializer):
                 "bin_custom": bin_custom,
                 "bin_size": bin_size,
                 "unit": self.unit,
-            } 
+            }
 
         if bin_count:
             # Using an offset because dividing by N equal parts
@@ -323,7 +323,7 @@ class HistogramReqSerializer(serializers.Serializer):
             def get_bin_end(bin_start):
                 idx_of_end = idx_lookup[bin_start] + 1
                 if idx_of_end >= len(bin_custom):
-                    return upper 
+                    return upper
                 return bin_custom[idx_of_end]
 
             def get_bin_idx(bin_start):
