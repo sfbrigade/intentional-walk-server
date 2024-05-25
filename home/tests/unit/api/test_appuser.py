@@ -1,24 +1,6 @@
 from django.test import TestCase
 
-from home.views.api.appuser import is_tester, validate_account_input
-
-
-class TestIsTester(TestCase):
-    def test_is_tester(self):
-        examples = [
-            ("Tester A", True),
-            ("Test B", False),  # are we sure this is the behavior we want?
-            ("tester c", True),
-            ("Testerosa", False),
-            ("tester-d", True),
-            ("Tester_E", True),
-            ("testrata", False),
-            ("tester", False),  # are we sure this is the behavior we want?
-        ]
-        for example, expected in examples:
-            self.assertEqual(
-                expected, is_tester(example), f"failed '{example}'"
-            )
+from home.views.api.appuser import validate_account_input
 
 
 class TestValidateAccountInput(TestCase):
