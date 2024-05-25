@@ -30,6 +30,7 @@ function Histogram({
     useEffect(() => {
         let cancelled = false;
         setLoading(true);
+        setError(null);
         const fetchHistogram = async () => {
             try {
                 const response = await Api.admin.histogram({
@@ -44,7 +45,6 @@ function Histogram({
                 });
                 const { data, unit } = response.data;
                 if (!cancelled) {
-                    setError(null);
                     setResp({
                         data: transform(data, field),
                         unit,
