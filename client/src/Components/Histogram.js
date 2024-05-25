@@ -43,11 +43,14 @@ function Histogram({
                     bin_custom,
                 });
                 const { data, unit } = response.data;
-                !cancelled && setResp({
-                    data: transform(data, field),
-                    unit,
-                    bin_size,
-                });
+                if (!cancelled) {
+                    setError(null);
+                    setResp({
+                        data: transform(data, field),
+                        unit,
+                        bin_size,
+                    });
+                }
             } catch (error) {
                 !cancelled && setError(error)
             } finally {
@@ -88,13 +91,16 @@ function Histogram({
 }
 
 const transform = (data, field) => {
+    // Display a cutoff for the last bin,
+    // since the last bin is the upper limit.
+    const lastIdx = data.length - 1;
     return [
         [capitalize(field), "Count"],
         ...data.map(
-            ({ bin_start, bin_end, count }) => [
+            ({ bin_start, bin_end, count }, i) => [
                 // Subtract by 1 at the end since the ranges are exclusive, and we want to
                 // display them as inclusive.
-                bin_end ? `${bin_start}-${bin_end - 1}` : `>${bin_start}`,
+                (i !== lastIdx) ? `${bin_start}-${bin_end - 1}` : `>${bin_start}`,
                 count,
             ])
     ]
