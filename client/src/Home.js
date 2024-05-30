@@ -342,9 +342,10 @@ function Home() {
               path="users"
               field="age"
               bin_custom="18,30,45,60"
+              // contest_id and dates are mutually exclusive
               contest_id={contest_id}
-              start_date={start_date}
-              end_date={end_date}
+              start_date={contest_id ? undefined : start_date}
+              end_date={contest_id ? undefined : end_date}
               options={chartOptions.histogram}
               width="100%"
               height="400px"

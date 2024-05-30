@@ -231,7 +231,7 @@ class HistogramReqSerializer(serializers.Serializer):
         bin_count: int,
         bin_size: int,
         bin_custom: List[int],
-    ):
+    ) -> ValidatedHistogramReq:
         """Handle bin_count generates a histogram based on the bin_count."""
         date_filter: Q = self.get_date_filter(
             model=model,
@@ -248,9 +248,14 @@ class HistogramReqSerializer(serializers.Serializer):
 
         upper, lower = range.get("max_value"), range.get("min_value")
         if not upper or not lower:
-            raise serializers.ValidationError(
-                {"non_field_errors": "No data found for the given date range."}
-            )
+            # no data was found in the range.
+            return {
+                "query_set": model.objects.none(),
+                "bin_count": bin_count,
+                "bin_custom": bin_custom,
+                "bin_size": bin_size,
+                "unit": self.unit,
+            }
 
         if bin_count:
             # Using an offset because dividing by N equal parts

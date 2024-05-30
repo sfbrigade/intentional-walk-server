@@ -181,7 +181,11 @@ class TestHistogram(TestCase):
                     "model": Leaderboard,
                 },
                 "expect": {
-                    "error": "No data found",
+                    "response": {
+                        "data": [],
+                        "unit": "steps",
+                        "bin_size": 10,
+                    }
                 },
             },
             {
