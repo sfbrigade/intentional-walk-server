@@ -39,6 +39,20 @@ class TestHistogram(TestCase):
                 },
             },
             {
+                "name": "empty contest with no user",
+                "input": {
+                    "field": "age",
+                    "bin_size": 10,
+                    "model": Account,
+                    "contest_id": self.empty_contest_id,
+                },
+                "expect": {
+                    "response": {
+                        "data": [],
+                    }
+                },
+            },
+            {
                 "name": "require contest id data for Leaderboard",
                 "input": {
                     "field": "steps",

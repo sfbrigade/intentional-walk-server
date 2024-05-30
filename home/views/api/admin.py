@@ -616,7 +616,7 @@ class AdminHistogramView(View):
         query_set,
         bin_size: int = None,
         bin_custom: list = None,
-        total_bin_ct: int = None,
+        total_bin_ct: int = 0,
     ):
         """Fill in missing bin intervals lazily.
 
@@ -662,7 +662,7 @@ class AdminHistogramView(View):
         cursor = next(bin_idx_counter)
         # Fill in the rest of the bins with 0 count,
         # until we reach the total expected count of bins.
-        while cursor < total_bin_ct:
+        while cursor and cursor < total_bin_ct:
             yield create_filler(
                 cursor=cursor, bin_size=bin_size, bin_custom=bin_custom
             )
