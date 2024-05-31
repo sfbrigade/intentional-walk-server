@@ -179,3 +179,6 @@ LOGGING = {
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+# Add trusted origins
+CSRF_TRUSTED_ORIGINS = [f"http://localhost:3000"]
