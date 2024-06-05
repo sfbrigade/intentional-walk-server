@@ -180,5 +180,6 @@ LOGGING = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-# Add trusted origins
-CSRF_TRUSTED_ORIGINS = [f"http://localhost:3000"]
+# React client is on 3000, while django admin auth is on 8000
+if os.getenv("DEPLOY_ENV") == "development":
+   CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
