@@ -306,7 +306,8 @@ class HistogramReqSerializer(serializers.Serializer):
             # ORDER BY bin_start
             last_bin = Value(bin_custom[-1])
             query_set = (
-                model.objects.annotate(
+                model.objects.filter(date_filter)
+                .annotate(
                     bin_start=Case(
                         *cases, default=last_bin, output_field=IntegerField()
                     ),
@@ -360,7 +361,8 @@ class HistogramReqSerializer(serializers.Serializer):
         #  GROUP BY bin
         #  ORDER BY bin
         query_set = (
-            model.objects.annotate(
+            model.objects.filter(date_filter)
+            .annotate(
                 bin_idx=ExpressionWrapper(
                     Floor(F(field) / bin_size), output_field=IntegerField()
                 ),
@@ -435,7 +437,9 @@ class HistogramReqSerializer(serializers.Serializer):
                 # We'll use the beginning of the start_date day,
                 # and the end of the end_date day to capture all records
                 start_date = make_aware(
-                    datetime.combine(contest.start, time.min)
+                    datetime.combine(
+                        contest.start_baseline or contest.start, time.min
+                    )
                 )
                 end_date = make_aware(datetime.combine(contest.end, time.max))
 

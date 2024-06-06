@@ -75,20 +75,26 @@ function Histogram({
     if (loading) {
         return <Loading width={width} height={height} />
     }
+    // Header is the first entry, so it needs more than 1 length to have data.
+    const hasData = resp.data.length > 1;
     return (
         <>
             <h3>{pathToTitle(path, field, resp.unit)}</h3>
-            <Chart
-                // Because we have pre-binned data.
-                chartType="ColumnChart"
-                data={resp.data}
-                options={options}
-                width={width}
-                height={height}
-            />
+
+            {
+                // The header is the first entry, the rest are 
+                // the bins. This indicates that there is data. 
+                (hasData) ? <Chart
+                    // Because we have pre-binned data.
+                    chartType="ColumnChart"
+                    data={resp.data}
+                    options={options}
+                    width={width}
+                    height={height}
+                /> : <p>No data available.</p>}
         </>
     );
-}
+};
 
 const transform = (data, field) => {
     // Display a cutoff for the last bin,
