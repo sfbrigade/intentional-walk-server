@@ -75,6 +75,8 @@ function Histogram({
     if (loading) {
         return <Loading width={width} height={height} />
     }
+    // Header is the first entry, so it needs more than 1 length to have data.
+    const hasData = resp.data.length > 1;
     return (
         <>
             <h3>{pathToTitle(path, field, resp.unit)}</h3>
@@ -82,7 +84,7 @@ function Histogram({
             {
                 // The header is the first entry, the rest are 
                 // the bins. This indicates that there is data. 
-                (resp.data.length > 1) ? <Chart
+                (hasData) ? <Chart
                     // Because we have pre-binned data.
                     chartType="ColumnChart"
                     data={resp.data}
