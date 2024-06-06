@@ -1,7 +1,7 @@
 from random import seed
-from datetime import date, timezone, datetime
+from datetime import date, timedelta, timezone, datetime
 from django.test import TestCase
-from home.models import Account, Contest
+from home.models import Account, Contest, Device
 from home.models.dailywalk import DailyWalk
 from home.models.intentionalwalk import IntentionalWalk
 from home.models.leaderboard import Leaderboard
@@ -14,9 +14,10 @@ class TestHistogram(TestCase):
         seed(123)
         self.contest_id = generate_test_data()
         no_participants = Contest(
-            start=datetime(5000, 1, 1, tzinfo=timezone.utc),
+            start=datetime(5000, 1, 2, tzinfo=timezone.utc),
             end=datetime(5000, 1, 31, tzinfo=timezone.utc),
             start_promo=datetime(5000, 1, 1, tzinfo=timezone.utc),
+            start_baseline=datetime(5000, 1, 1, tzinfo=timezone.utc),
         )
         no_participants.save()
         self.empty_contest_id = str(no_participants.contest_id)
@@ -291,12 +292,6 @@ class TestHistogram(TestCase):
                     "response": {
                         "data": [
                             {
-                                "bin_idx": 1,
-                                "bin_start": 10,
-                                "bin_end": 20,
-                                "count": 1,
-                            },
-                            {
                                 "bin_idx": 2,
                                 "bin_start": 20,
                                 "bin_end": 30,
@@ -312,7 +307,7 @@ class TestHistogram(TestCase):
                                 "bin_idx": 6,
                                 "bin_start": 60,
                                 "bin_end": 70,
-                                "count": 2,
+                                "count": 1,
                             },
                         ],
                         "bin_count": 5,
@@ -367,12 +362,6 @@ class TestHistogram(TestCase):
                     "response": {
                         "data": [
                             {
-                                "bin_start": 5,
-                                "bin_end": 18,
-                                "bin_idx": 0,
-                                "count": 1,
-                            },
-                            {
                                 "bin_start": 18,
                                 "bin_end": 24,
                                 "bin_idx": 1,
@@ -388,9 +377,9 @@ class TestHistogram(TestCase):
                                 "bin_start": 55,
                                 "bin_end": 67,
                                 "bin_idx": 4,
-                                "count": 2,
+                                "count": 1,
                             },
-                        ],
+                        ]
                     }
                 },
             },
@@ -398,7 +387,8 @@ class TestHistogram(TestCase):
 
     def test_validate_histogram_request(self):
         for test_case in self.create_test_cases():
-            with self.subTest(msg=test_case["name"]):
+            test_case_name = test_case["name"]
+            with self.subTest(msg=test_case_name):
                 input_data = test_case["input"]
                 expect = test_case["expect"]
                 serializer = HistogramReqSerializer(
@@ -428,5 +418,7 @@ class TestHistogram(TestCase):
                     want = expect["response"]["data"]
                     self.maxDiff = None
                     self.assertEqual(
-                        got, want, msg=f"Received: ${got}. Expected ${want}"
+                        got,
+                        want,
+                        msg=f"{test_case_name}: Received: {got}. Expected {want}",
                     )
