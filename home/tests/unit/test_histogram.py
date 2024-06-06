@@ -1,7 +1,7 @@
 from random import seed
-from datetime import date, timedelta, timezone, datetime
+from datetime import date, timezone, datetime
 from django.test import TestCase
-from home.models import Account, Contest, Device
+from home.models import Account, Contest 
 from home.models.dailywalk import DailyWalk
 from home.models.intentionalwalk import IntentionalWalk
 from home.models.leaderboard import Leaderboard
