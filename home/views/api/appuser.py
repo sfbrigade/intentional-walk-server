@@ -18,14 +18,6 @@ from home.models.account import (
 from .utils import validate_request_json
 
 
-# Determines whether Account is tester account, based on name prefix
-def is_tester(name_field: str) -> bool:
-    possible_prefixes = ["tester-", "tester ", "tester_"]
-    return any(
-        [name_field.lower().startswith(prefix) for prefix in possible_prefixes]
-    )
-
-
 # Validates Account input data. Raises AssertionError if field is invalid.
 # Does not check for required fields since that is done by
 # validate_request_json
@@ -119,7 +111,6 @@ def update_account(acct: Account, data: dict):
     # Not possible to update email
     if data.get("name") is not None:
         acct.name = data["name"]
-        acct.is_tester = is_tester(data["name"])
 
     if data.get("zip") is not None:
         acct.zip = data["zip"]
@@ -236,7 +227,6 @@ class AppUserCreateView(View):
                     name=json_data["name"],
                     zip=json_data["zip"],
                     age=json_data["age"],
-                    is_tester=is_tester(json_data["name"]),
                     is_sf_resident=json_data["zip"] in SAN_FRANCISCO_ZIP_CODES,
                 )
                 account_updated = False

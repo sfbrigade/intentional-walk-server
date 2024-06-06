@@ -61,9 +61,11 @@ class ApiTestCase(TestCase):
                 getattr(user_obj, field), expected_value, msg=f"{field}"
             )
 
-    # Test creation of a new "Tester" app user
+    # is_tester should always default to false;
+    # We can only set is_tester through the admin panel.
     def test_create_tester_appuser_success(self):
-        # Set up request and response for a Tester user based in SF
+        # Set up request and response for a regular user based in SF
+        # who coincidentally has tester in their name.
         request_params = self.request_params.copy()
         request_params.update(
             {
@@ -76,7 +78,7 @@ class ApiTestCase(TestCase):
             {
                 "name": "Tester John",
                 "zip": "94105",
-                "is_tester": True,
+                "is_tester": False,
                 "is_sf_resident": True,
             }
         )
