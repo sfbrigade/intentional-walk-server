@@ -5,3 +5,13 @@ from .device import Device
 from .intentionalwalk import IntentionalWalk
 from .leaderboard import Leaderboard
 from .weeklygoal import WeeklyGoal
+
+ALL_MODELS = [
+    Account,
+    Contest,
+    DailyWalk,
+    Device,
+    IntentionalWalk,
+    Leaderboard,
+    WeeklyGoal,
+]
