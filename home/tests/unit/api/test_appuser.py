@@ -1,7 +1,9 @@
 from django.test import TestCase
 
 from home.models.account import Account
-from home.models.mixins.privacyprotectedfields import PrivacyProtectedFieldsMixin
+from home.models.mixins.privacyprotectedfields import (
+    PrivacyProtectedFieldsMixin,
+)
 from home.views.api.appuser import is_tester, validate_account_input
 
 
