@@ -81,19 +81,20 @@ server container and perform the following actions within the container CLI.
    ```
    # python manage.py collectstatic
    ```
+### Seeding the database 
+For seeding the database for development you have two options:
 
- * To restore a database backup:
+1) (Recommended) - Grabbing a scrubbed replica of a deployed database from test/staging or prod:
+This needs to be run inside the docker integrated terminal (e.g. docker exec -it <id> /bin/bash)
+```sh
+python manage.py herokudump iwalk-prod
+```
 
-   ```
-   # bin/pg_restore_dump <name of backup.dump>
-   ```
-
- * To generate a random database dump for development
-
-   ```
-   # python scripts/dummydata.py --help
-   # python scripts/dummydata.py > data.dump
-   ```
+2) (Older) - A randomized database dump. 
+```
+# python scripts/dummydata.py --help
+# python scripts/dummydata.py > data.dump
+```
 
 ## Testing
 

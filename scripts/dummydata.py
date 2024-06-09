@@ -1,4 +1,8 @@
 """
+TODO: prefer python manage.py herokudump iwalk-test over this.
+This still has some use cases when you want a true random or load testing.
+This script needs some optimizations on bulk inserts.
+
 Generate dummy data to be imported into a clean database.
 Once generated, a user can import the resulting text into
 their postgresql instance.

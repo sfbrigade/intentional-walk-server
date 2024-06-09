@@ -22,6 +22,8 @@ if [ $RESULT -ne 0 ]; then
   psql ${DB_HOST} -c "CREATE DATABASE ${DB_NAME};"
   python manage.py migrate
 
+  # TODO: Possibly replace this step.
+  # Seed with scrubbed data using python manage.py herokudump iwalk-test
   echo "Generating random SQL data..."
   sql="$(python3 /app/scripts/dummydata.py --accounts 100)"
 
