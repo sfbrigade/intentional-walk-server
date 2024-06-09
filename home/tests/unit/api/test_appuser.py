@@ -1,5 +1,7 @@
 from django.test import TestCase
 
+from home.models.account import Account
+from home.models.mixins.privacyprotectedfields import PrivacyProtectedFieldsMixin
 from home.views.api.appuser import is_tester, validate_account_input
 
 
@@ -64,3 +66,10 @@ class TestValidateAccountInput(TestCase):
         for example in examples:
             with self.assertRaises(AssertionError, msg=example):
                 validate_account_input(example)
+
+    def test_private(self):
+        # Just ensure the method is implemented,
+        # mainly for test coverage.
+        self.assertTrue(issubclass(Account, PrivacyProtectedFieldsMixin))
+        items = Account.privacy_protected_fields()
+        self.assertGreater(len(items), 0)
