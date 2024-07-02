@@ -26,6 +26,65 @@ class Device(models.Model):
         auto_now_add=True,
         help_text="When the record was created/device was registered",
     )
+    device_model = models.CharField(
+        max_length=25,
+        null=True,
+        blank=True,
+        help_text="""Unique identifier for the device's model.
+            getDeviceid() - Gets the device ID.
+                iOS: "iPhone7,2"
+                Android: "goldfish"
+                Windows: "Y3R94UC#AC4"
+        """,
+    )
+    # device_type = models.CharField(
+    #     max_length=25,
+    #     null=True,
+    #     blank=True,
+    #     help_text=""""
+    #         getDeviceType() - Returns the device's type as a string, which will be one of:
+    #             Handset
+    #             Tablet
+    #             Tv
+    #             Desktop
+    #             GamingConsole
+    #             Headset
+    #             unknown
+    #     """,
+    # )
+    manufacturer = models.CharField(
+        max_length=25,
+        null=True,
+        blank=True,
+        help_text="""Manufacturer of the device.
+            getManufacturer() - Gets the device manufacturer
+                iOS: "Apple"
+                Android: "Google"
+                Windows: ?
+        """,
+    )
+    os_name = models.CharField(
+        max_length=25,
+        null=True,
+        blank=True,
+        help_text="""Operating system of the device.
+            getSystemName() - Gets the device OS name.
+                iOS: "iOS" on newer iOS devices "iPhone OS" on older devices (including older iPad models), "iPadOS" for iPads using iPadOS 15.0 or higher.
+                Android: "Android"
+                Windows: ?
+        """,
+    )
+    os_version = models.CharField(
+        max_length=25,
+        null=True,
+        blank=True,
+        help_text="""Device operating system version. 
+            getSystemVersion() - Gets the device OS version.
+                iOS: "11.0"
+                Android: "7.1.1"
+                Windows: ?
+        """,
+    )
 
     def __str__(self):
         return f"{self.device_id} | {self.account} "

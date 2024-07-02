@@ -2,22 +2,18 @@ import csv
 import logging
 import os
 import tempfile
-
 from datetime import timedelta
 
-from django.db.models import (
-    BooleanField,
-    Count,
-    ExpressionWrapper,
-    Q,
-    Sum,
-)
+from django.db.models import BooleanField, Count, ExpressionWrapper, Q, Sum
 from django.http import FileResponse, HttpResponse
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from ninja import Router
 
 from home.models import Account, Contest, DailyWalk
 
 logger = logging.getLogger(__name__)
+router = Router()
 
 # configure the base CSV headers
 CSV_COLUMNS = [
@@ -254,26 +250,24 @@ def export_contest_users_data(file, contest_id, is_tester):
         writer.writerows(rows)
 
 
-class ExportUsersView(View):
-    http_method_names = ["get"]
+@router.get("/users")
+@csrf_exempt
+def export_users(request, contest_id: str, is_tester: str):
+    is_tester = is_tester == "true"
 
-    def get(self, request, *args, **kwargs):
-        contest_id = request.GET.get("contest_id", None)
-        is_tester = request.GET.get("is_tester", None) == "true"
+    if not contest_id:
+        return HttpResponse(status=422)
+    elif not request.user.is_authenticated:
+        return HttpResponse(status=401)
 
-        if not contest_id:
-            return HttpResponse(status=422)
-        elif not request.user.is_authenticated:
-            return HttpResponse(status=401)
-
-        try:
-            tmp_file = tempfile.NamedTemporaryFile(delete=False)
-            with open(tmp_file.name, "w") as file:
-                export_contest_users_data(file, contest_id, is_tester)
-            return FileResponse(
-                open(tmp_file.name, "rb"),
-                as_attachment=True,
-                filename="users_agg.csv",
-            )
-        finally:
-            os.remove(tmp_file.name)
+    try:
+        tmp_file = tempfile.NamedTemporaryFile(delete=False)
+        with open(tmp_file.name, "w") as file:
+            export_contest_users_data(file, contest_id, is_tester)
+        return FileResponse(
+            open(tmp_file.name, "rb"),
+            as_attachment=True,
+            filename="users_agg.csv",
+        )
+    finally:
+        os.remove(tmp_file.name)

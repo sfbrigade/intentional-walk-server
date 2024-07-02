@@ -109,7 +109,7 @@ def validate_account_input(data: dict):
     elif data.get("sexual_orien_other") is not None:
         assert (
             False
-        ), "'sexual_orien_other' should not be specified without 'gender'"
+        ), "'sexual_orien_other' should not be specified without 'sexual_orien'"
 
 
 def update_account(acct: Account, data: dict):

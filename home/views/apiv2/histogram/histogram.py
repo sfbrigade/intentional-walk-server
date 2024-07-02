@@ -1,5 +1,6 @@
+import itertools
 from datetime import date, datetime, time
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import List, Optional, TypedDict
 
 from django.db import models as djmodel
 from django.db.models import (
@@ -17,13 +18,15 @@ from django.db.models import (
 )
 from django.db.models.functions import Floor
 from django.utils.timezone import make_aware
-from rest_framework import serializers
+from ninja.errors import ValidationError
 
-from home.models.account import Account
-from home.models.contest import Contest
-from home.models.dailywalk import DailyWalk
-from home.models.intentionalwalk import IntentionalWalk
-from home.models.leaderboard import Leaderboard
+from home.models import (
+    Account,
+    Contest,
+    DailyWalk,
+    IntentionalWalk,
+    Leaderboard,
+)
 
 
 class ValidatedHistogramReq(TypedDict):
@@ -37,15 +40,18 @@ class ValidatedHistogramReq(TypedDict):
     unit: str
 
 
-class HistogramReqSerializer(serializers.Serializer):
-    """HistogramReqSerializer is a serializer for the histogram API.
-
-    This serializer is used to validate and prepare the incoming request data
-    and prepare the annotations and filters for the histogram query.
-    This generates a histogram based on the bin_count or bin_size,
-    or custom bin intervals.
-    and the field of certain models to group by.
-    """
+class Histogram:
+    # TODO: Implement a ResponseSerializer
+    # to handle serialization of the response
+    # (with filling of the bins)
+    # to either JSON or CSV format.
+    model_name: str = None
+    supported_models = {
+        "users": Account,
+        "dailywalk": DailyWalk,
+        "intentionalwalk": IntentionalWalk,
+        "leaderboard": Leaderboard,
+    }
 
     supported_fields = {
         Leaderboard: ["steps"],
@@ -60,167 +66,16 @@ class HistogramReqSerializer(serializers.Serializer):
         "age": "years",
     }
 
-    field = serializers.CharField(
-        required=True, help_text="The field to group by"
-    )
-
-    contest_id = serializers.CharField(
-        required=False,
-        help_text="The ID of the contest to filter by."
-        + "This field is mutually exclusive with the date fields."
-        + "For distance and step metrics, this will restrict the records"
-        + "to the values recorded during the contest period's start and end date."
-        + "For account metrics, this will restrict the records to the accounts that participated in the contest.",
-    )
-    is_tester = serializers.BooleanField(
-        required=False,
-        help_text="If true, will only return records related to tester accounts.",
-    )
-
-    bin_size = serializers.IntegerField(
-        required=False,
-        help_text="The size of the bin to group the data by. Units will be the same as the field."
-        + "Note this is mutually exclusive with the bin_count and bin_custom field.",
-    )
-
-    bin_count = serializers.IntegerField(
-        required=False,
-        help_text="The number of bins to group the data by."
-        + "Note this is mutually exclusive with the bin_size and bin_custom field.",
-    )
-
-    bin_custom = serializers.CharField(
-        required=False,
-        help_text="A list of comma separated custom bin sizes in increasing order to group the data by."
-        + "Example: 0,18,29,44,59"
-        + "Note this is mutually exclusive with the bin_size and bin_count fields.",
-    )
-
-    # Date fields to filter by, inclusive.
-    # These fields are mutually exclusive with the contest_id field.
-    start_date = serializers.DateField(
-        required=False, help_text="The start date to filter the records by."
-    )
-    end_date = serializers.DateField(
-        required=False, help_text="The end date to filter the records by."
-    )
-
-    def __init__(self, *args, model=None, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, model):
         self.model: djmodel.Model = model
         self.__unit: str = None
-
-    def validate(self, data: Dict[str, Any]) -> ValidatedHistogramReq:
-        """Validates and prepares the incoming request data.
-
-        Converts the request params into FilterSet params and annotations.
-        """
-        model = self.model
-        if not model:
-            raise serializers.ValidationError(
-                {"non_field_errors": "Model is required."}
-            )
-
-        bin_size: Optional[int] = data.get("bin_size")
-        bin_count: Optional[int] = data.get("bin_count")
-        bin_custom_str: Optional[str] = data.get("bin_custom", "")
-        bin_custom = []
-        try:
-            bin_custom: List[int] = [
-                int(v) for v in bin_custom_str.split(",") if v
-            ]
-        except ValueError:
-            raise serializers.ValidationError(
-                {
-                    "bin_custom": f"bin_custom could not be parsed: {bin_custom_str}"
-                }
-            )
-        field: str = data.get("field")
-        contest_id: Optional[int] = data.get("contest_id")
-        is_tester: Optional[bool] = data.get("is_tester")
-        start_date: Optional[date] = data.get("start_date")
-        end_date: Optional[date] = data.get("end_date")
-
-        if sum((bool(x) for x in (bin_size, bin_count, bin_custom))) > 1:
-            raise serializers.ValidationError(
-                {
-                    "non_field_errors": "bin_size, bin_count and bin_custom are mutually exclusive."
-                }
-            )
-
-        if not bin_size and not bin_count and not bin_custom:
-            raise serializers.ValidationError(
-                {
-                    "non_field_errors": "bin_size, bin_count, or bin_custom is required."
-                }
-            )
-
-        if bin_size and bin_size <= 0:
-            raise serializers.ValidationError(
-                {"bin_size": "bin_size must be greater than 0."}
-            )
-
-        if bin_count and bin_count < 2:
-            raise serializers.ValidationError(
-                {"bin_count": "bin_count must be greater than 1."}
-            )
-
-        if bin_custom:
-            increasing = all(a < b for a, b in zip(bin_custom, bin_custom[1:]))
-            if not increasing:
-                raise serializers.ValidationError(
-                    {
-                        "bin_custom": "bin_custom values must be in increasing order."
-                    }
-                )
-            if not all([x >= 0 for x in bin_custom]):
-                raise serializers.ValidationError(
-                    {"bin_custom": "bin_custom values must be positive."}
-                )
-
-        valid_fields = self.supported_fields.get(model, [])
-        if field not in valid_fields:
-            raise serializers.ValidationError(
-                {
-                    "non_field_errors": f"{field} is not supported for {model}. Please use one of {valid_fields}."
-                }
-            )
-
-        self.__unit = self.field_units.get(field)
-
-        if contest_id and (start_date or end_date):
-            raise serializers.ValidationError(
-                {
-                    "non_field_errors": "contest_id and start_date/end_date are mutually exclusive."
-                }
-            )
-
-        contest = None
-        if contest_id:
-            try:
-                contest = Contest.objects.get(contest_id=contest_id)
-            except Contest.DoesNotExist:
-                raise serializers.ValidationError(
-                    {
-                        "contest_id": f"Contest with id {contest_id} does not exist."
-                    }
-                )
-
-        return self.create_bin_query(
-            model=model,
-            field=field,
-            is_tester=is_tester,
-            contest=contest,
-            start_date=start_date,
-            end_date=end_date,
-            bin_count=bin_count,
-            bin_size=bin_size,
-            bin_custom=bin_custom,
-        )
 
     @property
     def unit(self):
         return self.__unit
+
+    def set_unit(self, unit):
+        self.__unit = unit
 
     def create_bin_query(
         self,
@@ -405,13 +260,13 @@ class HistogramReqSerializer(serializers.Serializer):
         kwargs = {}
         if model is Leaderboard:
             if not contest:
-                raise serializers.ValidationError(
+                raise ValidationError(
                     {
                         "contest_id": "contest_id is required for Leaderboard model."
                     }
                 )
             if start_date or end_date:
-                raise serializers.ValidationError(
+                raise ValidationError(
                     {
                         "non_field_errors": "start_date and end_date is not supported for the Leaderboard model."
                     }
@@ -502,9 +357,66 @@ class HistogramReqSerializer(serializers.Serializer):
                 "account__is_tester": is_tester,
             }
         else:
-            raise serializers.ValidationError(
+            raise ValidationError(
                 {"non_field_errors": f"{model} is not yet supported."}
             )
         # Remove None values from the kwargs,
         # as they indicate optional fields that were not provided.
         return Q(**{k: v for k, v in kwargs.items() if v is not None})
+
+    def fill_missing_bin_idx(
+        self,
+        query_set,
+        bin_size: int = None,
+        bin_custom: list = None,
+        total_bin_ct: int = 0,
+    ):
+        """Fill in missing bin intervals lazily.
+
+            This is because the histogram is generated from a query set that may not have
+            found data in certain bins.
+
+            For example, if the bins were [0, 18, 20, 33, 50, 70],
+            which creates bins from 0-17, 18-20, 20-33, 33-50, 50-70.
+
+            There may be no users in in the 18-20 range, and no users in the 51 and 70.
+            In other words, missing on bin_idx = 1 and bin_idx = 4.
+            The query would not return any groupings for the [18, 20], or [50, 70]
+            This function will fill in those missing bins with a count of 0.
+        #"""
+
+        def create_filler(cursor, bin_size, bin_custom):
+            res = {}
+            # bin_start and bin_end are inclusive.
+            if bin_custom:
+                res["bin_start"] = bin_custom[cursor]
+                if cursor + 1 < len(bin_custom):
+                    res["bin_end"] = bin_custom[cursor + 1]
+            else:
+                res["bin_start"] = cursor * bin_size
+                res["bin_end"] = (cursor + 1) * bin_size
+            # Done down here to maintain stable order of keys.
+            res["count"] = 0
+            res["bin_idx"] = cursor
+            return res
+
+        bin_idx_counter = itertools.count()
+        cursor = 0
+        for bin in query_set:
+            cursor = next(bin_idx_counter)
+            curr_idx = bin["bin_idx"]
+            while curr_idx > cursor:
+                yield create_filler(
+                    cursor=cursor, bin_size=bin_size, bin_custom=bin_custom
+                )
+                cursor = next(bin_idx_counter)
+            yield bin
+
+        cursor = next(bin_idx_counter)
+        # Fill in the rest of the bins with 0 count,
+        # until we reach the total expected count of bins.
+        while cursor and cursor < total_bin_ct:
+            yield create_filler(
+                cursor=cursor, bin_size=bin_size, bin_custom=bin_custom
+            )
+            cursor = next(bin_idx_counter)

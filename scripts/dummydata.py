@@ -20,18 +20,20 @@ You can then continue on to running the server with the new database.
 
 Run this script with `--help` for a list of options.
 """
+
 import argparse
 import binascii
+import json
 import os
 import sys
 import traceback
 from calendar import monthrange
 from collections import OrderedDict
 from datetime import date, datetime
-from random import randint
-from typing import Any, Dict, List, Tuple
 from itertools import groupby
 from operator import itemgetter
+from random import randint
+from typing import Any, Dict, List, Tuple
 from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
@@ -120,7 +122,7 @@ TYPE_TRANSFORM = {
     float: lambda x: x,
     bool: lambda x: str(x).lower(),
     date: lambda x: str(x),
-    list: lambda x: f"{{{', '.join(x)}}}",
+    list: lambda x: json.dumps(x),
 }
 
 
@@ -218,6 +220,7 @@ class SQLGenerator:
         )
 
         self.accounts.append(acct)
+        # print(f"RACE: {args.get('race')}")
 
         return insert(
             "home_account",
