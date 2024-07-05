@@ -1,10 +1,13 @@
 from typing import Optional
 
 from ninja import Field, Schema
+from pydantic import ConfigDict
 from typing_extensions import Self
 
 
 class LeaderboardUserSchema(Schema):
+    model_config = ConfigDict(extra="forbid")
+
     account_id: int = Field(
         desription="Account id of the account the data is linked to."
     )
@@ -14,9 +17,6 @@ class LeaderboardUserSchema(Schema):
         default=None,
         description="Device id of the device the data is coming from.",
     )
-
-    class Config(Schema.Config):
-        extra = "forbid"
 
 
 class LeaderboardSchema(Schema):

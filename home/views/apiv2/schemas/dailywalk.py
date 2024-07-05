@@ -1,30 +1,28 @@
 from datetime import date as date_type
 
 from ninja import Field, Schema
-from pydantic import computed_field
+from pydantic import ConfigDict, computed_field
 
 
 class DailyWalkIn(Schema):
+    model_config = ConfigDict(extra="forbid")
+
     date: str = Field(
         description="The specific date for which the steps are recorded"
     )
     steps: int = Field(ge=0, description="Number of steps recorded")
     distance: float = Field(ge=0, description="Total distance covered")
 
-    class Config(Schema.Config):
-        extra = "forbid"
-
 
 class DailyWalkInSchema(Schema):
+    model_config = ConfigDict(extra="forbid")
+
     account_id: str = Field(
         description="Unique identifier for user's account."
     )
     daily_walks: list[DailyWalkIn] = Field(
         description="List of record daily walks: date, steps, distance."
     )
-
-    class Config(Schema.Config):
-        extra = "forbid"
 
 
 class DailyWalkOut(Schema):

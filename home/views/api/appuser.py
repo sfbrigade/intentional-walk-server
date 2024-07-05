@@ -272,7 +272,7 @@ class AppUserCreateView(View):
                     "zip": account.zip,
                     "age": account.age,
                     "is_latino": account.is_latino,
-                    "race": list(account.race),
+                    "race": account.race,
                     "race_other": account.race_other,
                     "gender": account.gender,
                     "gender_other": account.gender_other,

@@ -1,12 +1,12 @@
 from datetime import date
-from typing import Optional
 
 from ninja import Field, Schema
-from pydantic import field_validator, model_validator
-from typing_extensions import Self
+from pydantic import ConfigDict
 
 
 class WeeklyGoalIn(Schema):
+    model_config = ConfigDict(extra="forbid")
+
     start_of_week: str = Field(
         description="The start of the week for the goal."
     )
@@ -15,20 +15,16 @@ class WeeklyGoalIn(Schema):
         ge=0, description="Number of days per week to reach goal."
     )
 
-    class Config(Schema.Config):
-        extra = "forbid"
-
 
 class WeeklyGoalInSchema(Schema):
+    model_config = ConfigDict(extra="forbid")
+
     account_id: str = Field(
         description="Account id of the account the data is linked to."
     )
     weekly_goal: WeeklyGoalIn = Field(
         description="Start week, steps, and days of the weekly goal."
     )
-
-    class Config(Schema.Config):
-        extra = "forbid"
 
 
 class WeeklyGoalOut(Schema):
@@ -51,12 +47,11 @@ class WeeklyGoalOutSchema(Schema):
 
 
 class WeeklyGoalListInSchema(Schema):
+    model_config = ConfigDict(extra="forbid")
+
     account_id: str = Field(
         description="Account id of the account the data is linked to."
     )
-
-    class Config(Schema.Config):
-        extra = "forbid"
 
 
 class WeeklyGoalOutList(Schema):

@@ -9,16 +9,22 @@ from django.db.models import CharField, Count, Q, Sum, Value
 from django.db.models.functions import Concat, TruncDate
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views import View
+from rest_framework import status
+from rest_framework.response import Response
 
 from home.models import Account, Contest, DailyWalk
 from home.models.intentionalwalk import IntentionalWalk
 from home.models.leaderboard import Leaderboard
-from home.views.api.histogram.serializers import (HistogramReqSerializer,
-                                                  ValidatedHistogramReq)
-from home.views.api.serializers.request_serializers import \
-    GetUsersReqSerializer
-from home.views.api.serializers.response_serializers import \
-    GetUsersRespSerializer
+from home.views.api.histogram.serializers import (
+    HistogramReqSerializer,
+    ValidatedHistogramReq,
+)
+from home.views.api.serializers.request_serializers import (
+    GetUsersReqSerializer,
+)
+from home.views.api.serializers.response_serializers import (
+    GetUsersRespSerializer,
+)
 
 from .utils import paginate, require_authn
 
@@ -294,7 +300,7 @@ class AdminContestsView(View):
 class AdminUsersView(View):
     http_method_names = ["get"]
 
-    # @require_authn
+    @require_authn
     def get(self, request, *args, **kwargs):
         serializer = GetUsersReqSerializer(data=request.GET)
         if not serializer.is_valid():
@@ -338,7 +344,9 @@ class AdminUsersView(View):
             for dto, iw_stat in zip(query, iw_query)
         ]
         resp = GetUsersRespSerializer(result_dto, many=True)
-        response = JsonResponse(resp.data, safe=False)
+        # response = JsonResponse(resp.data, safe=False)
+        response = JsonResponse(result_dto, safe=False)
+
         if links:
             response.headers["Link"] = links
 

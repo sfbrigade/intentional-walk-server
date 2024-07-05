@@ -7,6 +7,7 @@ from typing import Dict, List
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from freezegun import freeze_time
+from pytz import utc
 
 from home.utils.generators import (
     AccountGenerator,
@@ -16,7 +17,6 @@ from home.utils.generators import (
     IntentionalWalkGenerator,
 )
 from home.views.web.data import USER_AGG_CSV_BASE_HEADER
-from pytz import utc
 
 
 class Login:
@@ -145,7 +145,7 @@ class TestCsvViews(TestCase):
                 )  # Empty walk data
                 self.assertEqual(row, expected_row)
                 self.assertIn(
-                    row["Race"], {"{'OT', 'BL'}", "{'BL', 'OT'}"}
+                    row["Race"], {"['OT', 'BL']", "['BL', 'OT']"}
                 )  # order is non-deterministic
 
             else:

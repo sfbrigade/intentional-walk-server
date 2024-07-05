@@ -1,11 +1,21 @@
-from datetime import date
+from datetime import date, timedelta
 from typing import Dict, List, Optional
 
-from django.db.models import QuerySet
-from ninja import Field, FilterSchema, Schema
+from django.db.models import (
+    BooleanField,
+    Count,
+    ExpressionWrapper,
+    F,
+    Q,
+    QuerySet,
+    Sum,
+)
+from ninja import Field, FilterSchema, ModelSchema, Schema
 from ninja.errors import ValidationError
-from pydantic import field_validator, model_validator
+from pydantic import computed_field, field_validator, model_validator
 from typing_extensions import Self
+
+from home.models import Account, Contest
 
 
 class AdminMeSchema(Schema):
@@ -73,22 +83,120 @@ class ContestOutSchema(Schema):
 class UsersInSchema(Schema):
     contest_id: str = Field(
         default=None,
-        description="""The ID of the contest to filter by.
-            <br>This field is mutually exclusive with the date fields.
-            <br>For distance and step metrics, this will restrict the records
-            to the values recorded during the contest period's start and end date.
-            <br>For account metrics, this will restrict the records to the accounts that participated in the contest.""",
+        description="""The ID of the contest to filter by. 
+            Providing this also will add additional metrics related to te contest.""",
     )
     is_tester: bool = Field(
         default=False,
         description="If true, will only return records related to tester accounts.",
     )
-    order_by: str = None
-    page: int = None
-    query: str = None
+    order_by: str = Field(
+        default=None,
+        description="""The field to order the results by. Prefix with '-' to order in descending order. 
+            The secondary sort and default sort will be lexicographically, the 'name'.""",
+    )
+    page: int = Field(
+        default=1, description="The page number to return. Defaults to 1."
+    )
+    query: str = Field(
+        default=None,
+        description="Query string to filter for containment in the name or email.",
+    )
+
+    @computed_field
+    @property
+    def filter_dict(self) -> int:
+        filters, annotate, intentionalwalk_filter = None, None, None
+        if self.contest_id:
+            contest = Contest.objects.get(pk=self.contest_id)
+            dailywalk_filter = Q(
+                dailywalk__date__range=(contest.start, contest.end)
+            )
+
+            filters = Q(contests__contest_id=self.contest_id)
+            annotate = {
+                "is_new": ExpressionWrapper(
+                    Q(
+                        created__gte=contest.start_promo,
+                        created__lt=contest.end + timedelta(days=1),
+                    ),
+                    output_field=BooleanField(),
+                ),
+                "dw_count": Count("dailywalk", filter=dailywalk_filter),
+                "dw_steps": Sum("dailywalk__steps", filter=dailywalk_filter),
+                "dw_distance": Sum(
+                    "dailywalk__distance", filter=dailywalk_filter
+                ),
+            }
+            intentionalwalk_filter = Q(
+                intentionalwalk__start__gte=contest.start,
+                intentionalwalk__start__lt=contest.end + timedelta(days=1),
+            )
+        else:
+            filters = Q()
+            annotate = {
+                "dw_count": Count("dailywalk"),
+                "dw_steps": Sum("dailywalk__steps"),
+                "dw_distance": Sum("dailywalk__distance"),
+            }
+            intentionalwalk_filter = Q()
+
+        intentionalwalk_annotate = {
+            "iw_count": Count(
+                "intentionalwalk", filter=intentionalwalk_filter
+            ),
+            "iw_steps": Sum(
+                "intentionalwalk__steps", filter=intentionalwalk_filter
+            ),
+            "iw_distance": Sum(
+                "intentionalwalk__distance", filter=intentionalwalk_filter
+            ),
+            "iw_time": Sum(
+                "intentionalwalk__walk_time", filter=intentionalwalk_filter
+            ),
+        }
+
+        # filter to show users vs testers
+        filters &= Q(is_tester=self.is_tester)
+
+        # filter by search query
+        if self.query:
+            filters &= Q(
+                Q(name__icontains=self.query) | Q(email__icontains=self.query)
+            )
+
+        # set ordering
+        order = []
+        if self.order_by:
+            desc = self.order_by.startswith("-")
+            field = F(self.order_by[1:] if desc else self.order_by)
+            order.append(
+                field.desc(nulls_last=True)
+                if desc
+                else field.asc(nulls_first=False)
+            )
+        order.append(F("name"))
+
+        return {
+            "annotate": annotate,
+            "intentionalwalk_annotate": intentionalwalk_annotate,
+            "contest_id": self.contest_id,
+            "filters": filters,
+            "order_by": order,
+            "page": self.page,
+            "per_page": 25,
+        }
+
+    # @property
+    def update_user_dto(self, dto, iw_stats):
+        dto.update(iw_stats)
+        # at this point, we have enough info to determine if user is "active"
+        if self.contest_id:
+            dto["is_active"] = dto["dw_count"] > 0 or dto["iw_count"] > 0
+        return dto
 
 
-class UsersOutSchema(Schema):
+class UsersOut(ModelSchema):
     dw_count: int = Field(description="Total number of daily walk users")
     dw_steps: int = Field(
         description="Total number of steps users took on daily walks"
@@ -116,6 +224,15 @@ class UsersOutSchema(Schema):
         default=None,
     )
     is_active: bool = None
+
+    class Meta:
+        model = Account
+        # fields = "__all__"
+        fields = ("name", "email", "age", "zip", "created")
+
+
+class UsersOutSchema(Schema):
+    users: List[UsersOut]
 
 
 class UsersByZipInSchema(Schema):

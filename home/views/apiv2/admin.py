@@ -7,12 +7,17 @@ from dateutil import parser
 from django.db import connection
 from django.db.models import CharField, Count, Q, Sum, Value
 from django.db.models.functions import Concat, TruncDate
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from ninja import Query, Router
 from ninja.errors import HttpError, ValidationError
 from ninja.security import django_auth_superuser
 
 from home.models import Account, Contest, DailyWalk
+from home.views.api.serializers.response_serializers import (
+    GetUsersRespSerializer,
+)
+from home.views.api.utils import paginate
 
 from .histogram.histogram import Histogram
 from .schemas.admin import (
@@ -25,6 +30,8 @@ from .schemas.admin import (
     HomeGraphFilter,
     UsersByZipInSchema,
     UsersByZipOutSchema,
+    UsersInSchema,
+    UsersOutSchema,
 )
 
 logger = logging.getLogger(__name__)
@@ -341,6 +348,51 @@ def get_walks_steps_daily(request, qs: Query[HomeGraphFilter]):
     )
 
     return results
+
+
+@router.get(
+    "/users",
+    response={200: UsersOutSchema},
+    exclude_none=True,
+    auth=django_auth_superuser,
+)
+def get_users(
+    request: HttpRequest, response: HttpResponse, qs: Query[UsersInSchema]
+):
+
+    contest_id = qs.contest_id
+    filters = qs.filter_dict["filters"]
+    order_by = qs.filter_dict["order_by"]
+    page = qs.filter_dict["page"]
+    per_page = qs.filter_dict["per_page"]
+
+    annotate = qs.filter_dict["annotate"]
+    intentionalwalk_annotate = qs.filter_dict["intentionalwalk_annotate"]
+
+    query = (
+        Account.objects.filter(filters)
+        .values("id", "name", "email", "age", "zip", "created")
+        .annotate(**annotate)
+        .order_by(*order_by)
+    )
+    query, links = paginate(request, query, page, per_page)
+
+    iw_query = (
+        Account.objects.filter(id__in=(row["id"] for row in query))
+        .values("id")
+        .annotate(**intentionalwalk_annotate)
+        .order_by(*order_by)
+    )
+
+    result_dto = [
+        qs.update_user_dto(dto, iw_stat)
+        for dto, iw_stat in zip(query, iw_query)
+    ]
+
+    if links:
+        response.headers["Link"] = links
+
+    return 200, {"users": result_dto}
 
 
 @router.get(

@@ -2,10 +2,12 @@ from datetime import datetime
 from typing import List, Optional
 
 from ninja import Field, Schema
-from pydantic import computed_field
+from pydantic import ConfigDict, computed_field
 
 
 class IntentionalWalkInBaseSchema(Schema):
+    model_config = ConfigDict(extra="forbid")
+
     event_id: str = Field(
         max_length=250,
         description="v4 random uuid generated on the client.",
@@ -21,9 +23,6 @@ class IntentionalWalkInBaseSchema(Schema):
         ge=0, description="Total time paused (in seconds)."
     )
     distance: float = Field(ge=0, description="Total distance covered.")
-
-    class Config(Schema.Config):
-        extra = "forbid"
 
 
 class IntentionalWalkInSchema(Schema):

@@ -100,7 +100,7 @@ class ApiTestCase(TestCase):
                 msg=fail_message,
             )
         self.assertSetEqual(
-            user_obj.race, set(request_params["race"]), msg=fail_message
+            set(user_obj.race), set(request_params["race"]), msg=fail_message
         )
 
     # Test updating a User's age

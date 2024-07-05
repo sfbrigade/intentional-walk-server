@@ -1,7 +1,7 @@
 from typing import List
 
 from ninja import Field, Schema
-from pydantic import field_validator, model_validator
+from pydantic import ConfigDict, field_validator, model_validator
 from typing_extensions import Self
 
 from home.models.account import (
@@ -14,6 +14,8 @@ from home.models.account import (
 
 
 class AccountSchema(Schema):
+    model_config = ConfigDict(extra="forbid")
+
     account_id: str = Field(description="Account id of the user's account")
     name: str = Field(min_length=1, max_length=250, description="User's name")
     email: str = Field(decription="Email which uniquely identifies an account")
@@ -78,9 +80,6 @@ class AccountSchema(Schema):
         max_length=75,
         description="Free-form text field for 'sexual_orien' value 'OT'",
     )
-
-    class Config(Schema.Config):
-        extra = "forbid"
 
     # Check for valid zip code
     @field_validator("zip")
