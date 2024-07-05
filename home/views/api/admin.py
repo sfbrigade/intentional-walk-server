@@ -344,8 +344,7 @@ class AdminUsersView(View):
             for dto, iw_stat in zip(query, iw_query)
         ]
         resp = GetUsersRespSerializer(result_dto, many=True)
-        # response = JsonResponse(resp.data, safe=False)
-        response = JsonResponse(result_dto, safe=False)
+        response = JsonResponse(resp.data, safe=False)
 
         if links:
             response.headers["Link"] = links

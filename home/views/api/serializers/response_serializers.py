@@ -36,4 +36,19 @@ class GetUsersRespSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ("name", "email", "age", "zip", "created")
+        fields = (
+            "name",
+            "email",
+            "age",
+            "zip",
+            "created",
+            "dw_count",
+            "dw_steps",
+            "dw_distance",
+            "iw_count",
+            "iw_steps",
+            "iw_distance",
+            "iw_time",
+            "is_new",
+            "is_active",
+        )
