@@ -1,6 +1,8 @@
+from datetime import date, datetime, timezone
 from random import seed
-from datetime import date, timezone, datetime
+
 from django.test import TestCase
+
 from home.models import Account, Contest
 from home.models.dailywalk import DailyWalk
 from home.models.intentionalwalk import IntentionalWalk
@@ -142,6 +144,39 @@ class TestHistogram(TestCase):
                 },
                 "expect": {
                     "error": "greater than",
+                },
+            },
+            {
+                "name": "bin_custom values must be in increasing order",
+                "input": {
+                    "field": "steps",
+                    "bin_custom": "1,1,3,4,5",
+                    "model": Leaderboard,
+                },
+                "expect": {
+                    "error": "values must be in increasing order",
+                },
+            },
+            {
+                "name": "bin_custom values must be positive",
+                "input": {
+                    "field": "steps",
+                    "bin_custom": "-1,2,3,4,5",
+                    "model": Leaderboard,
+                },
+                "expect": {
+                    "error": "values must be positive",
+                },
+            },
+            {
+                "name": "bin_custom could not be parsed",
+                "input": {
+                    "field": "steps",
+                    "bin_custom": "1,2,3,4,5,a",
+                    "model": Leaderboard,
+                },
+                "expect": {
+                    "error": "could not be parsed",
                 },
             },
             {

@@ -447,3 +447,100 @@ class ApiTestCase(TestCase):
             ],
             msg=fail_message,
         )
+
+    # Test request with a missing account_id field
+    def test_intentionalwalk_get_missing_account_id(self):
+
+        del self.request_params["account_id"]
+
+        # Send the request
+        response = self.client.post(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Required input 'account_id' missing in the request",
+            msg=fail_message,
+        )
+
+    # Test invalid method
+    def test_intentionalwalk_get_invalid_methods(self):
+        # Test not allowed get method
+        response = self.client.get(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Method not allowed!",
+            msg=fail_message,
+        )
+
+        # Test not allowed patch method
+        response = self.client.patch(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Method not allowed!",
+            msg=fail_message,
+        )
+
+        # Test not allowed put method
+        response = self.client.put(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Method not allowed!",
+            msg=fail_message,
+        )
+
+        # Test not allowed delete method
+        response = self.client.delete(
+            path=self.url,
+            data=self.request_params,
+            content_type=self.content_type,
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Method not allowed!",
+            msg=fail_message,
+        )

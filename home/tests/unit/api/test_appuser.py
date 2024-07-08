@@ -55,8 +55,8 @@ class TestValidateAccountInput(TestCase):
             dict(zip="1234"),
             dict(age=0),
             dict(is_latino=True),
-            dict(gender="", gender_other="other gender"),
-            dict(sexual_orien="", sexual_orien_other="idk"),
+            dict(gender=None, gender_other="other gender"),
+            dict(sexual_orien=None, sexual_orien_other="idk"),
             dict(race=None, race_other="other race"),
             dict(gender="NB", gender_other="nonbinary"),
         ]

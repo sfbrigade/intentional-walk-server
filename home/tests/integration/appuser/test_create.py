@@ -299,3 +299,58 @@ class ApiTestCase(TestCase):
             "Required input 'account_id' missing in the request",
             msg=fail_message,
         )
+
+    # Test invalid method
+    def test_create_appuser_invalid_method(self):
+        # Required fields for user creation
+        request_params = self.request_params.copy()
+
+        # Test not allowed get method
+        response = self.client.get(
+            path=self.url, data=request_params, content_type=self.content_type
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Method not allowed!",
+            msg=fail_message,
+        )
+
+        # Test not allowed patch method
+        response = self.client.patch(
+            path=self.url, data=request_params, content_type=self.content_type
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Method not allowed!",
+            msg=fail_message,
+        )
+
+        # Test not allowed delete method
+        response = self.client.delete(
+            path=self.url,
+            data=request_params["account_id"],
+            content_type=self.content_type,
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Method not allowed!",
+            msg=fail_message,
+        )

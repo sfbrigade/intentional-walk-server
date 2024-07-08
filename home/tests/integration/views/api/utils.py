@@ -1,12 +1,11 @@
 import math
-
 from datetime import date, datetime, timedelta
-from freezegun import freeze_time
-from pytz import utc
 
 from django.contrib.auth.models import User
 from django.test import Client
 from django.utils import timezone
+from freezegun import freeze_time
+from pytz import utc
 
 from home.utils.generators import (
     AccountGenerator,

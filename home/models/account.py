@@ -152,11 +152,5 @@ class Account(models.Model):
     def __str__(self):
         return f"{self.name} | {self.email}"
 
-    def set_race(self, x):
-        self.foo = json.dumps(x)
-
-    def get_race(self):
-        return json.loads(self.foo)
-
     class Meta:
         ordering = ("-created",)

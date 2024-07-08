@@ -5,11 +5,7 @@ from django.test import Client, TestCase
 from freezegun import freeze_time
 
 from home.models import Contest, Device, Leaderboard
-from home.utils.generators import (
-    AccountGenerator,
-    DeviceGenerator,
-)
-
+from home.utils.generators import AccountGenerator, DeviceGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -388,3 +384,140 @@ class TestLeaderboard(TestCase):
             response_data_pretest["payload"]["leaderboard"],
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_get_leaderboard_missing_contest_id(self):
+        # generate active account
+        accounts = list(AccountGenerator().generate(2))
+        # generate a contest
+        contest = Contest()
+        contest.start_baseline = "3000-01-01"
+        contest.start_promo = "3000-02-01"
+        contest.start = "3000-02-01"
+        contest.end = "3000-02-28"
+        contest.save()
+        # generate devices for the active accounts
+        device1 = list(DeviceGenerator(accounts[1:2]).generate(1))
+        Leaderboard.objects.create(
+            device=device1[0],
+            contest=contest,
+            account=accounts[0],
+            steps=5,
+        )
+        data = {
+            "device_id": device1[0].device_id,
+        }
+        query = urllib.parse.urlencode(data)
+        response = self.client.get("/api/leaderboard/get/?" + query)
+        self.assertEqual(response.status_code, 200)
+        response_message = response.content
+        fail_message = f"Server response - {response_message}"
+        self.assertEqual(
+            response_message,
+            b"No contest specified",
+            msg=fail_message,
+        )
+
+    def test_get_leaderboard_invalid_contest_id(self):
+        # generate active account
+        accounts = list(AccountGenerator().generate(2))
+        # generate a contest
+        contest = Contest()
+        contest.start_baseline = "3000-01-01"
+        contest.start_promo = "3000-02-01"
+        contest.start = "3000-02-01"
+        contest.end = "3000-02-28"
+        contest.save()
+        # generate devices for the active accounts
+        device1 = list(DeviceGenerator(accounts[1:2]).generate(1))
+        Leaderboard.objects.create(
+            device=device1[0],
+            contest=contest,
+            account=accounts[0],
+            steps=5,
+        )
+        data = {
+            "contest_id": "invalid_contest_id",
+            "device_id": device1[0].device_id,
+        }
+        query = urllib.parse.urlencode(data)
+        response = self.client.get("/api/leaderboard/get/?" + query)
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Contest not found",
+            msg=fail_message,
+        )
+
+    def test_get_leaderboard_missing_device_id(self):
+        # generate active account
+        accounts = list(AccountGenerator().generate(2))
+        # generate a contest
+        contest = Contest()
+        contest.start_baseline = "3000-01-01"
+        contest.start_promo = "3000-02-01"
+        contest.start = "3000-02-01"
+        contest.end = "3000-02-28"
+        contest.save()
+        # generate devices for the active accounts
+        device1 = list(DeviceGenerator(accounts[1:2]).generate(1))
+        Leaderboard.objects.create(
+            device=device1[0],
+            contest=contest,
+            account=accounts[0],
+            steps=5,
+        )
+        data = {"contest_id": contest.contest_id}
+        query = urllib.parse.urlencode(data)
+        response = self.client.get("/api/leaderboard/get/?" + query)
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            f"Unregistered device - Please register first!device_id:{data.get('device_id')}",
+            msg=fail_message,
+        )
+
+    def test_get_leaderboard_invalid_device_id(self):
+        # generate active account
+        accounts = list(AccountGenerator().generate(2))
+        # generate a contest
+        contest = Contest()
+        contest.start_baseline = "3000-01-01"
+        contest.start_promo = "3000-02-01"
+        contest.start = "3000-02-01"
+        contest.end = "3000-02-28"
+        contest.save()
+        # generate devices for the active accounts
+        device1 = list(DeviceGenerator(accounts[1:2]).generate(1))
+        Leaderboard.objects.create(
+            device=device1[0],
+            contest=contest,
+            account=accounts[0],
+            steps=5,
+        )
+        data = {
+            "contest_id": contest.contest_id,
+            "device_id": "invalid_device_id",
+        }
+        query = urllib.parse.urlencode(data)
+        response = self.client.get("/api/leaderboard/get/?" + query)
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            f"Unregistered device - Please register first!device_id:{data['device_id']}",
+            msg=fail_message,
+        )

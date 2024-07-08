@@ -9,8 +9,6 @@ from django.db.models import CharField, Count, Q, Sum, Value
 from django.db.models.functions import Concat, TruncDate
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views import View
-from rest_framework import status
-from rest_framework.response import Response
 
 from home.models import Account, Contest, DailyWalk
 from home.models.intentionalwalk import IntentionalWalk

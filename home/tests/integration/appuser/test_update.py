@@ -195,3 +195,80 @@ class ApiTestCase(TestCase):
             "Email cannot be updated. Contact admin",
             msg=fail_message,
         )
+
+    # Test updating User's age without providing account_id
+    # This should return a response with status "error" and a fail message
+    def test_update_appuser_missing_account_id(self):
+        # Required fields for user creation
+        # Remove the account_id field
+        request_params = {**self.request_params, "age": 88}
+        del request_params["account_id"]
+
+        # Register the user
+        response = self.client.put(
+            path=self.url, data=request_params, content_type=self.content_type
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Required input 'account_id' missing in the request",
+            msg=fail_message,
+        )
+
+    # Test invalid method - patch
+    def test_update_appuser_invalid_methods(self):
+        # Required fields for user creation
+        request_params = {**self.request_params, "age": 88}
+
+        # Test get method
+        response = self.client.get(
+            path=self.url, data=request_params, content_type=self.content_type
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Method not allowed!",
+            msg=fail_message,
+        )
+
+        # Test patch method
+        response = self.client.patch(
+            path=self.url, data=request_params, content_type=self.content_type
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Method not allowed!",
+            msg=fail_message,
+        )
+
+        # Test delete method
+        response = self.client.delete(
+            path=self.url, data=request_params, content_type=self.content_type
+        )
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 200)
+        # Parse the response
+        response_data = response.json()
+        fail_message = f"Server response - {response_data}"
+        self.assertEqual(response_data["status"], "error", msg=fail_message)
+        self.assertEqual(
+            response_data["message"],
+            "Method not allowed!",
+            msg=fail_message,
+        )

@@ -1,12 +1,12 @@
 import csv
 import io
 import logging
-
 from datetime import date, timedelta
 
 from django.test import Client, TestCase
 
 from home.views.api.export import CSV_COLUMNS
+
 from .utils import Login, generate_test_data
 
 logger = logging.getLogger(__name__)
@@ -75,3 +75,18 @@ class TestExportViews(TestCase):
         self.assertEqual(rows[3]["Total Steps During Contest"], "")
         self.assertEqual(rows[3]["Total Recorded Walks During Contest"], "0")
         self.assertEqual(rows[3]["Total Recorded Steps During Contest"], "")
+
+    def test_export_users_missing_contest_id(self):
+        c = Client()
+        self.assertTrue(Login.login(c))
+
+        response = c.get("/api/export/users?contest_id=")
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 422)
+
+    def test_export_users_unauthenticated(self):
+        c = Client()
+
+        response = c.get(f"/api/export/users?contest_id={self.contest0_id}")
+        # Check for a successful response by the server
+        self.assertEqual(response.status_code, 401)
