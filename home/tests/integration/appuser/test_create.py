@@ -67,14 +67,14 @@ class ApiTestCase(TestCase):
         request_params = self.request_params.copy()
         request_params.update(
             {
-                "name": "Tester John",
+                "name": "IWT John",
                 "zip": "94105",
             }
         )
         expected_response = self.expected_response.copy()
         expected_response.update(
             {
-                "name": "Tester John",
+                "name": "IWT John",
                 "zip": "94105",
                 "is_tester": True,
                 "is_sf_resident": True,
