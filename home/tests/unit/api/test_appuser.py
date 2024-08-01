@@ -13,7 +13,7 @@ class TestIsTester(TestCase):
             ("iwt-d", True),
             ("Iwt_E", True),
             ("iwtrata", False),
-            ("iwt", True), 
+            ("iwt", True),
         ]
         for example, expected in examples:
             self.assertEqual(
