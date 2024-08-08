@@ -11,7 +11,7 @@ zip: the user's home zip code
 age: the user's self reported age  
 is_latino: enum of responses, see IsLatinoLabels in home/models/account.py  
 is_sf_resident: true/false if the zip code is in the list of SF zip codes  
-is_tester: true if the user is a tested, automatically set if the name includes IWT  
+is_tester: true if the user is a tested, automatically set if the name includes IWT or iwt 
 gender: enum of responses, see GenderLabels in home/models/account.py  
 gender_other: freeform text response if gender is Other  
 race: enum of responses, see RaceLabels in home/models/account.py  
