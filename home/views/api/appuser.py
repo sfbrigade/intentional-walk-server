@@ -20,7 +20,7 @@ from .utils import validate_request_json
 
 # Determines whether Account is tester account, based on name prefix
 def is_tester(name_field: str) -> bool:
-    possible_prefixes = ["tester-", "tester ", "tester_"]
+    possible_prefixes = ["iwt "]
     return any(
         [name_field.lower().startswith(prefix) for prefix in possible_prefixes]
     )

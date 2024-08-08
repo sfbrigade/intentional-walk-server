@@ -6,14 +6,14 @@ from home.views.api.appuser import is_tester, validate_account_input
 class TestIsTester(TestCase):
     def test_is_tester(self):
         examples = [
-            ("Tester A", True),
-            ("Test B", False),  # are we sure this is the behavior we want?
-            ("tester c", True),
-            ("Testerosa", False),
-            ("tester-d", True),
-            ("Tester_E", True),
-            ("testrata", False),
-            ("tester", False),  # are we sure this is the behavior we want?
+            ("Iwt A", True),
+            ("Test B", False),
+            ("iwt c", True),
+            ("Iwterosa", False),
+            ("iwt-d", True),
+            ("Iwt_E", True),
+            ("iwtrata", False),
+            ("iwt", True),
         ]
         for example, expected in examples:
             self.assertEqual(
