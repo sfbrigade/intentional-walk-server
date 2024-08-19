@@ -44,7 +44,7 @@ def get_daily_walks(request, account_id: str):
     return 200, {"daily_walks": list(daily_walks)}
 
 
-@router.post("", response={201: DailyWalkOutSchema})
+@router.post("", response={201: DailyWalkOutSchema, 404: ErrorSchema})
 @csrf_exempt
 def create_daily_walk(request, payload: DailyWalkInSchema):
     json_data = payload.dict()
@@ -63,7 +63,6 @@ def create_daily_walk(request, payload: DailyWalkInSchema):
 
     # Json response template
     json_response = {
-        "account_id": device.device_id,
         "daily_walks": [],
     }
 

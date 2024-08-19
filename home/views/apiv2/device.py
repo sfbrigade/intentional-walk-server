@@ -24,9 +24,9 @@ def update_device(request, device_id: str, payload: DeviceInSchema):
     except Device.DoesNotExist:
         raise HttpError(
             404,
-            f"""Unregistered device -
-                device_id: {device_id}
-                Please register first!""",
+            "Unregistered device - "
+            f"device_id: {device_id}. "
+            "Please register first!",
         )
     update_model(device, payload.dict())
 
@@ -42,9 +42,9 @@ def patch_device(request, device_id: str, payload: DeviceInSchema):
         raise HttpError(
             404,
             (
-                f"Unregistered device - "
-                f"{device_id}. "
-                f"Please register first!"
+                "Unregistered device - "
+                f"device_id: {device_id}. "
+                "Please register first!"
             ),
         )
     update_model(device, payload.dict(exclude_unset=True))
@@ -61,9 +61,9 @@ def delete_device(request, device_id: str):
         raise HttpError(
             404,
             (
-                f"Unregistered device - "
-                f"{device_id}. "
-                f"Please register first!"
+                "Unregistered device - "
+                f"device_id: {device_id}. "
+                "Please register first!"
             ),
         )
     device.account.delete()

@@ -4,7 +4,11 @@ from ninja.errors import HttpError
 
 from home.models import Account, Device
 from home.models.account import SAN_FRANCISCO_ZIP_CODES
-from home.views.apiv2.schemas.account import AccountPatchSchema, AccountSchema
+from home.views.apiv2.schemas.account import (
+    AccountPatchSchema,
+    AccountSchema,
+    ErrorSchema,
+)
 
 router = Router()
 
@@ -25,7 +29,7 @@ def update_model(account: Account, json_data: dict):
     account.save()
 
 
-@router.post("", response={201: AccountSchema})
+@router.post("", response={201: AccountSchema, 400: ErrorSchema})
 @csrf_exempt
 def create_appuser(request, payload: AccountSchema):
     # Parse the body json
@@ -52,7 +56,7 @@ def create_appuser(request, payload: AccountSchema):
         # Otherwise, update the account's other details
         account = Account.objects.get(email__iexact=json_data["email"])
         update_model(account, json_data)
-        # return 201, {"account_id": device.device_id, **account.__dict__}
+
         return 201, payload
     # This implies that it is a new device
     except Device.DoesNotExist:
@@ -79,7 +83,7 @@ def create_appuser(request, payload: AccountSchema):
     return 201, payload
 
 
-@router.put("/{account_id}", response={204: None})
+@router.put("/{account_id}", response={204: None, 404: ErrorSchema})
 @csrf_exempt
 def update_appuser(request, account_id: str, payload: AccountSchema):
     json_data = payload.dict()
@@ -98,7 +102,7 @@ def update_appuser(request, account_id: str, payload: AccountSchema):
     return 204, None
 
 
-@router.patch("/{account_id}", response={204: None})
+@router.patch("/{account_id}", response={204: None, 404: ErrorSchema})
 @csrf_exempt
 def update_appuser(request, account_id: str, payload: AccountPatchSchema):
     json_data = payload.dict()
@@ -120,7 +124,7 @@ def update_appuser(request, account_id: str, payload: AccountPatchSchema):
     return 204, None
 
 
-@router.delete("/{account_id}", response={204: None})
+@router.delete("/{account_id}", response={204: None, 404: ErrorSchema})
 @csrf_exempt
 def delete_appuser(request, account_id: str):
     try:

@@ -9,7 +9,6 @@ from home.utils.dates import DATE_FORMAT, get_start_of_week
 from home.views.apiv2.schemas.weeklygoal import (
     ErrorSchema,
     WeeklyGoalInSchema,
-    WeeklyGoalListInSchema,
     WeeklyGoalListOutSchema,
     WeeklyGoalOutSchema,
 )
@@ -76,21 +75,22 @@ def create_weekly_goal(request, payload: WeeklyGoalInSchema):
     return 201, json_response
 
 
-@router.get("", response={200: WeeklyGoalListOutSchema, 404: ErrorSchema})
+@router.get(
+    "/{account_id}", response={200: WeeklyGoalListOutSchema, 404: ErrorSchema}
+)
 @csrf_exempt
-def get_weekly_goals(request, payload: WeeklyGoalListInSchema):
+def get_weekly_goals(request, account_id: str):
     """Get List of Weekly Goals"""
-    json_data = payload.dict()
     # Get the device
     try:
-        device = Device.objects.get(device_id=json_data["account_id"])
+        device = Device.objects.get(device_id=account_id)
         account = device.account
     except Device.DoesNotExist:
         raise HttpError(
             404,
             (
-                f"Unregistered device - "
-                f"{json_data['account_id']}. "
+                f"Unregistered account - "
+                f"{account_id}. "
                 f"Please register first!"
             ),
         )

@@ -74,7 +74,7 @@ def get_admin_home(request):
 
 
 def get_contest_start_end(qs: HomeGraphFilter) -> tuple[str, str]:
-    # handle common parameters for all the chart data API endpoints
+    # Handle common parameters for all the chart data API endpoints
     if qs.contest_id:
         try:
             contest = Contest.objects.get(pk=qs.contest_id)
@@ -98,12 +98,12 @@ def process_results(
     end_date: str | None,
     is_cumulative: bool = False,
 ) -> list:
-    # handle common result processing for the chart data
+    # Handle common result processing for the chart data
     if len(results) > 0:
         if start_date and results[0][0] != f"{start_date}T00:00:00":
             results.insert(0, [f"{start_date}T00:00:00", 0])
         if end_date and results[-1][0] != f"{end_date}T00:00:00":
-            if is_cumulative():
+            if is_cumulative:
                 results.append([f"{end_date}T00:00:00", results[-1][1]])
             else:
                 results.append([f"{end_date}T00:00:00", 0])
@@ -123,9 +123,9 @@ def process_results(
 def get_users_daily(request, qs: Query[HomeGraphFilter]):
     start_date, end_date = get_contest_start_end(qs)
     filters = Q()
-    # filter to show users vs testers
+    # Filter to show users vs testers
     filters = filters & Q(is_tester=qs.is_tester)
-    # filter by date
+    # Filter by date
     if start_date:
         filters = filters & Q(created__gte=start_date)
     if end_date:
@@ -208,9 +208,9 @@ def get_results_walks_daily(
     value_type=None,
 ):
     filters = Q()
-    # filter to show users vs testers
+    # Filter to show users vs testers
     filters = filters & Q(account__is_tester=is_tester)
-    # filter by date
+    # Filter by date
     if start_date:
         filters = filters & Q(date__gte=start_date)
     if end_date:
@@ -299,10 +299,10 @@ def get_results_walks_cumulative(
                 (SELECT
                     CONCAT("date", 'T00:00:00') AS "date",
                     SUM("{value_type}") AS "count"
-                    FROM "home_dailywalk"
-                    JOIN "home_account" ON "home_account"."id"="home_dailywalk"."account_id"
-                    WHERE {conditions}
-                    GROUP BY "date") subquery
+                FROM "home_dailywalk"
+                JOIN "home_account" ON "home_account"."id"="home_dailywalk"."account_id"
+                WHERE {conditions}
+                GROUP BY "date") subquery
             ORDER BY "date"
             """,
             params,
@@ -325,7 +325,12 @@ def get_walks_steps_daily(request, qs: Query[HomeGraphFilter]):
         is_tester=qs.is_tester,
         value_type="steps",
     )
-    results = process_results(results, start_date, end_date)
+    results = process_results(
+        results=results,
+        start_date=start_date,
+        end_date=end_date,
+        is_cumulative=True,
+    )
 
     return results
 
@@ -344,7 +349,10 @@ def get_walks_steps_daily(request, qs: Query[HomeGraphFilter]):
         value_type="distance",
     )
     results = process_results(
-        results, start_date, end_date, is_cumulative=True
+        results=results,
+        start_date=start_date,
+        end_date=end_date,
+        is_cumulative=True,
     )
 
     return results
@@ -417,9 +425,8 @@ def get_contests(request):
 def get_users_by_zip(request, qs: Query[UsersByZipInSchema]):
     values = ["zip"]
     order_by = ["zip"]
-    # if request.user.is_authenticated:
     payload = {}
-    # filter and annotate based on contest_id
+    # Filter and annotate based on contest_id
     filters = None
     annotate = {
         "count": Count("zip"),
@@ -430,10 +437,10 @@ def get_users_by_zip(request, qs: Query[UsersByZipInSchema]):
     else:
         filters = Q()
 
-    # filter to show users vs testers
+    # Filter to show users vs testers
     filters = filters & Q(is_tester=qs.is_tester)
 
-    # query for totals
+    # Query for totals
     results = (
         Account.objects.filter(filters)
         .values(*values)
@@ -645,7 +652,7 @@ def get_model_histogram(
         bin_size=qs.bin_size,
         bin_custom=qs.bin_custom,
     )
-    # even bins either specified by bin_size or bin_size computed from bin_count
+    # Even bins either specified by bin_size or bin_size computed from bin_count
     if res.get("bin_size"):
         return 200, {
             "data": list(
@@ -659,7 +666,7 @@ def get_model_histogram(
             "bin_size": res["bin_size"],
         }
 
-    # custom bins
+    # Custom bins
     return 200, {
         "data": list(
             histogram.fill_missing_bin_idx(

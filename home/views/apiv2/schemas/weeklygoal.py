@@ -46,14 +46,6 @@ class WeeklyGoalOutSchema(Schema):
     )
 
 
-class WeeklyGoalListInSchema(Schema):
-    model_config = ConfigDict(extra="forbid")
-
-    account_id: str = Field(
-        description="Account id of the account the data is linked to."
-    )
-
-
 class WeeklyGoalOutList(Schema):
     id: int = Field(description="Unique id for the set weekly goal.")
     start_of_week: str = Field(

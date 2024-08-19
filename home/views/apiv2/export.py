@@ -252,9 +252,8 @@ def export_contest_users_data(file, contest_id, is_tester):
 
 @router.get("/users")
 @csrf_exempt
-def export_users(request, contest_id: str, is_tester: str):
+def export_users(request, contest_id: str, is_tester: str = "false"):
     is_tester = is_tester == "true"
-
     if not contest_id:
         return HttpResponse(status=422)
     elif not request.user.is_authenticated:

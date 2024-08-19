@@ -123,9 +123,11 @@ class UsersInSchema(Schema):
                     output_field=BooleanField(),
                 ),
                 "dw_count": Count("dailywalk", filter=dailywalk_filter),
-                "dw_steps": Sum("dailywalk__steps", filter=dailywalk_filter),
+                "dw_steps": Sum(
+                    "dailywalk__steps", filter=dailywalk_filter, default=0
+                ),
                 "dw_distance": Sum(
-                    "dailywalk__distance", filter=dailywalk_filter
+                    "dailywalk__distance", filter=dailywalk_filter, default=0
                 ),
             }
             intentionalwalk_filter = Q(
@@ -136,8 +138,8 @@ class UsersInSchema(Schema):
             filters = Q()
             annotate = {
                 "dw_count": Count("dailywalk"),
-                "dw_steps": Sum("dailywalk__steps"),
-                "dw_distance": Sum("dailywalk__distance"),
+                "dw_steps": Sum("dailywalk__steps", default=0),
+                "dw_distance": Sum("dailywalk__distance", default=0),
             }
             intentionalwalk_filter = Q()
 
@@ -146,13 +148,19 @@ class UsersInSchema(Schema):
                 "intentionalwalk", filter=intentionalwalk_filter
             ),
             "iw_steps": Sum(
-                "intentionalwalk__steps", filter=intentionalwalk_filter
+                "intentionalwalk__steps",
+                filter=intentionalwalk_filter,
+                default=0,
             ),
             "iw_distance": Sum(
-                "intentionalwalk__distance", filter=intentionalwalk_filter
+                "intentionalwalk__distance",
+                filter=intentionalwalk_filter,
+                default=0,
             ),
             "iw_time": Sum(
-                "intentionalwalk__walk_time", filter=intentionalwalk_filter
+                "intentionalwalk__walk_time",
+                filter=intentionalwalk_filter,
+                default=0,
             ),
         }
 
@@ -232,7 +240,7 @@ class UsersOut(ModelSchema):
 
 
 class UsersOutSchema(Schema):
-    users: List[UsersOut]
+    users: List[UsersOut] = Field(default=None)
 
 
 class UsersByZipInSchema(Schema):
@@ -252,16 +260,6 @@ class UsersByZipOutSchema(Schema):
     new: dict[str, int] = Field(
         default=None,
         description="Total number of users in each zip code from contest promo start to contest end date",
-    )
-
-
-class UsersByZipActiveInSchema(Schema):
-    contest_id: str = Field(
-        default=None, description="The ID of the contest to filter by."
-    )
-    is_tester: bool = Field(
-        default=False,
-        description="If true, will only return records related to tester accounts.",
     )
 
 
@@ -372,6 +370,7 @@ class Bins(Schema):
         description="The end of the bin",
     )
     bin_end: int = Field(
+        default=None,
         description="The end of the bin",
     )
     count: int = Field(

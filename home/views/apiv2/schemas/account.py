@@ -117,8 +117,6 @@ class AccountSchema(Schema):
         gender = self.gender
         gender_other = self.gender_other
         if gender is not None:
-            # if gender not in GenderLabels.__members__:
-            #     raise ValueError(f"Invalid gender selection '{gender}'")
             if gender == "OT":
                 if not gender_other:
                     raise ValueError("Must specify 'other' gender")
@@ -138,10 +136,6 @@ class AccountSchema(Schema):
         sexual_orien = self.sexual_orien
         sexual_orien_other = self.sexual_orien_other
         if sexual_orien is not None:
-            # if sexual_orien not in SexualOrientationLabels.__members__:
-            #     raise ValueError(
-            #         f"Invalid sexual orientation selection '{sexual_orien}'"
-            #     )
             if sexual_orien == "OT":
                 if not sexual_orien_other:
                     raise ValueError("Must specify 'other' sexual orientation")

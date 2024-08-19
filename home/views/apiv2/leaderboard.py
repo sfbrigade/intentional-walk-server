@@ -28,13 +28,15 @@ def get_leaderboard(request, contest_id: str, device_id: str):
         device = Device.objects.get(device_id=device_id)
     except Device.DoesNotExist:
         raise HttpError(
-            404, (
-            f"Unregistered device - "
-            f"{device_id}. "
-            f"Please register first!"),
+            404,
+            (
+                f"Unregistered device - "
+                f"{device_id}. "
+                f"Please register first!"
+            ),
         )
 
-    # Json response template
+    # JSON response template
     json_response = {"leaderboard": []}
 
     leaderboard_list = []
@@ -48,7 +50,7 @@ def get_leaderboard(request, contest_id: str, device_id: str):
         .annotate(rank=Window(expression=Rank(), order_by=F("steps").desc()))
     )
 
-    # get top 10
+    # Get top 10
     leaderboard_list = list(leaderboard[0:leaderboard_length])
 
     # Check if user should be added after top 10 displayed
