@@ -14,6 +14,7 @@ See [Wiki](https://github.com/sfbrigade/intentional-walk-server/wiki)
    See the troubleshooting notes below.
 
 2. Copy `example.env` to `.env` and edit the Docker environment variables as needed.
+    Sentry CSN will need to be retrieved from the Sentry console or another developer on this project.
 
 3. Open a command-line shell, change into your repo directory, and execute this command:
 
