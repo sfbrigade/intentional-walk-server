@@ -20,10 +20,9 @@ from .utils import validate_request_json
 
 # Determines whether Account is tester account, based on name in label
 def is_tester(name_field: str) -> bool:
-    possible_prefixes = ["iwt"]
-    parts = name_field.split(" ",1)
+    parts = name_field.split(" ", 1)
     for s in parts:
-        if 'iwt' == s.lower():
+        if "iwt" == s.lower():
             return True
     return False
 
