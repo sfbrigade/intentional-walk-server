@@ -1,7 +1,5 @@
 from django.test import Client, TestCase
 
-from home.models import Account
-
 
 class ApiTestCase(TestCase):
     def setUp(self):

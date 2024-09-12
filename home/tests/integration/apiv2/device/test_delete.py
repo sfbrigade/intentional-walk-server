@@ -179,7 +179,7 @@ class ApiTestCase(TestCase):
 
         self.check_delete_failure(
             response,
-            expected_msg=f"Unregistered device - device_id: fakeID. Please register first!",
+            expected_msg="Unregistered device - device_id: fakeID. Please register first!",
         )
         self.check_users_and_device_still_exist(
             [self.account_id1, self.account_id2]

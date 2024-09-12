@@ -179,7 +179,7 @@ class ApiTestCase(TestCase):
 
         self.check_delete_failure(
             response,
-            expected_msg=f"Cannot find device registered with account_id: fakeID",
+            expected_msg="Cannot find device registered with account_id: fakeID",
         )
         self.check_users_and_device_still_exist(
             [self.account_id1, self.account_id2]

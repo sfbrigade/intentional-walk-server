@@ -7,16 +7,13 @@ from dateutil import parser
 from django.db import connection
 from django.db.models import CharField, Count, Q, Sum, Value
 from django.db.models.functions import Concat, TruncDate
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from ninja import Query, Router
 from ninja.errors import HttpError, ValidationError
 from ninja.security import django_auth_superuser
 
 from home.models import Account, Contest, DailyWalk
-from home.views.api.serializers.response_serializers import (
-    GetUsersRespSerializer,
-)
 from home.views.api.utils import paginate
 
 from .histogram.histogram import Histogram
@@ -317,7 +314,7 @@ def get_results_walks_cumulative(
     response={200: List, 404: ErrorSchema},
     auth=django_auth_superuser,
 )
-def get_walks_steps_daily(request, qs: Query[HomeGraphFilter]):
+def get_walks_steps_cumulative(request, qs: Query[HomeGraphFilter]):
     start_date, end_date = get_contest_start_end(qs)
     results = get_results_walks_cumulative(
         start_date,
@@ -340,7 +337,7 @@ def get_walks_steps_daily(request, qs: Query[HomeGraphFilter]):
     response={200: List, 404: ErrorSchema},
     auth=django_auth_superuser,
 )
-def get_walks_steps_daily(request, qs: Query[HomeGraphFilter]):
+def get_walks_distance_cumulative(request, qs: Query[HomeGraphFilter]):
     start_date, end_date = get_contest_start_end(qs)
     results = get_results_walks_cumulative(
         start_date,
@@ -367,8 +364,6 @@ def get_walks_steps_daily(request, qs: Query[HomeGraphFilter]):
 def get_users(
     request: HttpRequest, response: HttpResponse, qs: Query[UsersInSchema]
 ):
-
-    contest_id = qs.contest_id
     filters = qs.filter_dict["filters"]
     order_by = qs.filter_dict["order_by"]
     page = qs.filter_dict["page"]

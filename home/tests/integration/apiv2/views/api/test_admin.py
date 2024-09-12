@@ -121,7 +121,7 @@ class TestAdminViews(TestCase):
     def test_get_home_steps_daily_invalid_contest_id(self):
         c = Client()
         self.assertTrue(Login.login(c))
-        response = c.get(f"/api/v2/admin/home/steps/daily?contest_id=invalid")
+        response = c.get("/api/v2/admin/home/steps/daily?contest_id=invalid")
         # Check for a successful response by the server
         self.assertEqual(response.status_code, 404)
         # Parse the response
@@ -308,7 +308,7 @@ class TestAdminViews(TestCase):
         # authenticated
         self.assertTrue(Login.login(c))
 
-        response = c.get(f"/api/v2/admin/users/zip")
+        response = c.get("/api/v2/admin/users/zip")
         data = response.json()
         self.assertEqual(
             data,
@@ -341,7 +341,7 @@ class TestAdminViews(TestCase):
         self.assertTrue(Login.login(c))
 
         # no  contest_id given
-        response = c.get(f"/api/v2/admin/users/zip/active")
+        response = c.get("/api/v2/admin/users/zip/active")
         self.assertEqual(response.status_code, 404)
         # Parse the response
         response_data = response.json()
@@ -376,7 +376,7 @@ class TestAdminViews(TestCase):
         self.assertTrue(Login.login(c))
 
         # no  contest_id given
-        response = c.get(f"/api/v2/admin/users/zip/steps")
+        response = c.get("/api/v2/admin/users/zip/steps")
         self.assertEqual(response.status_code, 404)
         # Parse the response
         response_data = response.json()

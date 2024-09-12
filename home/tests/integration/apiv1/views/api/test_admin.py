@@ -293,7 +293,7 @@ class TestAdminViews(TestCase):
         # authenticated
         self.assertTrue(Login.login(c))
 
-        response = c.get(f"/api/admin/users/zip")
+        response = c.get("/api/admin/users/zip")
         data = response.json()
         self.assertEqual(
             data,
@@ -324,7 +324,7 @@ class TestAdminViews(TestCase):
         self.assertTrue(Login.login(c))
 
         # no  contest_id given
-        response = c.get(f"/api/admin/users/zip/active")
+        response = c.get("/api/admin/users/zip/active")
         self.assertEqual(response.status_code, 422)
 
         response = c.get(
@@ -351,7 +351,7 @@ class TestAdminViews(TestCase):
         self.assertTrue(Login.login(c))
 
         # no  contest_id given
-        response = c.get(f"/api/admin/users/zip/steps")
+        response = c.get("/api/admin/users/zip/steps")
         self.assertEqual(response.status_code, 422)
 
         response = c.get(

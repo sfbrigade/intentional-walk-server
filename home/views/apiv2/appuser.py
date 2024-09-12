@@ -85,7 +85,7 @@ def create_appuser(request, payload: AccountSchema):
 
 @router.put("/{account_id}", response={204: None, 404: ErrorSchema})
 @csrf_exempt
-def update_appuser(request, account_id: str, payload: AccountSchema):
+def update_appuser_put(request, account_id: str, payload: AccountSchema):
     json_data = payload.dict()
     try:
         device = Device.objects.get(device_id=account_id)
@@ -104,7 +104,9 @@ def update_appuser(request, account_id: str, payload: AccountSchema):
 
 @router.patch("/{account_id}", response={204: None, 404: ErrorSchema})
 @csrf_exempt
-def update_appuser(request, account_id: str, payload: AccountPatchSchema):
+def update_appuser_patch(
+    request, account_id: str, payload: AccountPatchSchema
+):
     json_data = payload.dict()
     try:
         device = Device.objects.get(device_id=account_id)

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional
 
 from ninja import Field, Schema
 from pydantic import ConfigDict, computed_field

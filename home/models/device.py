@@ -30,7 +30,7 @@ class Device(models.Model):
         max_length=25,
         null=True,
         blank=True,
-        help_text="""Unique identifier for the device's model.
+        help_text="""Unique identifier for the device's model.\n
             getDeviceid() - Gets the device ID.
                 iOS: "iPhone7,2"
                 Android: "goldfish"
@@ -56,7 +56,7 @@ class Device(models.Model):
         max_length=25,
         null=True,
         blank=True,
-        help_text="""Manufacturer of the device.
+        help_text="""Manufacturer of the device.\n
             getManufacturer() - Gets the device manufacturer
                 iOS: "Apple"
                 Android: "Google"
@@ -67,9 +67,10 @@ class Device(models.Model):
         max_length=25,
         null=True,
         blank=True,
-        help_text="""Operating system of the device.
+        help_text="""Operating system of the device.\n
             getSystemName() - Gets the device OS name.
-                iOS: "iOS" on newer iOS devices "iPhone OS" on older devices (including older iPad models), "iPadOS" for iPads using iPadOS 15.0 or higher.
+                iOS: "iOS" on newer iOS devices "iPhone OS" on older devices (including older iPad models),
+                \t\t"iPadOS" for iPads using iPadOS 15.0 or higher.
                 Android: "Android"
                 Windows: ?
         """,
@@ -78,7 +79,7 @@ class Device(models.Model):
         max_length=25,
         null=True,
         blank=True,
-        help_text="""Device operating system version. 
+        help_text="""Device operating system version.\n
             getSystemVersion() - Gets the device OS version.
                 iOS: "11.0"
                 Android: "7.1.1"

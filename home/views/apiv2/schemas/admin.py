@@ -1,16 +1,8 @@
 from datetime import date, timedelta
-from typing import Dict, List, Optional
+from typing import List
 
-from django.db.models import (
-    BooleanField,
-    Count,
-    ExpressionWrapper,
-    F,
-    Q,
-    QuerySet,
-    Sum,
-)
-from ninja import Field, FilterSchema, ModelSchema, Schema
+from django.db.models import BooleanField, Count, ExpressionWrapper, F, Q, Sum
+from ninja import Field, ModelSchema, Schema
 from ninja.errors import ValidationError
 from pydantic import computed_field, field_validator, model_validator
 from typing_extensions import Self
@@ -39,21 +31,21 @@ class AdminHomeSchema(Schema):
 class HomeGraphFilter(Schema):
     contest_id: str = Field(
         default=None,
-        description="""The ID of the contest to filter by.
-            <br>This field is mutually exclusive with the date fields.
-            <br>For distance and step metrics, this will restrict the records
-            to the values recorded during the contest period's start and end date.
-            <br>For account metrics, this will restrict the records to the accounts that participated in the contest.""",
+        description="""The ID of the contest to filter by.\n
+            This field is mutually exclusive with the date fields.\n
+            For distance and step metrics, this will restrict the records
+            to the values recorded during the contest period's start and end date.\n
+            For account metrics, this will restrict the records to the accounts that participated in the contest.""",
     )
     start_date: date = Field(
         default=None,
-        description="""The start date to filter the records by.
-            <br><br>**Note** start_date and end_date areThese fields are mutually exclusive with the contest_id field.""",
+        description="""The start date to filter the records by.\n\n
+            **Note** start_date and end_date areThese fields are mutually exclusive with the contest_id field.""",
     )
     end_date: date = Field(
         default=None,
-        description="""The end date to filter the records by.
-            <br><br>**Note** start_date and end_date are mutually exclusive with the contest_id field.""",
+        description="""The end date to filter the records by.\n\n
+            **Note** start_date and end_date are mutually exclusive with the contest_id field.""",
     )
     is_tester: bool = Field(
         default=False,
@@ -83,7 +75,7 @@ class ContestOutSchema(Schema):
 class UsersInSchema(Schema):
     contest_id: str = Field(
         default=None,
-        description="""The ID of the contest to filter by. 
+        description="""The ID of the contest to filter by.
             Providing this also will add additional metrics related to te contest.""",
     )
     is_tester: bool = Field(
@@ -92,7 +84,7 @@ class UsersInSchema(Schema):
     )
     order_by: str = Field(
         default=None,
-        description="""The field to order the results by. Prefix with '-' to order in descending order. 
+        description="""The field to order the results by. Prefix with '-' to order in descending order.
             The secondary sort and default sort will be lexicographically, the 'name'.""",
     )
     page: int = Field(
@@ -267,11 +259,11 @@ class HistogramInSchema(Schema):
     field: str = Field(description="The field to group by")
     contest_id: str = Field(
         default=None,
-        description="""The ID of the contest to filter by.
-            <br>This field is mutually exclusive with the date fields.
-            <br>For distance and step metrics, this will restrict the records
-            to the values recorded during the contest period's start and end date.
-            <br>For account metrics, this will restrict the records to the accounts that participated in the contest.""",
+        description="""The ID of the contest to filter by.\n
+            This field is mutually exclusive with the date fields.\n
+            For distance and step metrics, this will restrict the records
+            to the values recorded during the contest period's start and end date.\n
+            For account metrics, this will restrict the records to the accounts that participated in the contest.""",
     )
     is_tester: bool = Field(
         default=False,
@@ -284,27 +276,27 @@ class HistogramInSchema(Schema):
     )
     bin_count: int = Field(
         default=None,
-        description="""The number of bins to group the data by.
-            <br><br>**Note** this is mutually exclusive with the bin_size and bin_custom field.""",
+        description="""The number of bins to group the data by.\n\n
+            **Note** this is mutually exclusive with the bin_size and bin_custom field.""",
     )
     bin_custom: str = Field(
         default=None,
-        description="""A list of comma separated custom bin sizes in increasing order to group the data by.
-            <br><br>Example: 0,18,29,44,59
-            <br><br>**Note** this is mutually exclusive with the bin_size and bin_count fields.""",
+        description="""A list of comma separated custom bin sizes in increasing order to group the data by.\n
+            Example: 0,18,29,44,59\n\n
+            **Note** this is mutually exclusive with the bin_size and bin_count fields.""",
     )
 
     # Date fields to filter by, inclusive.
     # These fields are mutually exclusive with the contest_id field.
     start_date: date = Field(
         default=None,
-        description="""The start date to filter the records by.
-            <br><br>**Note** start_date and end_date areThese fields are mutually exclusive with the contest_id field.""",
+        description="""The start date to filter the records by.\n\n
+            **Note** start_date and end_date areThese fields are mutually exclusive with the contest_id field.""",
     )
     end_date: date = Field(
         default=None,
-        description="""The end date to filter the records by.
-            <br><br>**Note** start_date and end_date are mutually exclusive with the contest_id field.""",
+        description="""The end date to filter the records by.\n\n
+            **Note** start_date and end_date are mutually exclusive with the contest_id field.""",
     )
 
     @field_validator("bin_custom")
@@ -382,19 +374,19 @@ class HistogramOutSchema(Schema):
     data: List[Bins]
     bin_size: int = Field(
         default=None,
-        description="""The size of the bin to group the data by. Units will be the same as the field.
-            <br><br>**Note** this is mutually exclusive with the bin_count and bin_custom field.""",
+        description="""The size of the bin to group the data by. Units will be the same as the field.\n\n
+            **Note** this is mutually exclusive with the bin_count and bin_custom field.""",
     )
     bin_count: int = Field(
         default=None,
-        description="""The number of bins to group the data by.
-            <br><br>**Note** this is mutually exclusive with the bin_size and bin_custom field.""",
+        description="""The number of bins to group the data by.\n\n
+            **Note** this is mutually exclusive with the bin_size and bin_custom field.""",
     )
     bin_custom: List[int] | None = Field(
         default=None,
-        description="""A list of comma separated custom bin sizes in increasing order to group the data by. 
-            <br><br>Example: 0,18,29,44,59 
-            <br><br>Note this is mutually exclusive with the bin_size and bin_count fields.""",
+        description="""A list of comma separated custom bin sizes in increasing order to group the data by.\n\n
+            Example: 0,18,29,44,59\n
+            Note this is mutually exclusive with the bin_size and bin_count fields.""",
     )
     unit: str = Field(description="The unit of measurement for the data")
 

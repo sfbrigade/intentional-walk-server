@@ -15,7 +15,11 @@ class Migration(migrations.Migration):
             name="device_model",
             field=models.CharField(
                 blank=True,
-                help_text='Unique identifier for the device\'s model.\n            getDeviceid() - Gets the device ID.\n                iOS: "iPhone7,2"\n                Android: "goldfish"\n                Windows: "Y3R94UC#AC4"\n        ',
+                help_text='''Unique identifier for the device\'s model.\n
+                getDeviceid() - Gets the device ID.
+                iOS: "iPhone7,2"
+                Android: "goldfish"
+                Windows: "Y3R94UC#AC4"''',
                 max_length=25,
                 null=True,
             ),
@@ -25,7 +29,11 @@ class Migration(migrations.Migration):
             name="manufacturer",
             field=models.CharField(
                 blank=True,
-                help_text='Manufacturer of the device.\n            getManufacturer() - Gets the device manufacturer\n                iOS: "Apple"\n                Android: "Google"\n                Windows: ?\n        ',
+                help_text="""Manufacturer of the device.\n
+                getManufacturer() - Gets the device manufacturer
+                iOS: "Apple"
+                Android: "Google"
+                Windows: ?""",
                 max_length=25,
                 null=True,
             ),
@@ -35,7 +43,12 @@ class Migration(migrations.Migration):
             name="os_name",
             field=models.CharField(
                 blank=True,
-                help_text='Operating system of the device.\n            getSystemName() - Gets the device OS name.\n                iOS: "iOS" on newer iOS devices "iPhone OS" on older devices (including older iPad models), "iPadOS" for iPads using iPadOS 15.0 or higher.\n                Android: "Android"\n                Windows: ?\n        ',
+                help_text="""Operating system of the device.\n
+                getSystemName() - Gets the device OS name.
+                iOS: "iOS" on newer iOS devices "iPhone OS" on older devices (including older iPad models),
+                \t\t"iPadOS" for iPads using iPadOS 15.0 or higher.
+                Android: "Android"
+                Windows: ?""",
                 max_length=25,
                 null=True,
             ),
@@ -45,7 +58,11 @@ class Migration(migrations.Migration):
             name="os_version",
             field=models.CharField(
                 blank=True,
-                help_text='Device operating system version. \n            getSystemVersion() - Gets the device OS version.\n                iOS: "11.0"\n                Android: "7.1.1"\n                Windows: ?\n        ',
+                help_text="""Device operating system version.\n
+                getSystemVersion() - Gets the device OS version.
+                iOS: "11.0"
+                Android: "7.1.1"
+                Windows: ?""",
                 max_length=25,
                 null=True,
             ),

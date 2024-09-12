@@ -1,8 +1,5 @@
-from typing import Optional
-
 from ninja import Field, Schema
 from pydantic import ConfigDict
-from typing_extensions import Self
 
 
 class LeaderboardUserSchema(Schema):
