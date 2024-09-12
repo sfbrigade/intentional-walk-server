@@ -363,8 +363,11 @@ const chartOptions = {
   histogram: {
     legend: { position: "none" },
     bar: { groupWidth: "95%" },
+    hAxis: {
+      title: "Age"
+    },
     vAxis: {
-      title: "Age",
+      title: "Users",
       viewWindow: { min: 0 },
     },
     colors: ["#2ECC71"],
