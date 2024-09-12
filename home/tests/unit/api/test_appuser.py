@@ -9,9 +9,10 @@ class TestIsTester(TestCase):
             ("Iwt A", True),
             ("Test B", False),
             ("iwt c", True),
+            ("John Iwt", True),
             ("Iwterosa", False),
-            ("iwt-d", True),
-            ("Iwt_E", True),
+            ("iwt-d", False),
+            ("Iwt_E", False),
             ("iwtrata", False),
             ("iwt", True),
         ]
