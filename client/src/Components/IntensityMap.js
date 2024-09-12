@@ -53,7 +53,7 @@ function IntensityMap({
         .attr("stroke", "#000000")
         .attr("fill", (feature) => colorScale(data[feature.id] ?? 0))
         .on("mouseover", (_, feature) => onMouseOver(feature))
-        .on("mouseout", () => onMouseOver());
+        .on("mouseout", () => onMouseOver(null));
     }
   }, [data, map, width, height, minColor, maxColor, onMouseOver]);
 

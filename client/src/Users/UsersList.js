@@ -40,6 +40,7 @@ function UsersList() {
   const [usersByZipActive, setUsersByZipActive] = useState();
   const [usersByZipMedianSteps, setUsersByZipMedianSteps] = useState();
   const [selectedFeature, setSelectedFeature] = useState();
+  const [resetTimeoutId, setResetTimeoutId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -152,7 +153,18 @@ function UsersList() {
   }
 
   function onMouseOverZip(feature) {
-    setSelectedFeature(feature);
+    if (resetTimeoutId) {
+      clearTimeout(resetTimeoutId);
+    }
+    setSelectedFeature(feature); 
+
+    
+    const newTimeoutId = setTimeout(() => {
+      setSelectedFeature(null);
+    }, 100);
+
+    setResetTimeoutId(newTimeoutId);
+    
   }
 
   let totalUsers;
