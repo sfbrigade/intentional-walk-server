@@ -11,7 +11,7 @@ class TestIsTester(TestCase):
             ("iwt c", True),
             ("Iwterosa", False),
             ("iwt-d", False),
-            ("Iwt_E", True),
+            ("Iwt_E", False),
             ("iwtrata", False),
             ("iwt", True),
         ]
