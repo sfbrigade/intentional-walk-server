@@ -262,7 +262,7 @@ function UsersList() {
             </div>
             <div className="col-lg-2">
               <h4>
-                {!selectedFeature && "San Franciso"}
+                {!selectedFeature && "San Francisco"}
                 {selectedFeature &&
                   `${selectedFeature.properties.neighborhood} (${selectedFeature.id})`}
               </h4>
