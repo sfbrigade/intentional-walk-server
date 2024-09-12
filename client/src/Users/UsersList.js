@@ -123,15 +123,15 @@ function UsersList() {
   }
 
   function onChangeContest(event) {
-    onChange(event.target.value, is_tester, order_by, query);
+    onChange(event.target.value, is_tester, order_by, query, show_rw);
   }
 
   function onChangeShow(event) {
-    onChange(contest_id, event.target.value === "true", order_by, query);
+    onChange(contest_id, event.target.value === "true", order_by, query, show_rw);
   }
 
   function onChangeOrder(newOrderBy) {
-    onChange(contest_id, is_tester, newOrderBy, query);
+    onChange(contest_id, is_tester, newOrderBy, query, show_rw);
   }
 
   function onChangeQuery(event) {
@@ -141,7 +141,7 @@ function UsersList() {
     setNewQuery(event.target.value);
     setQueryDebounceTimerId(
       setTimeout(
-        () => onChange(contest_id, is_tester, order_by, event.target.value),
+        () => onChange(contest_id, is_tester, order_by, event.target.value, show_rw),
         300
       )
     );
@@ -262,7 +262,7 @@ function UsersList() {
             </div>
             <div className="col-lg-2">
               <h4>
-                {!selectedFeature && "San Franciso"}
+                {!selectedFeature && "San Francisco"}
                 {selectedFeature &&
                   `${selectedFeature.properties.neighborhood} (${selectedFeature.id})`}
               </h4>
