@@ -49,9 +49,7 @@ jobs:
           command: |
             docker-compose -p iwalk exec -e COVERALLS_REPO_TOKEN server bash -c "
               git config --global --add safe.directory /app 
-              make test
-              make coverage
-              poetry run coveralls
+              make test && make coverage && poetry run coveralls
             "
 workflows:
   main:

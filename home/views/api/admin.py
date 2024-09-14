@@ -322,13 +322,14 @@ class AdminUsersView(View):
             .order_by(*order_by)
         )
         query, links = paginate(request, query, page, per_page)
+        result_dto = [row for row in query]
 
         iw_query = (
-            Account.objects.filter(id__in=(row["id"] for row in query))
+            Account.objects.filter(id__in=(row["id"] for row in result_dto))
             .values("id")
             .annotate(**intentionalwalk_annotate)
-            .order_by(*order_by)
         )
+        iw_results = [row for row in iw_query]
 
         def update_user_dto(dto, iw_stats):
             dto.update(iw_stats)
@@ -337,10 +338,12 @@ class AdminUsersView(View):
                 dto["is_active"] = dto["dw_count"] > 0 or dto["iw_count"] > 0
             return dto
 
-        result_dto = [
-            update_user_dto(dto, iw_stat)
-            for dto, iw_stat in zip(query, iw_query)
-        ]
+        for dto in result_dto:
+            for iw_stat in iw_results:
+                if dto["id"] == iw_stat["id"]:
+                    update_user_dto(dto, iw_stat)
+                    break
+
         resp = GetUsersRespSerializer(result_dto, many=True)
         response = JsonResponse(resp.data, safe=False)
 
