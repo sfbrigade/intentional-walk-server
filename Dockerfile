@@ -1,4 +1,4 @@
-FROM python:3.11.9-bookworm
+FROM python:3.11.10-bookworm
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Install postgres client
