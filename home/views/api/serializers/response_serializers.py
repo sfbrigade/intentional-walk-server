@@ -6,7 +6,9 @@ These serve to map internal Python data types
 to JSON-compatible data types that can be sent in the HTTP response,
 and to clearly document the structure of the response data.
 """
+
 from rest_framework import serializers
+
 from home.models import Account
 
 
@@ -34,4 +36,19 @@ class GetUsersRespSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = "__all__"
+        fields = (
+            "name",
+            "email",
+            "age",
+            "zip",
+            "created",
+            "dw_count",
+            "dw_steps",
+            "dw_distance",
+            "iw_count",
+            "iw_steps",
+            "iw_distance",
+            "iw_time",
+            "is_new",
+            "is_active",
+        )

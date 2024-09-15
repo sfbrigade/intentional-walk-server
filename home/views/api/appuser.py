@@ -110,7 +110,7 @@ def validate_account_input(data: dict):
     elif data.get("sexual_orien_other") is not None:
         assert (
             False
-        ), "'sexual_orien_other' should not be specified without 'gender'"
+        ), "'sexual_orien_other' should not be specified without 'sexual_orien'"
 
 
 def update_account(acct: Account, data: dict):
@@ -273,7 +273,7 @@ class AppUserCreateView(View):
                     "zip": account.zip,
                     "age": account.age,
                     "is_latino": account.is_latino,
-                    "race": list(account.race),
+                    "race": account.race,
                     "race_other": account.race_other,
                     "gender": account.gender,
                     "gender_other": account.gender_other,

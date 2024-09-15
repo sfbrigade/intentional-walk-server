@@ -57,7 +57,7 @@ class AccountGenerator:
             age=random.randint(10, 100),
             gender=gender_background,
             gender_other="Gender Queer" if gender_background == "OT" else None,
-            race=racial_background,
+            race=list(racial_background),
             race_other="Middle Eastern" if "OT" in racial_background else None,
             sexual_orien=random.choice([en.name for en in self.sexual_oriens]),
             is_latino=random.choice([en.name for en in self.ethnicity]),

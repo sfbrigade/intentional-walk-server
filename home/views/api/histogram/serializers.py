@@ -1,27 +1,29 @@
 from datetime import date, datetime, time
-from rest_framework import serializers
+from typing import Any, Dict, List, Optional, TypedDict
+
+from django.db import models as djmodel
 from django.db.models import (
+    Case,
+    Count,
+    ExpressionWrapper,
+    F,
+    IntegerField,
     Max,
     Min,
     Q,
-    F,
-    Count,
-    ExpressionWrapper,
-    IntegerField,
     QuerySet,
-    When,
     Value,
-    Case,
+    When,
 )
 from django.db.models.functions import Floor
-from typing import Dict, Any, Optional, TypedDict, List
+from django.utils.timezone import make_aware
+from rest_framework import serializers
+
+from home.models.account import Account
 from home.models.contest import Contest
 from home.models.dailywalk import DailyWalk
 from home.models.intentionalwalk import IntentionalWalk
 from home.models.leaderboard import Leaderboard
-from home.models.account import Account
-from django.db import models as djmodel
-from django.utils.timezone import make_aware
 
 
 class ValidatedHistogramReq(TypedDict):

@@ -6,17 +6,12 @@ Each serializer in this module corresponds to a specific API endpoint. The seria
 it for further processing.
 """
 
-from rest_framework import serializers
 from datetime import timedelta
+
+from django.db.models import BooleanField, Count, ExpressionWrapper, F, Q, Sum
+from rest_framework import serializers
+
 from home.models import Contest
-from django.db.models import (
-    BooleanField,
-    Count,
-    ExpressionWrapper,
-    F,
-    Q,
-    Sum,
-)
 
 
 class GetUsersReqSerializer(serializers.Serializer):

@@ -1,18 +1,11 @@
 import itertools
 import logging
 import os
-
 from datetime import timedelta
-from dateutil import parser
 
+from dateutil import parser
 from django.db import connection
-from django.db.models import (
-    CharField,
-    Count,
-    Q,
-    Sum,
-    Value,
-)
+from django.db.models import CharField, Count, Q, Sum, Value
 from django.db.models.functions import Concat, TruncDate
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views import View
@@ -84,8 +77,8 @@ class AdminHomeGraphView(View):
         return []
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponse(status=401)
+        # if not request.user.is_authenticated:
+        #     return HttpResponse(status=401)
 
         # handle common parameters for all the chart data API endpoints
         contest_id = request.GET.get("contest_id", None)
@@ -293,13 +286,13 @@ class AdminContestsView(View):
     http_method_names = ["get"]
 
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            values = ["contest_id", "start", "end"]
-            order_by = ["-start"]
-            results = Contest.objects.values(*values).order_by(*order_by)
-            return JsonResponse(list(results), safe=False)
-        else:
-            return HttpResponse(status=401)
+        # if request.user.is_authenticated:
+        values = ["contest_id", "start", "end"]
+        order_by = ["-start"]
+        results = Contest.objects.values(*values).order_by(*order_by)
+        return JsonResponse(list(results), safe=False)
+        # else:
+        #     return HttpResponse(status=401)
 
 
 class AdminUsersView(View):
@@ -353,6 +346,7 @@ class AdminUsersView(View):
 
         resp = GetUsersRespSerializer(result_dto, many=True)
         response = JsonResponse(resp.data, safe=False)
+
         if links:
             response.headers["Link"] = links
 

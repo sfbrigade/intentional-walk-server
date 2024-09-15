@@ -2,16 +2,9 @@ import csv
 import logging
 import os
 import tempfile
-
 from datetime import timedelta
 
-from django.db.models import (
-    BooleanField,
-    Count,
-    ExpressionWrapper,
-    Q,
-    Sum,
-)
+from django.db.models import BooleanField, Count, ExpressionWrapper, Q, Sum
 from django.http import FileResponse, HttpResponse
 from django.views import View
 

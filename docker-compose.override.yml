@@ -19,6 +19,6 @@ services:
     ports:
       - "8001:8001"
   db:
-    image: postgres:12
+    image: postgres:14.12
     ports:
       - 5433:5432

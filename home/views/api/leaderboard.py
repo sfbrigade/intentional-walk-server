@@ -1,18 +1,13 @@
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
+from django.db.models.expressions import Window
+from django.db.models.functions import Rank
 from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models.functions import Rank
-from django.db.models.expressions import Window
-from django.db.models import F
-from django.core.exceptions import ObjectDoesNotExist
 
-
-from home.models import (
-    Contest,
-    Device,
-    Leaderboard,
-)
+from home.models import Contest, Device, Leaderboard
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -33,7 +28,7 @@ class LeaderboardListView(View):
             return HttpResponse("No contest specified")
 
         current_contest = Contest.objects.filter(contest_id=contest_id)
-        if current_contest is None:
+        if not current_contest:
             return JsonResponse(
                 {
                     "status": "error",
