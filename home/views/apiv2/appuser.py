@@ -15,10 +15,11 @@ router = Router()
 
 # Determines whether Account is tester account, based on name prefix
 def is_tester(name_field: str) -> bool:
-    possible_prefixes = ["tester-", "tester ", "tester_"]
-    return any(
-        [name_field.lower().startswith(prefix) for prefix in possible_prefixes]
-    )
+    parts = name_field.split(" ", 1)
+    for s in parts:
+        if "iwt" == s.lower():
+            return True
+    return False
 
 
 def update_model(account: Account, json_data: dict):
