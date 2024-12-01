@@ -1,7 +1,14 @@
 from enum import Enum
+from typing import List
 
 from django.db import models
 from setfield import SetField
+
+from home.models.mixins.privacyprotectedfields import (
+    PrivacyProtectedFieldsMixin,
+    PrivateFieldInfo,
+    FieldType,
+)
 
 SAN_FRANCISCO_ZIP_CODES = set(
     [
@@ -72,7 +79,7 @@ class IsLatinoLabels(Enum):
 
 
 # Note: Maybe inherit from Django's User model?
-class Account(models.Model):
+class Account(models.Model, PrivacyProtectedFieldsMixin):
     """
     Stores a single user account as identified by email. This is created when
     the app is installed and the user signs up for the first time and is has
@@ -149,6 +156,14 @@ class Account(models.Model):
 
     def __str__(self):
         return f"{self.name} | {self.email}"
+
+    @staticmethod
+    def privacy_protected_fields() -> List[PrivateFieldInfo]:
+        """Privacy protected fields overrides the PrivacyProtectedFields mixin.c"""
+        return [
+            PrivateFieldInfo(name="email", type=FieldType.EMAIL),
+            PrivateFieldInfo(name="name", type=FieldType.NAME),
+        ]
 
     class Meta:
         ordering = ("-created",)
