@@ -162,6 +162,7 @@ class IntentionalWalkListView(View):
             total_walk_time += intentional_walk.walk_time
             total_distance += intentional_walk.distance
             total_pause_time += intentional_walk.pause_time
+        total_distance = round(total_distance, 6)
         intentional_walk_list = sorted(
             intentional_walk_list, key=lambda x: x["start"], reverse=True
         )
