@@ -20,8 +20,8 @@ uuid = "^1.30"
 faker = "^8.11.0"
 django-postgres-setfield = {git = "https://github.com/benperlman/django-postgres-setfield.git"}
 black = "^22.8.0"
-flake8 = "^5.0.4"
-autoflake = "^1.5.3"
+flake8 = "^7.1.1"
+autoflake = "^2.3.1"
 djangorestframework = "^3.14.0"
 
 [tool.poetry.dev-dependencies]
