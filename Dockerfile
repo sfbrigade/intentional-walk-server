@@ -1,4 +1,4 @@
-FROM python:3.11.4
+FROM python:3.13.1
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Install postgres client
