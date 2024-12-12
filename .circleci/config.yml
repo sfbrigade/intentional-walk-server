@@ -15,6 +15,10 @@ jobs:
           command: |
             cp example.env .env
       - run:
+          name: Build Docker image
+          command: |
+            docker-compose -p iwalk -f docker-compose.yml -f docker-compose.override.yml build --no-cache server
+      - run:
           name: Run Docker image
           command: |
             docker-compose -p iwalk -f docker-compose.yml -f docker-compose.override.yml up -d
