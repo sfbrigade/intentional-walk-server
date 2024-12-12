@@ -34,7 +34,7 @@ jobs:
       - run:
           name: Lint code with Flake8
           command: |
-            docker-compose -p iwalk exec server bash -c "poetry run flake8 --count ."
+            docker-compose -p iwalk exec server bash -c "poetry run flake8 --exclude=node_modules --count ."
       - run:
           name: Run Pytest, report coverage
           # make test and make coverage are redundant,
