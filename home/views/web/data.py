@@ -151,19 +151,23 @@ def _get_user_summary_acct_and_walk_data(
                     "rw_steps"
                 ),
                 "Total Recorded Walk Time During Baseline": (
-                    iw_contest.get("rw_total_walk_time").total_seconds()
-                    - iw_contest.get("rw_pause_time")
-                )
-                / 60.0
-                if iw_contest
-                else None,
+                    (
+                        iw_contest.get("rw_total_walk_time").total_seconds()
+                        - iw_contest.get("rw_pause_time")
+                    )
+                    / 60.0
+                    if iw_contest
+                    else None
+                ),
                 "Total Recorded Walk Time During Contest": (
-                    iw_contest.get("rw_total_walk_time").total_seconds()
-                    - iw_contest.get("rw_pause_time")
-                )
-                / 60.0
-                if iw_contest
-                else None,
+                    (
+                        iw_contest.get("rw_total_walk_time").total_seconds()
+                        - iw_contest.get("rw_pause_time")
+                    )
+                    / 60.0
+                    if iw_contest
+                    else None
+                ),
             }
         )
 
@@ -322,9 +326,9 @@ def daily_walks_csv_view(request) -> HttpResponse:
         end_date = date.fromisoformat(end_date_str) if end_date_str else None
 
         response = HttpResponse(content_type="text/csv")
-        response[
-            "Content-Disposition"
-        ] = 'attachment; filename="daily_walks.csv"'
+        response["Content-Disposition"] = (
+            'attachment; filename="daily_walks.csv"'
+        )
 
         csv_header = [
             "email",
@@ -380,9 +384,9 @@ def intentional_walks_csv_view(request) -> HttpResponse:
         end_date = date.fromisoformat(end_date_str) if end_date_str else None
 
         response = HttpResponse(content_type="text/csv")
-        response[
-            "Content-Disposition"
-        ] = 'attachment; filename="recorded_walks.csv"'
+        response["Content-Disposition"] = (
+            'attachment; filename="recorded_walks.csv"'
+        )
 
         csv_header = [
             "email",

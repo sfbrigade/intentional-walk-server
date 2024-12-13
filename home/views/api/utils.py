@@ -54,9 +54,9 @@ def validate_request_json(
         if required_field not in json_data:
             # Set the error fields
             response["status"] = "error"
-            response[
-                "message"
-            ] = f"Required input '{required_field}' missing in the request"
+            response["message"] = (
+                f"Required input '{required_field}' missing in the request"
+            )
             # Fail on the first missing key
             break
 
