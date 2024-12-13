@@ -1,0 +1,27 @@
+.order-by {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.order-by--ascending,
+.order-by--descending {
+  &::after {
+    margin-left: 0.5rem;
+  }
+}
+
+.order-by--ascending::after {
+  content: "\2193";
+}
+
+.order-by--descending::after {
+  content: "\2191";
+}
