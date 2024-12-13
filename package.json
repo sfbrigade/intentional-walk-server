@@ -4,7 +4,7 @@
   "private": true,
   "engines": {
     "node": "18.20.5",
-    "npm": "19.8.2"
+    "npm": "10.8.2"
   },
   "workspaces": [
     "client"
