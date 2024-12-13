@@ -1,3 +1,2 @@
-client: cd client && npm run start
-viteclient: cd viteclient && npm run dev -- --host
+client: cd client && npm run dev -- --host
 server: python manage.py runserver 0:8000

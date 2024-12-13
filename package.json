@@ -7,8 +7,7 @@
     "npm": "10"
   },
   "workspaces": [
-    "client",
-    "viteclient"
+    "client"
   ],
   "scripts": {
     "build": "npm run build -w client"
