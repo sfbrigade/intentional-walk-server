@@ -45,28 +45,32 @@ function Home() {
       .then(
         (response) =>
           !cancelled &&
-          setUsersDaily(response.data.map((r) => [new Date([r[0]]), r[1]]))
+          setUsersDaily(response.data.map((r) => [new Date([r[0]]), r[1]])),
       );
     Api.admin
       .homeUsersCumulative({ contest_id, start_date, end_date })
       .then(
         (response) =>
           !cancelled &&
-          setUsersCumulative(response.data.map((r) => [new Date([r[0]]), r[1]]))
+          setUsersCumulative(
+            response.data.map((r) => [new Date([r[0]]), r[1]]),
+          ),
       );
     Api.admin
       .homeStepsDaily({ contest_id, start_date, end_date })
       .then(
         (response) =>
           !cancelled &&
-          setStepsDaily(response.data.map((r) => [new Date([r[0]]), r[1]]))
+          setStepsDaily(response.data.map((r) => [new Date([r[0]]), r[1]])),
       );
     Api.admin
       .homeStepsCumulative({ contest_id, start_date, end_date })
       .then(
         (response) =>
           !cancelled &&
-          setStepsCumulative(response.data.map((r) => [new Date([r[0]]), r[1]]))
+          setStepsCumulative(
+            response.data.map((r) => [new Date([r[0]]), r[1]]),
+          ),
       );
     Api.admin
       .homeDistanceDaily({ contest_id, start_date, end_date })
@@ -77,8 +81,8 @@ function Home() {
             response.data.map((r, i) => [
               new Date([r[0]]),
               i === 0 ? r[1] : r[1] / 1609,
-            ])
-          )
+            ]),
+          ),
       );
     Api.admin
       .homeDistanceCumulative({ contest_id, start_date, end_date })
@@ -89,15 +93,15 @@ function Home() {
             response.data.map((r, i) => [
               new Date([r[0]]),
               i === 0 ? r[1] : r[1] / 1609,
-            ])
-          )
+            ]),
+          ),
       );
     return () => (cancelled = true);
   }, [contest_id, start_date, end_date]);
 
   function onChange(params) {
     navigate(
-      params.length > 0 ? `?${new URLSearchParams(params).toString()}` : ""
+      params.length > 0 ? `?${new URLSearchParams(params).toString()}` : "",
     );
   }
 
@@ -358,7 +362,7 @@ function Home() {
 }
 
 // Histogram chart options, to maintain stable
-// reference for the react reconciliation algorithm. 
+// reference for the react reconciliation algorithm.
 const chartOptions = {
   histogram: {
     legend: { position: "none" },
@@ -368,6 +372,6 @@ const chartOptions = {
       viewWindow: { min: 0 },
     },
     colors: ["#2ECC71"],
-  }
-}
+  },
+};
 export default Home;
