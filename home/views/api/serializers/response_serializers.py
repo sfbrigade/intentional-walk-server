@@ -6,6 +6,7 @@ These serve to map internal Python data types
 to JSON-compatible data types that can be sent in the HTTP response,
 and to clearly document the structure of the response data.
 """
+
 from rest_framework import serializers
 from home.models import Account
 
