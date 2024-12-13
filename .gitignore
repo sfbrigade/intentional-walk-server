@@ -117,5 +117,5 @@ venv.bak/
 home/static
 
 # React SPA
-/client/build
+/client/dist
 /node_modules
