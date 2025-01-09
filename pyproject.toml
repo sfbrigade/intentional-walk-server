@@ -1,8 +1,5 @@
 [tool.poetry]
-name = "intentional-walk"
-version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.13.1"
@@ -17,7 +14,7 @@ uuid = "^1.30"
 django-postgres-setfield = {git = "https://github.com/benperlman/django-postgres-setfield.git"}
 djangorestframework = "^3.14.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 autoflake = "^2.3.1"
 black = "^24.10.0"
 coverage = "^5.0.3"
