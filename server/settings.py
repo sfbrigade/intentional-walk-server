@@ -16,17 +16,17 @@ from pathlib import Path
 import dj_database_url
 from dotenv import find_dotenv, load_dotenv
 
+import sentry_sdk
+
 load_dotenv(find_dotenv())
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BASE_DIR
 
-import sentry_sdk
-
 sentry_sdk.init(
     # SECURITY WARNING: keep the Sentry DSN secret!
-    dsn= os.getenv("SENTRY_DSN"),
+    dsn=os.getenv("SENTRY_DSN"),
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for tracing.
     traces_sample_rate=1.0,
