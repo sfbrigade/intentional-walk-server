@@ -27,6 +27,7 @@ PROJECT_ROOT = BASE_DIR
 # Initialize Sentry SDK if DSN is set
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 if SENTRY_DSN:
+    print(f"Initializing Sentry SDK with DSN: {SENTRY_DSN}")
     sentry_sdk.init(
         # SECURITY WARNING: keep the Sentry DSN secret!
         dsn=SENTRY_DSN,
