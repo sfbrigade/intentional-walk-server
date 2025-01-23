@@ -1,11 +1,11 @@
-import { Route, Routes } from "react-router";
+import { Route, Routes } from 'react-router';
 
-import UsersList from "./UsersList";
+import UsersList from './UsersList';
 
-function UsersRoutes() {
+function UsersRoutes () {
   return (
     <Routes>
-      <Route path="" element={<UsersList />} />
+      <Route path='' element={<UsersList />} />
     </Routes>
   );
 }

@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
-import { Chart } from "react-google-charts";
-import Api from "../Api";
-import Loading from "./Loader";
-import ErrorTryAgainLater from "./ErrorTryAgainLater";
+import { useEffect, useState } from 'react';
+import { Chart } from 'react-google-charts';
+import Api from '../Api';
+import Loading from './Loader';
+import ErrorTryAgainLater from './ErrorTryAgainLater';
 
-function Histogram({
+/* eslint-disable camelcase */
+
+function Histogram ({
   // query
   contest_id,
   start_date,
@@ -21,7 +23,7 @@ function Histogram({
 }) {
   const [resp, setResp] = useState({
     data: [],
-    unit: "",
+    unit: '',
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
@@ -85,7 +87,7 @@ function Histogram({
         hasData ? (
           <Chart
             // Because we have pre-binned data.
-            chartType="ColumnChart"
+            chartType='ColumnChart'
             data={resp.data}
             options={options}
             width={width}
@@ -104,7 +106,7 @@ const transform = (data, field) => {
   // since the last bin is the upper limit.
   const lastIdx = data.length - 1;
   return [
-    [capitalize(field), "Count"],
+    [capitalize(field), 'Count'],
     ...data.map(({ bin_start, bin_end, count }, i) => [
       // Subtract by 1 at the end since the ranges are exclusive, and we want to
       // display them as inclusive.
@@ -120,13 +122,13 @@ const capitalize = (str) => {
 
 const pathToTitle = (path, field, unit) => {
   switch (path) {
-    case "intentionalwalk":
+    case 'intentionalwalk':
       return `Intentional Walk (${unit})`;
-    case "users":
+    case 'users':
       return `User ${field} (${unit})`;
-    case "dailywalk":
+    case 'dailywalk':
       return `Daily Walk (${unit})`;
-    case "leaderboard":
+    case 'leaderboard':
       return `Leaderboard (${unit})`;
     default:
       return `${capitalize(path)} ${field} (${unit})`;
