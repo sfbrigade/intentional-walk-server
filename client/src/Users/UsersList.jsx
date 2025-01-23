@@ -94,7 +94,7 @@ function UsersList() {
       Api.admin
         .usersByZipMedianSteps({ contest_id, is_tester })
         .then(
-          (response) => !cancelled && setUsersByZipMedianSteps(response.data)
+          (response) => !cancelled && setUsersByZipMedianSteps(response.data),
         );
     }
     return () => (cancelled = true);
@@ -118,7 +118,7 @@ function UsersList() {
       params.push(["show_rw", "true"]);
     }
     navigate(
-      params.length > 0 ? `?${new URLSearchParams(params).toString()}` : ""
+      params.length > 0 ? `?${new URLSearchParams(params).toString()}` : "",
     );
   }
 
@@ -127,7 +127,13 @@ function UsersList() {
   }
 
   function onChangeShow(event) {
-    onChange(contest_id, event.target.value === "true", order_by, query, show_rw);
+    onChange(
+      contest_id,
+      event.target.value === "true",
+      order_by,
+      query,
+      show_rw,
+    );
   }
 
   function onChangeOrder(newOrderBy) {
@@ -141,9 +147,16 @@ function UsersList() {
     setNewQuery(event.target.value);
     setQueryDebounceTimerId(
       setTimeout(
-        () => onChange(contest_id, is_tester, order_by, event.target.value, show_rw),
-        300
-      )
+        () =>
+          onChange(
+            contest_id,
+            is_tester,
+            order_by,
+            event.target.value,
+            show_rw,
+          ),
+        300,
+      ),
     );
   }
 
@@ -173,11 +186,11 @@ function UsersList() {
   if (usersByZipActive) {
     totalActiveUsers = Object.values(usersByZipActive.total).reduce(
       (a, b) => a + b,
-      0
+      0,
     );
     totalNewActiveUsers = Object.values(usersByZipActive.new).reduce(
       (a, b) => a + b,
-      0
+      0,
     );
     totalActiveUsersData = [
       { label: "Prev", value: totalActiveUsers - totalNewActiveUsers },
@@ -193,9 +206,9 @@ function UsersList() {
             {!contest && "All users"}
             {contest &&
               `Contest: ${DateTime.fromISO(contest.start).toLocaleString(
-                DateTime.DATE_MED
+                DateTime.DATE_MED,
               )} - ${DateTime.fromISO(contest.end).toLocaleString(
-                DateTime.DATE_MED
+                DateTime.DATE_MED,
               )}`}
           </h2>
         </div>
@@ -321,7 +334,7 @@ function UsersList() {
                   {usersByZipMedianSteps &&
                     selectedFeature &&
                     numeral(usersByZipMedianSteps[selectedFeature.id]).format(
-                      "0,0"
+                      "0,0",
                     )}
                 </dd>
               </dl>
@@ -509,7 +522,7 @@ function UsersList() {
                 <td>{u.zip}</td>
                 <td>
                   {DateTime.fromISO(u.created).toLocaleString(
-                    DateTime.DATE_MED
+                    DateTime.DATE_MED,
                   )}
                 </td>
                 {contest && <td>{u.is_new ? "Yes" : "No"}</td>}

@@ -13,7 +13,7 @@ instance.interceptors.response.use(
       window.location = "/admin/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 function parseLinkHeader(response) {

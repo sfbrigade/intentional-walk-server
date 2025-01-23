@@ -200,6 +200,7 @@ class DailyWalkListView(View):
             )
             total_steps += daily_walk.steps
             total_distance += daily_walk.distance
+        total_distance = round(total_distance, 6)
 
         # Sort the list based on the date
         daily_walk_list = sorted(

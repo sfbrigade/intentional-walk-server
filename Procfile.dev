@@ -1,2 +1,2 @@
-client: cd client && npm run start
+client: cd client && npm run dev -- --host --port 3000
 server: python manage.py runserver 0:8000

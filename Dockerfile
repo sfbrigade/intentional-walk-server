@@ -1,4 +1,4 @@
-FROM python:3.11.4
+FROM python:3.13.1
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Install postgres client
@@ -6,7 +6,7 @@ RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key ad
     echo "deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main" >> /etc/apt/sources.list.d/pgdg.list && \
     apt-get update -y && \
     apt-get install -y postgresql-client-12 tzdata && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 

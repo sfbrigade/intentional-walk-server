@@ -5,14 +5,8 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
       - postgres-data:/var/lib/postgresql/data
-  server:
-    build: .
-    env_file:
-      - .env
     ports:
-      - ${PORT:-8000}:8000
-    depends_on:
-      - db
+      - 5432:5432
 
 volumes:
   postgres-data: {}

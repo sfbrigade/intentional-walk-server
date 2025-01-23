@@ -1,24 +1,24 @@
 services:
   server:
-    container_name: server
+    build: .
     command: bash -l -c "bin/init; nf start -j Procfile.dev"
-    environment:
-      - PORT=3000
+    container_name: server
+    depends_on:
+      - db
+    env_file:
+      - .env
     ports:
-      - 3000:3000
+      - "3000:3000"
+      - "8000:8000"
     volumes:
       - .:/app
       - /app/client/node_modules
       - /app/node_modules
   coverage:
-    image: python:3.8
+    image: python:3.13.1
     volumes:
       - .:/app
     working_dir: /app/htmlcov
     command: python -m http.server 8001
     ports:
       - "8001:8001"
-  db:
-    image: postgres:12
-    ports:
-      - 5433:5432

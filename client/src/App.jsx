@@ -1,6 +1,5 @@
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Route, Routes } from 'react-router';
 
-import "./App.css";
 import { AuthContextProvider, AuthProtected } from "./AuthContext";
 import Navigation from "./Navigation";
 import Home from "./Home";
@@ -9,8 +8,8 @@ import UsersRoutes from "./Users/UsersRoutes";
 
 function App() {
   return (
-    <AuthContextProvider>
-      <Router>
+    <>
+      <AuthContextProvider>
         <Navigation />
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -31,9 +30,9 @@ function App() {
             }
           />
         </Routes>
-      </Router>
-    </AuthContextProvider>
-  );
+      </AuthContextProvider>
+    </>
+  )
 }
 
-export default App;
+export default App

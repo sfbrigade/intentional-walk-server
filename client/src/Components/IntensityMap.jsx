@@ -22,16 +22,11 @@ function IntensityMap({
         .translate([width / 2, height / 2]);
 
       // The largest value could still be 0 ...
-      const maxDataValue = Math.floor(
-        Math.max(...Object.values(data))
-      );
+      const maxDataValue = Math.floor(Math.max(...Object.values(data)));
 
       // Ensure the upperLimit is at least greater than 0,
       // so that we don't have a scale of [0, 0]
-      const upperLimit = Math.max(
-        maxDataValue,
-        1,
-      )
+      const upperLimit = Math.max(maxDataValue, 1);
       // set up color gradient
       const colorScale = d3
         .scaleLinear()
