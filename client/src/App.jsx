@@ -1,20 +1,20 @@
 import { Route, Routes } from 'react-router';
 
-import { AuthContextProvider, AuthProtected } from "./AuthContext";
-import Navigation from "./Navigation";
-import Home from "./Home";
-import Login from "./Login";
-import UsersRoutes from "./Users/UsersRoutes";
+import { AuthContextProvider, AuthProtected } from './AuthContext';
+import Navigation from './Navigation';
+import Home from './Home';
+import Login from './Login';
+import UsersRoutes from './Users/UsersRoutes';
 
-function App() {
+function App () {
   return (
     <>
       <AuthContextProvider>
         <Navigation />
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path='/login' element={<Login />} />
           <Route
-            path="/"
+            path='/'
             element={
               <AuthProtected>
                 <Home />
@@ -22,7 +22,7 @@ function App() {
             }
           />
           <Route
-            path="/users/*"
+            path='/users/*'
             element={
               <AuthProtected>
                 <UsersRoutes />
@@ -32,7 +32,7 @@ function App() {
         </Routes>
       </AuthContextProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

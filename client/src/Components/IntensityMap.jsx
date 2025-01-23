@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
-import * as d3 from "d3";
+import { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
 
-function IntensityMap({
+function IntensityMap ({
   data,
   map,
   onMouseOver,
@@ -35,20 +35,20 @@ function IntensityMap({
 
       // draw map
       const el = d3.select(ref.current);
-      el.selectAll("*").remove();
-      el.append("g")
-        .selectAll("path")
+      el.selectAll('*').remove();
+      el.append('g')
+        .selectAll('path')
         .data(map)
         .enter()
-        .append("path")
+        .append('path')
         // draw each neighborhood
-        .attr("d", d3.geoPath().projection(projection))
+        .attr('d', d3.geoPath().projection(projection))
         // use a dark stroke so that even when the value for a region is empty (0), there
         // is still a visible outline of the neighborhood.
-        .attr("stroke", "#000000")
-        .attr("fill", (feature) => colorScale(data[feature.id] ?? 0))
-        .on("mouseover", (_, feature) => onMouseOver(feature))
-        .on("mouseout", () => onMouseOver());
+        .attr('stroke', '#000000')
+        .attr('fill', (feature) => colorScale(data[feature.id] ?? 0))
+        .on('mouseover', (_, feature) => onMouseOver(feature))
+        .on('mouseout', () => onMouseOver());
     }
   }, [data, map, width, height, minColor, maxColor, onMouseOver]);
 
