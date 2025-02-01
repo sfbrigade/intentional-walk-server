@@ -29,7 +29,7 @@
     "foreman": "^3.0.1",
     "globals": "^15.14.0",
     "neostandard": "^0.12.0",
-    "sass-embedded": "^1.83.0",
+    "sass-embedded": "^1.83.4",
     "vite": "^6.0.11"
   }
 }
