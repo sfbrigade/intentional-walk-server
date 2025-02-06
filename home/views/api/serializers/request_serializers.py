@@ -128,7 +128,7 @@ class GetUsersReqSerializer(serializers.Serializer):
             order.append(
                 field.desc(nulls_last=True)
                 if desc
-                else field.asc(nulls_first=False)
+                else field.asc(nulls_first=None)
             )
         order.append(F("name"))
 
