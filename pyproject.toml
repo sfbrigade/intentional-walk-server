@@ -19,7 +19,7 @@ sentry-sdk = {extras = ["django"], version = "^2.14.0"}
 autoflake = "^2.3.1"
 black = "^24.10.0"
 coverage = "^5.0.3"
-coveralls = "^1.11.1"
+coveralls = "^3.3.1"
 faker = "^33.1.0"
 flake8 = "^7.1.1"
 freezegun = "^1.5.1"
