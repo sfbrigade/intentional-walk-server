@@ -17,10 +17,10 @@ sentry-sdk = {extras = ["django"], version = "^2.14.0"}
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "^2.3.1"
-black = "^24.10.0"
+black = "^25.1.0"
 coverage = "^5.0.3"
-coveralls = "^1.11.1"
-faker = "^33.1.0"
+coveralls = "^3.3.1"
+faker = "^35.2.0"
 flake8 = "^7.1.1"
 freezegun = "^1.5.1"
 pytest = "^8.3.4"
