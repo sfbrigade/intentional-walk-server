@@ -13,7 +13,9 @@ from django.db.models import (
     Sum,
 )
 from django.http import FileResponse, HttpResponse
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 
 from home.models import Account, Contest, DailyWalk
 
@@ -21,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 # configure the base CSV headers
 CSV_COLUMNS = [
+    {"name": "Survey ID", "id": "survey_id"},
     {"name": "Participant Name", "id": "name"},
     {"name": "Date Enrolled", "id": "created"},
     {"name": "Email", "id": "email"},
@@ -125,7 +128,21 @@ def get_daily_walks(ids, contest):
     )
 
 
-def export_contest_users_data(file, contest_id, is_tester):
+def export_contest_users_data(
+    file, contest_id, is_tester, survey_file=None, email_col=None, id_col=None
+):
+    # if a survey file is provided, extract the email and id columns into a mapping
+    survey_ids = {}
+    if survey_file is not None:
+        logger.info(
+            "Processing survey file, email column: %s, id column: %s",
+            email_col,
+            id_col,
+        )
+        reader = csv.reader(survey_file.read().decode("utf-8").splitlines())
+        for row in reader:
+            survey_ids[row[email_col].lower()] = row[id_col]
+
     # get the Contest object
     contest = Contest.objects.get(pk=contest_id)
 
@@ -182,6 +199,10 @@ def export_contest_users_data(file, contest_id, is_tester):
         ids = []
         rows = []
         for row in results[offset : offset + limit]:  # noqa E203
+            # check for a survey id mapping and add...
+            survey_id = survey_ids.get(row["email"].lower(), None)
+            if survey_id is not None:
+                row["survey_id"] = survey_id
             # convert race Set into a comma delimited string
             row["race"] = ",".join(row["race"])
             # gather all rows and ids
@@ -254,8 +275,9 @@ def export_contest_users_data(file, contest_id, is_tester):
         writer.writerows(rows)
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class ExportUsersView(View):
-    http_method_names = ["get"]
+    http_method_names = ["get", "post"]
 
     def get(self, request, *args, **kwargs):
         contest_id = request.GET.get("contest_id", None)
@@ -270,6 +292,33 @@ class ExportUsersView(View):
             tmp_file = tempfile.NamedTemporaryFile(delete=False)
             with open(tmp_file.name, "w") as file:
                 export_contest_users_data(file, contest_id, is_tester)
+            return FileResponse(
+                open(tmp_file.name, "rb"),
+                as_attachment=True,
+                filename="users_agg.csv",
+            )
+        finally:
+            os.remove(tmp_file.name)
+
+    def post(self, request, *args, **kwargs):
+        contest_id = request.POST.get("contest_id", None)
+        is_tester = request.POST.get("is_tester", None) == "true"
+
+        if not contest_id:
+            return HttpResponse(status=422)
+        elif not request.user.is_authenticated:
+            return HttpResponse(status=401)
+
+        survey_file = request.FILES.get("file", None)
+        email_col = int(request.POST.get("email", None))
+        id_col = int(request.POST.get("id", None))
+
+        try:
+            tmp_file = tempfile.NamedTemporaryFile(delete=False)
+            with open(tmp_file.name, "w") as file:
+                export_contest_users_data(
+                    file, contest_id, is_tester, survey_file, email_col, id_col
+                )
             return FileResponse(
                 open(tmp_file.name, "rb"),
                 as_attachment=True,

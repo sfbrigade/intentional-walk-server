@@ -10,6 +10,7 @@ import OrderBy from '../Components/OrderBy';
 import Pagination from '../Components/Pagination';
 
 import './UsersList.scss';
+import UsersExportModal from './UsersExportModal';
 
 /* eslint-disable camelcase */
 
@@ -42,6 +43,8 @@ function UsersList () {
   const [usersByZipActive, setUsersByZipActive] = useState();
   const [usersByZipMedianSteps, setUsersByZipMedianSteps] = useState();
   const [selectedFeature, setSelectedFeature] = useState();
+
+  const [showExportModal, setShowExportModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -250,12 +253,15 @@ function UsersList () {
         <div className='col-md'>
           <div className='d-flex justify-content-end'>
             {contest && (
-              <a
-                href={`/api/export/users?contest_id=${contest.contest_id}&is_tester=${is_tester}`}
-                className='btn btn-outline-primary'
-              >
-                Download as CSV
-              </a>
+              <>
+                <a
+                  href={`/api/export/users?contest_id=${contest.contest_id}&is_tester=${is_tester}`}
+                  className='btn btn-outline-primary'
+                >
+                  Export as CSV
+                </a>
+                <button onClick={() => setShowExportModal(true)} className='btn btn-outline-primary ms-2'>With Survey IDs</button>
+              </>
             )}
           </div>
         </div>
@@ -557,6 +563,7 @@ function UsersList () {
           otherParams={{ contest_id, order_by, is_tester, query, show_rw }}
         />
       </div>
+      {showExportModal && <UsersExportModal contest_id={contest_id} is_tester={is_tester} onClose={() => setShowExportModal(false)} />}
     </div>
   );
 }

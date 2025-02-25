@@ -123,6 +123,13 @@ const Api = {
       });
     },
   },
+  export: {
+    users(formData) {
+      return instance.post('/api/export/users', formData, {
+        responseType: 'blob',
+      });
+    }
+  },
   static: {
     map () {
       return instance.get('/static/home/SanFrancisco.Neighborhoods.json');
