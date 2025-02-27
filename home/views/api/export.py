@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 # configure the base CSV headers
 CSV_COLUMNS = [
+    {"name": "Account ID", "id": "id"},
     {"name": "Survey ID", "id": "survey_id"},
     {"name": "Participant Name", "id": "name"},
     {"name": "Date Enrolled", "id": "created"},
