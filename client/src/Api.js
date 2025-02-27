@@ -124,7 +124,7 @@ const Api = {
     },
   },
   export: {
-    users(formData) {
+    users (formData) {
       return instance.post('/api/export/users', formData, {
         responseType: 'blob',
       });

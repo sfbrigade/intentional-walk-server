@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { parse } from 'csv-parse/browser/esm/sync';
-import { saveAs } from 'file-saver'
+import { saveAs } from 'file-saver';
 
 import Api from '../Api';
 

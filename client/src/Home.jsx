@@ -367,13 +367,13 @@ function Home () {
 // reference for the react reconciliation algorithm.
 const chartOptions = {
   histogram: {
-    legend: { position: "none" },
-    bar: { groupWidth: "95%" },
+    legend: { position: 'none' },
+    bar: { groupWidth: '95%' },
     hAxis: {
-      title: "Age"
+      title: 'Age'
     },
     vAxis: {
-      title: "Users",
+      title: 'Users',
       viewWindow: { min: 0 },
     },
     colors: ['#2ECC71'],
