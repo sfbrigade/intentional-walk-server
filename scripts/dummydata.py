@@ -20,6 +20,7 @@ You can then continue on to running the server with the new database.
 
 Run this script with `--help` for a list of options.
 """
+
 import argparse
 import binascii
 import os

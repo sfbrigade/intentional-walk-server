@@ -1,36 +1,39 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
-import { DateTime } from "luxon";
-import numeral from "numeral";
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import { DateTime } from 'luxon';
+import numeral from 'numeral';
 
-import Api from "../Api";
-import BarChart from "../Components/BarChart";
-import IntensityMap from "../Components/IntensityMap";
-import OrderBy from "../Components/OrderBy";
-import Pagination from "../Components/Pagination";
+import Api from '../Api';
+import BarChart from '../Components/BarChart';
+import IntensityMap from '../Components/IntensityMap';
+import OrderBy from '../Components/OrderBy';
+import Pagination from '../Components/Pagination';
 
-import "./UsersList.scss";
+import './UsersList.scss';
+import UsersExportModal from './UsersExportModal';
 
-function UsersList() {
+/* eslint-disable camelcase */
+
+function UsersList () {
   const { search } = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(search);
 
-  const page = parseInt(params.get("page") ?? "1", 10);
+  const page = parseInt(params.get('page') ?? '1', 10);
   const [lastPage, setLastPage] = useState();
 
-  const is_tester = params.get("is_tester") === "true";
+  const is_tester = params.get('is_tester') === 'true';
 
-  const contest_id = params.get("contest_id") ?? "";
+  const contest_id = params.get('contest_id') ?? '';
   const [contests, setContests] = useState();
 
-  const order_by = params.get("order_by") ?? "name";
+  const order_by = params.get('order_by') ?? 'name';
 
-  const query = params.get("query") ?? "";
+  const query = params.get('query') ?? '';
   const [newQuery, setNewQuery] = useState(query);
   const [queryDebounceTimerId, setQueryDebounceTimerId] = useState();
 
-  const show_rw = params.get("show_rw") === "true";
+  const show_rw = params.get('show_rw') === 'true';
 
   const [contest, setContest] = useState();
   const [users, setUsers] = useState();
@@ -40,6 +43,8 @@ function UsersList() {
   const [usersByZipActive, setUsersByZipActive] = useState();
   const [usersByZipMedianSteps, setUsersByZipMedianSteps] = useState();
   const [selectedFeature, setSelectedFeature] = useState();
+
+  const [showExportModal, setShowExportModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -100,58 +105,71 @@ function UsersList() {
     return () => (cancelled = true);
   }, [contest_id, is_tester]);
 
-  function onChange(contest_id, is_tester, order_by, query, show_rw) {
+  function onChange (contest_id, is_tester, order_by, query, show_rw) {
     const params = [];
     if (contest_id) {
-      params.push(["contest_id", contest_id]);
+      params.push(['contest_id', contest_id]);
     }
     if (is_tester) {
-      params.push(["is_tester", "true"]);
+      params.push(['is_tester', 'true']);
     }
-    if (order_by !== "name") {
-      params.push(["order_by", order_by]);
+    if (order_by !== 'name') {
+      params.push(['order_by', order_by]);
     }
     if (query) {
-      params.push(["query", query]);
+      params.push(['query', query]);
     }
     if (show_rw) {
-      params.push(["show_rw", "true"]);
+      params.push(['show_rw', 'true']);
     }
     navigate(
-      params.length > 0 ? `?${new URLSearchParams(params).toString()}` : ""
+      params.length > 0 ? `?${new URLSearchParams(params).toString()}` : ''
     );
   }
 
-  function onChangeContest(event) {
+  function onChangeContest (event) {
     onChange(event.target.value, is_tester, order_by, query, show_rw);
   }
 
-  function onChangeShow(event) {
-    onChange(contest_id, event.target.value === "true", order_by, query, show_rw);
+  function onChangeShow (event) {
+    onChange(
+      contest_id,
+      event.target.value === 'true',
+      order_by,
+      query,
+      show_rw
+    );
   }
 
-  function onChangeOrder(newOrderBy) {
+  function onChangeOrder (newOrderBy) {
     onChange(contest_id, is_tester, newOrderBy, query, show_rw);
   }
 
-  function onChangeQuery(event) {
+  function onChangeQuery (event) {
     if (queryDebounceTimerId) {
       clearTimeout(queryDebounceTimerId);
     }
     setNewQuery(event.target.value);
     setQueryDebounceTimerId(
       setTimeout(
-        () => onChange(contest_id, is_tester, order_by, event.target.value, show_rw),
+        () =>
+          onChange(
+            contest_id,
+            is_tester,
+            order_by,
+            event.target.value,
+            show_rw
+          ),
         300
       )
     );
   }
 
-  function onChangeShowRW(event) {
+  function onChangeShowRW (event) {
     onChange(contest_id, is_tester, order_by, query, event.target.checked);
   }
 
-  function onMouseOverZip(feature) {
+  function onMouseOverZip (feature) {
     setSelectedFeature(feature);
   }
 
@@ -162,8 +180,8 @@ function UsersList() {
     totalUsers = Object.values(usersByZip.total).reduce((a, b) => a + b, 0);
     totalNewUsers = Object.values(usersByZip.new).reduce((a, b) => a + b, 0);
     totalUsersData = [
-      { label: "Prev", value: totalUsers - totalNewUsers },
-      { label: "New", value: totalNewUsers },
+      { label: 'Prev', value: totalUsers - totalNewUsers },
+      { label: 'New', value: totalNewUsers },
     ];
   }
 
@@ -180,17 +198,17 @@ function UsersList() {
       0
     );
     totalActiveUsersData = [
-      { label: "Prev", value: totalActiveUsers - totalNewActiveUsers },
-      { label: "New", value: totalNewActiveUsers },
+      { label: 'Prev', value: totalActiveUsers - totalNewActiveUsers },
+      { label: 'New', value: totalNewActiveUsers },
     ];
   }
 
   return (
-    <div className="users-list container-fluid">
-      <div className="row my-5">
-        <div className="col-md">
-          <h2 className="users-list__title">
-            {!contest && "All users"}
+    <div className='users-list container-fluid'>
+      <div className='row my-5'>
+        <div className='col-md'>
+          <h2 className='users-list__title'>
+            {!contest && 'All users'}
             {contest &&
               `Contest: ${DateTime.fromISO(contest.start).toLocaleString(
                 DateTime.DATE_MED
@@ -199,74 +217,77 @@ function UsersList() {
               )}`}
           </h2>
         </div>
-        <div className="col-md order-md-first">
-          <div className="d-flex">
-            <label className="col-form-label me-2" htmlFor="contest_id">
+        <div className='col-md order-md-first'>
+          <div className='d-flex'>
+            <label className='col-form-label me-2' htmlFor='contest_id'>
               Contest:
             </label>
             <select
               value={contest_id}
               onChange={onChangeContest}
-              className="form-select w-auto me-3"
-              id="contest_id"
+              className='form-select w-auto me-3'
+              id='contest_id'
             >
-              <option value="">None</option>
+              <option value=''>None</option>
               {contests?.map((c) => (
                 <option key={c.contest_id} value={c.contest_id}>
-                  {DateTime.fromISO(c.start).toLocaleString(DateTime.DATE_MED)}{" "}
+                  {DateTime.fromISO(c.start).toLocaleString(DateTime.DATE_MED)}{' '}
                   - {DateTime.fromISO(c.end).toLocaleString(DateTime.DATE_MED)}
                 </option>
               ))}
             </select>
-            <label className="col-form-label me-2" htmlFor="is_tester">
+            <label className='col-form-label me-2' htmlFor='is_tester'>
               Show:
             </label>
             <select
               value={is_tester}
               onChange={onChangeShow}
-              className="form-select w-auto"
-              id="is_tester"
+              className='form-select w-auto'
+              id='is_tester'
             >
               <option value={false}>Users</option>
-              <option value={true}>Testers</option>
+              <option value>Testers</option>
             </select>
           </div>
         </div>
-        <div className="col-md">
-          <div className="d-flex justify-content-end">
+        <div className='col-md'>
+          <div className='d-flex justify-content-end'>
             {contest && (
-              <a
-                href={`/api/export/users?contest_id=${contest.contest_id}&is_tester=${is_tester}`}
-                className="btn btn-outline-primary"
-              >
-                Download as CSV
-              </a>
+              <>
+                <a
+                  href={`/api/export/users?contest_id=${contest.contest_id}&is_tester=${is_tester}`}
+                  className='btn btn-outline-primary'
+                >
+                  Export as CSV
+                </a>
+                <button onClick={() => setShowExportModal(true)} className='btn btn-outline-primary ms-2'>With Survey IDs</button>
+              </>
             )}
           </div>
         </div>
       </div>
       {contest && (
         <>
-          <div className="row mb-5">
-            <div className="col-lg-3 offset-lg-2 text-center">
+          <div className='row mb-5'>
+            <div className='col-lg-3 offset-lg-2 text-center'>
               <IntensityMap
                 data={usersByZip?.total}
                 map={map}
                 onMouseOver={onMouseOverZip}
-                minColor="#eeeeee"
-                maxColor="#702b84"
+                minColor='#eeeeee'
+                maxColor='#702b84'
                 width={380}
                 height={300}
               />
               <h5>Users by Zip</h5>
             </div>
-            <div className="col-lg-2">
+            <div className='col-lg-2'>
               <h4>
-                {!selectedFeature && "San Francisco"}
+                {!selectedFeature && 'San Francisco'}
                 {selectedFeature &&
                   `${selectedFeature.properties.neighborhood} (${selectedFeature.id})`}
               </h4>
-              <dl className="users-list__map-legend">
+              <dl className='users-list__map-legend'>
                 <dt>Total Users:</dt>
                 <dd>
                   {usersByZip && (
@@ -280,9 +301,9 @@ function UsersList() {
                       )}
                       {selectedFeature && (
                         <>
-                          {usersByZip.total[selectedFeature.id] ?? "0"}&nbsp;
+                          {usersByZip.total[selectedFeature.id] ?? '0'}&nbsp;
                           <span>(</span>
-                          {usersByZip.new[selectedFeature.id] ?? "0"}
+                          {usersByZip.new[selectedFeature.id] ?? '0'}
                           <span>&nbsp;new)</span>
                         </>
                       )}
@@ -303,9 +324,9 @@ function UsersList() {
                       )}
                       {selectedFeature && (
                         <>
-                          {usersByZipActive.total[selectedFeature.id] ?? "0"}
+                          {usersByZipActive.total[selectedFeature.id] ?? '0'}
                           &nbsp;<span>(</span>
-                          {usersByZipActive.new[selectedFeature.id] ?? "0"}
+                          {usersByZipActive.new[selectedFeature.id] ?? '0'}
                           <span>&nbsp;new)</span>
                         </>
                       )}
@@ -317,31 +338,31 @@ function UsersList() {
                 <dd>
                   {usersByZipMedianSteps &&
                     !selectedFeature &&
-                    numeral(usersByZipMedianSteps.all).format("0,0")}
+                    numeral(usersByZipMedianSteps.all).format('0,0')}
                   {usersByZipMedianSteps &&
                     selectedFeature &&
                     numeral(usersByZipMedianSteps[selectedFeature.id]).format(
-                      "0,0"
+                      '0,0'
                     )}
                 </dd>
               </dl>
             </div>
-            <div className="col-lg-3 text-center">
+            <div className='col-lg-3 text-center'>
               <IntensityMap
                 data={usersByZipMedianSteps}
                 map={map}
                 onMouseOver={onMouseOverZip}
-                minColor="#eeeeee"
-                maxColor="#2b388f"
+                minColor='#eeeeee'
+                maxColor='#2b388f'
                 width={380}
                 height={300}
               />
               <h5>Median Steps by Zip</h5>
             </div>
           </div>
-          <div className="row mb-5">
-            <div className="col-lg-3 offset-lg-2 d-flex flex-column align-items-center">
-              <h4 className="text-center">
+          <div className='row mb-5'>
+            <div className='col-lg-3 offset-lg-2 d-flex flex-column align-items-center'>
+              <h4 className='text-center'>
                 Total Users (<b>{totalUsers}</b>)
               </h4>
               {totalUsersData && (
@@ -349,13 +370,13 @@ function UsersList() {
                   data={totalUsersData}
                   width={300}
                   height={300}
-                  minColor="#aaa"
-                  maxColor="#702b84"
+                  minColor='#aaa'
+                  maxColor='#702b84'
                 />
               )}
             </div>
-            <div className="col-lg-3 offset-lg-2 d-flex flex-column align-items-center">
-              <h4 className="text-center">
+            <div className='col-lg-3 offset-lg-2 d-flex flex-column align-items-center'>
+              <h4 className='text-center'>
                 Total Active Users (<b>{totalActiveUsers}</b>)
               </h4>
               {totalActiveUsersData && (
@@ -363,41 +384,41 @@ function UsersList() {
                   data={totalActiveUsersData}
                   width={300}
                   height={300}
-                  minColor="#aaa"
-                  maxColor="#2b388f"
+                  minColor='#aaa'
+                  maxColor='#2b388f'
                 />
               )}
             </div>
           </div>
         </>
       )}
-      <div className="table-responsive">
-        <table className="users-list__table table table-striped">
+      <div className='table-responsive'>
+        <table className='users-list__table table table-striped'>
           <thead>
             <tr>
               <td colSpan={10 + (show_rw ? 4 : 0)}>
-                <div className="d-flex justify-content-between align-items-center">
-                  <div className="d-flex">
-                    <label className="col-form-label me-2" htmlFor="search">
+                <div className='d-flex justify-content-between align-items-center'>
+                  <div className='d-flex'>
+                    <label className='col-form-label me-2' htmlFor='search'>
                       Search:
                     </label>
                     <input
-                      type="text"
-                      placeholder="Name or Email..."
+                      type='text'
+                      placeholder='Name or Email...'
                       value={newQuery}
                       onChange={onChangeQuery}
-                      className="form-control w-auto"
+                      className='form-control w-auto'
                     />
                   </div>
-                  <div className="form-check">
+                  <div className='form-check'>
                     <input
-                      className="form-check-input"
-                      type="checkbox"
+                      className='form-check-input'
+                      type='checkbox'
                       checked={show_rw}
                       onChange={onChangeShowRW}
-                      id="showRW"
+                      id='showRW'
                     />
-                    <label className="form-check-label" htmlFor="showRW">
+                    <label className='form-check-label' htmlFor='showRW'>
                       Show Recorded Walks
                     </label>
                   </div>
@@ -408,7 +429,7 @@ function UsersList() {
               <th>&nbsp;&nbsp;&nbsp;</th>
               <th>
                 <OrderBy
-                  value="name"
+                  value='name'
                   currentValue={order_by}
                   onChange={onChangeOrder}
                 >
@@ -417,7 +438,7 @@ function UsersList() {
               </th>
               <th>
                 <OrderBy
-                  value="email"
+                  value='email'
                   currentValue={order_by}
                   onChange={onChangeOrder}
                 >
@@ -426,7 +447,7 @@ function UsersList() {
               </th>
               <th>
                 <OrderBy
-                  value="age"
+                  value='age'
                   currentValue={order_by}
                   onChange={onChangeOrder}
                 >
@@ -435,7 +456,7 @@ function UsersList() {
               </th>
               <th>
                 <OrderBy
-                  value="zip"
+                  value='zip'
                   currentValue={order_by}
                   onChange={onChangeOrder}
                 >
@@ -444,7 +465,7 @@ function UsersList() {
               </th>
               <th>
                 <OrderBy
-                  value="created"
+                  value='created'
                   currentValue={order_by}
                   onChange={onChangeOrder}
                 >
@@ -454,7 +475,7 @@ function UsersList() {
               {contest && (
                 <th>
                   <OrderBy
-                    value="is_new"
+                    value='is_new'
                     currentValue={order_by}
                     onChange={onChangeOrder}
                   >
@@ -464,7 +485,7 @@ function UsersList() {
               )}
               <th>
                 <OrderBy
-                  value="dw_count"
+                  value='dw_count'
                   currentValue={order_by}
                   onChange={onChangeOrder}
                 >
@@ -473,7 +494,7 @@ function UsersList() {
               </th>
               <th>
                 <OrderBy
-                  value="dw_steps"
+                  value='dw_steps'
                   currentValue={order_by}
                   onChange={onChangeOrder}
                 >
@@ -482,7 +503,7 @@ function UsersList() {
               </th>
               <th>
                 <OrderBy
-                  value="dw_distance"
+                  value='dw_distance'
                   currentValue={order_by}
                   onChange={onChangeOrder}
                 >
@@ -512,12 +533,12 @@ function UsersList() {
                     DateTime.DATE_MED
                   )}
                 </td>
-                {contest && <td>{u.is_new ? "Yes" : "No"}</td>}
+                {contest && <td>{u.is_new ? 'Yes' : 'No'}</td>}
                 <td>{u.dw_count?.toLocaleString()}</td>
                 <td>{u.dw_steps?.toLocaleString()}</td>
                 <td>
                   {u.dw_distance &&
-                    numeral(u.dw_distance / 1609).format("0,0.0")}
+                    numeral(u.dw_distance / 1609).format('0,0.0')}
                 </td>
                 {show_rw && (
                   <>
@@ -525,10 +546,10 @@ function UsersList() {
                     <td>{u.iw_steps?.toLocaleString()}</td>
                     <td>
                       {u.iw_distance &&
-                        numeral(u.iw_distance / 1609).format("0,0.0")}
+                        numeral(u.iw_distance / 1609).format('0,0.0')}
                     </td>
                     <td>
-                      {u.iw_time && numeral(u.iw_time / 60).format("0,0.0")}
+                      {u.iw_time && numeral(u.iw_time / 60).format('0,0.0')}
                     </td>
                   </>
                 )}
@@ -542,6 +563,7 @@ function UsersList() {
           otherParams={{ contest_id, order_by, is_tester, query, show_rw }}
         />
       </div>
+      {showExportModal && <UsersExportModal contest_id={contest_id} is_tester={is_tester} onClose={() => setShowExportModal(false)} />}
     </div>
   );
 }

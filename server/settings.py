@@ -16,11 +16,28 @@ from pathlib import Path
 import dj_database_url
 from dotenv import find_dotenv, load_dotenv
 
+import sentry_sdk
+
 load_dotenv(find_dotenv())
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BASE_DIR
+
+# Initialize Sentry SDK if DSN is set
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+if SENTRY_DSN:
+    sentry_sdk.init(
+        # SECURITY WARNING: keep the Sentry DSN secret!
+        dsn=SENTRY_DSN,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for tracing.
+        traces_sample_rate=1.0,
+        # Set profiles_sample_rate to 1.0 to profile 100%
+        # of sampled transactions.
+        # We recommend adjusting this value in production.
+        profiles_sample_rate=1.0,
+    )
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -39,7 +56,7 @@ STATIC_ROOT = PROJECT_ROOT / "staticfiles"
 
 if PRODUCTION:
     WHITENOISE_INDEX_FILE = True
-    WHITENOISE_ROOT = BASE_DIR / "client" / "build"
+    WHITENOISE_ROOT = BASE_DIR / "client" / "dist"
     STATICFILES_STORAGE = (
         "whitenoise.storage.CompressedManifestStaticFilesStorage"
     )
@@ -47,6 +64,9 @@ if PRODUCTION:
 # Host configuration
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
+).split(",")
 
 # Application definition
 
@@ -86,7 +106,7 @@ ROOT_URLCONF = "server.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "client" / "build"],
+        "DIRS": [BASE_DIR / "client" / "dist"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -179,7 +199,3 @@ LOGGING = {
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-
-# React client is on 3000, while django admin auth is on 8000
-if os.getenv("DEPLOY_ENV") == "development":
-    CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]

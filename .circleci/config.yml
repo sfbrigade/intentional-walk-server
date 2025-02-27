@@ -15,6 +15,10 @@ jobs:
           command: |
             cp example.env .env
       - run:
+          name: Build Docker image
+          command: |
+            docker-compose -p iwalk -f docker-compose.yml -f docker-compose.override.yml build --no-cache server
+      - run:
           name: Run Docker image
           command: |
             docker-compose -p iwalk -f docker-compose.yml -f docker-compose.override.yml up -d
@@ -34,7 +38,7 @@ jobs:
       - run:
           name: Lint code with Flake8
           command: |
-            docker-compose -p iwalk exec server bash -c "poetry run flake8 --count ."
+            docker-compose -p iwalk exec server bash -c "poetry run flake8 --exclude=node_modules --count ."
       - run:
           name: Run Pytest, report coverage
           # make test and make coverage are redundant,
@@ -49,9 +53,7 @@ jobs:
           command: |
             docker-compose -p iwalk exec -e COVERALLS_REPO_TOKEN server bash -c "
               git config --global --add safe.directory /app 
-              make test
-              make coverage
-              poetry run coveralls
+              make test && make coverage && poetry run coveralls
             "
 workflows:
   main:

@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
-import * as d3 from "d3";
+import { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
 
-function BarChart({ data, width, height, minColor, maxColor }) {
+function BarChart ({ data, width, height, minColor, maxColor }) {
   const ref = useRef();
 
   useEffect(() => {
@@ -19,11 +19,11 @@ function BarChart({ data, width, height, minColor, maxColor }) {
       const groups_domain = data.map((e) => e.label);
 
       const el = d3.select(ref.current);
-      el.selectAll("*").remove();
+      el.selectAll('*').remove();
 
       const chart = el
-        .append("g")
-        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+        .append('g')
+        .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
       // x-axis
       const x = d3
@@ -33,8 +33,8 @@ function BarChart({ data, width, height, minColor, maxColor }) {
         .padding(0.3);
 
       chart
-        .append("g")
-        .attr("transform", `translate(0, ${content.height})`)
+        .append('g')
+        .attr('transform', `translate(0, ${content.height})`)
         .call(d3.axisBottom(x));
 
       // y-axis
@@ -43,7 +43,7 @@ function BarChart({ data, width, height, minColor, maxColor }) {
         .domain([0, data.reduce((max, e) => Math.max(max, e.value), 0)])
         .range([content.height, 0]);
 
-      chart.append("g").call(d3.axisLeft(y));
+      chart.append('g').call(d3.axisLeft(y));
 
       // data bars
       const color = d3
@@ -55,24 +55,24 @@ function BarChart({ data, width, height, minColor, maxColor }) {
         .selectAll()
         .data(data)
         .enter()
-        .append("g")
-        .append("rect")
-        .attr("x", (e) => x(e.label))
-        .attr("y", (e) => y(e.value))
-        .attr("width", x.bandwidth())
-        .attr("height", (e) => content.height - y(e.value) + "px")
-        .attr("fill", (e) => color(e.label));
+        .append('g')
+        .append('rect')
+        .attr('x', (e) => x(e.label))
+        .attr('y', (e) => y(e.value))
+        .attr('width', x.bandwidth())
+        .attr('height', (e) => content.height - y(e.value) + 'px')
+        .attr('fill', (e) => color(e.label));
 
       // labels under the bars
       for (const e of data) {
         chart
-          .append("text")
-          .attr("class", "h6")
-          .attr("x", x(e.label) + x.bandwidth() / 2)
-          .attr("y", y(e.value) - 10)
-          .attr("text-anchor", "middle")
-          .attr("color", "#444444")
-          .text(e.value + "");
+          .append('text')
+          .attr('class', 'h6')
+          .attr('x', x(e.label) + x.bandwidth() / 2)
+          .attr('y', y(e.value) - 10)
+          .attr('text-anchor', 'middle')
+          .attr('color', '#444444')
+          .text(e.value + '');
       }
     }
   }, [data, width, height, minColor, maxColor]);
