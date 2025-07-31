@@ -102,6 +102,9 @@ class Account(models.Model):
         default=list,
         blank=True,
     )
+    # Intended to replace the "race" field, which uses the deprecated django-postgres-set-field
+    # See https://github.com/sfbrigade/intentional-walk-server/issues/176
+    race_json = models.JSONField(default=dict)
     race_other = models.CharField(
         max_length=75,
         null=True,
