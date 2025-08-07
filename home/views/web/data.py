@@ -75,7 +75,7 @@ def _acct_to_row_data(
         "Sexual Orientation Other": acct["sexual_orien_other"],
         "Gender Identity": acct["gender"],
         "Gender Identity Other": acct["gender_other"],
-        "Race": acct["race"],
+        "Race": acct["race_json"],
         "Race Other": acct["race_other"],
         "Is Latino": acct["is_latino"],
         "Age": acct["age"],

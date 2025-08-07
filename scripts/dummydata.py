@@ -235,7 +235,7 @@ class SQLGenerator:
             is_tester=args.get("is_tester", False),
             gender_other=args.get("gender_other", "N/A"),
             race_other=args.get("race_other", "N/A"),
-            race=args.get("race"),
+            race_json=args.get("race"),
             sexual_orien=args.get("sexual_orien"),
             sexual_orien_other=args.get("sexual_orien_other", "N/A"),
         )
@@ -356,7 +356,7 @@ class SQLGenerator:
                 age=random_age(),
                 is_sf_resident=True,
                 is_latino=random_is_latino(),
-                race=random_race(),
+                race_json=random_race(),
                 gender=random_gender(),
                 sexual_orien=random_orientation(),
             )

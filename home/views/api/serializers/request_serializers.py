@@ -31,7 +31,7 @@ class GetUsersReqSerializer(serializers.Serializer):
     )
     # Choices are: age, contests, created, dailywalk, device, email, gender, gender_other, id,
     # intentionalwalk,  is_latino, is_sf_resident, is_tester, iw_count, iw_distance, iw_steps,
-    # iw_time, leaderboard, name, race, race_other, sexual_orien, sexual_orien_other, updated,
+    # iw_time, leaderboard, name, race_json, race_other, sexual_orien, sexual_orien_other, updated,
     # weeklygoal, zip.
     # TODO: Can move this to the choices field tuple.
     # which will allow some tools to auto-pick up.

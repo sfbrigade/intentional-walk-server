@@ -171,7 +171,7 @@ def export_contest_users_data(
         "gender_other",
         "sexual_orien",
         "sexual_orien_other",
-        "race",
+        "race_json",
         "race_other",
         "is_latino",
     ]
@@ -205,7 +205,7 @@ def export_contest_users_data(
             if survey_id is not None:
                 row["survey_id"] = survey_id
             # convert race Set into a comma delimited string
-            row["race"] = ",".join(row["race"])
+            row["race_json"] = ",".join(row["race_json"])
             # gather all rows and ids
             rows.append(row)
             ids.append(row["id"])

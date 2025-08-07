@@ -135,7 +135,7 @@ def update_account(acct: Account, data: dict):
 
     # Screen 3. Race
     if data.get("race") is not None:
-        acct.race = data.get("race", [])
+        acct.race_json = data.get("race", [])
         acct.race_other = data.get("race_other")
 
     # Screen 4. Gender Identity
@@ -273,7 +273,7 @@ class AppUserCreateView(View):
                     "zip": account.zip,
                     "age": account.age,
                     "is_latino": account.is_latino,
-                    "race": list(account.race),
+                    "race": list(account.race_json),
                     "race_other": account.race_other,
                     "gender": account.gender,
                     "gender_other": account.gender_other,
