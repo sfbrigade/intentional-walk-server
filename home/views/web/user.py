@@ -21,7 +21,7 @@ ACCOUNT_FIELDS = [
     "created",
     "gender",
     "gender_other",
-    "race",
+    "race_json",
     "race_other",
     "is_latino",
     "sexual_orien",

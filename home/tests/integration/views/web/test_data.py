@@ -84,7 +84,7 @@ class TestCsvViews(TestCase):
         with freeze_time("3000-03-02"):
             acct_params = {
                 "email": "custom@gmail.com",
-                "race": ["BL", "OT"],
+                "race_json": ["BL", "OT"],
                 "race_other": "Arab",
                 "gender": "OT",
                 "gender_other": "Gender Queer",
@@ -145,7 +145,7 @@ class TestCsvViews(TestCase):
                 )  # Empty walk data
                 self.assertEqual(row, expected_row)
                 self.assertIn(
-                    row["Race"], {"{'OT', 'BL'}", "{'BL', 'OT'}"}
+                    row["Race"], {"['OT', 'BL']", "['BL', 'OT']"}
                 )  # order is non-deterministic
 
             else:
