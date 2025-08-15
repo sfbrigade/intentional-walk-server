@@ -191,9 +191,17 @@ class UserListView(generic.ListView):
 
             # Find everyone who signed up during the constest
             for acct in get_new_signups(contest, include_testers):
+
+                # If this account hasn't performed a daily walk yet:
                 if acct["email"] not in daily_walks:
+
+                    # Provide some sane defaults for them
                     user_stats_container[acct["email"]] = dict(
-                        new_signup=True, account=acct
+                        new_signup=True,
+                        account=acct,
+                        num_dws=0,
+                        dw_steps=0,
+                        dw_distance=0,
                     )
                     new_signups_by_zip[acct["zip"]] += 1
 
